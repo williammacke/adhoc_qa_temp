@@ -31,10 +31,10 @@ DEBUG = False
 GRID_SIZE = 10
 MAX_ITERS = 100
 N_STATIONS = 3
-
+BIAS_PROB = .99
 
 #An observation should have all positions, my index to get my position from all of them, station indices, and finally, the most recent actions performed by all the agents in the arena.
-obs = recordclass('obs','allActions allPos leaderInd adhocInd stationIndices')
+obs = recordclass('obs','allActions allPos leaderInd adhocInd stationIndices stationStatus timestep')
 #obs_history = namedtuple('trajectory','listOfObservations')
 
 
@@ -93,6 +93,8 @@ class Point2D(_point2d):
     def norm_dist(self,other):
         diff = self - other
         return math.sqrt((diff[0]**2)+(diff[1]**2))
+
+BASE = Point2D(0,0)
 
 Actions = IntEnum('Actions','RIGHT LEFT UP DOWN NOOP WORK',start=0)
 Actions_list = list(Actions)

@@ -13,18 +13,19 @@ from profilehooks import profile
 config = namedtuple("cfg",'S k maxstep')
 config_env = config(1000,1,150)
 
-env_state_def = namedtuple('env_state_def','size n_objects obj_pos is_terminal step_count config agent_state_list')
+env_state_def = namedtuple('env_state_def','size n_stations sttn_pos is_terminal step_count config agent_state_list')
 
 class environment():
-    def __init__(self,size,obj_positions,visualize=False,config_environment=config_env):
+    def __init__(self,size,sttn_positions,visualize=False,config_environment=config_env):
 
         """
         :param size: Dimension of the grid in which the environment is assumed to live.
-        :param obj_positions: Positions of the object inside the grid. The positions are in regular axes, and not numpy notations.
+        :param sttn_positions: Positions of the station inside the grid. The positions are in regular axes, and not numpy notations.
         """
+        
         self.size = size
-        self.n_objects = len(obj_positions)
-        self.obj_pos = obj_positions
+        self.n_stations = len(sttn_positions)
+        self.sttn_pos = sttn_positions
         self.agents = [] #initializing with a empty list of agents.
 
         self.is_terminal = False
@@ -35,8 +36,8 @@ class environment():
             import threading
             import src.levelbasedforaging_visualizer as vis_class
             self.vis_library = vis_class
-            obj_positions_copy = [pos.__copy__() for pos in self.obj_pos]
-            self.visualizer = vis_class.Visualizer(self.size,obj_positions_copy,[],[])
+            sttn_positions_copy = [pos.__copy__() for pos in self.sttn_pos]
+            self.visualizer = vis_class.Visualizer(self.size,sttn_positions_copy,[],[])
             self.visualize_thread = threading.Thread(target=self.visualizer.wait_on_event)
             self.visualize_thread.start()
 
@@ -59,8 +60,8 @@ class environment():
 
     def generate_observation(self,agent_index):
         agent_locs = [agent.pos for agent in self.agents]
-        object_locs = [pos for pos in self.obj_pos]
-        all_locs = agent_locs+object_locs
+        station_locs = [pos for pos in self.sttn_pos]
+        all_locs = agent_locs+station_locs
 
         load_indices = range(len(self.agents),len(all_locs))
         obs = global_defs.obs(all_locs,agent_index,load_indices)
@@ -79,9 +80,9 @@ class environment():
         agent_positions = [agent.pos.__copy__() for agent in self.agents]
         agent_orientations = [agent.orientation for agent in self.agents]
 
-        object_positions = [obj_pos.__copy__() for obj_pos in self.obj_pos]
+        station_positions = [sttn_pos.__copy__() for sttn_pos in self.sttn_pos]
         self.update_event = self.vis_library.pygame.event.Event(self.visualizer.update_event_type,{
-            'agents_positions':agent_positions,'agents_orientations':agent_orientations,'obj_positions':object_positions
+            'agents_positions':agent_positions,'agents_orientations':agent_orientations,'sttn_positions':station_positions
         })
         self.vis_library.pygame.event.post(self.update_event)
 
@@ -183,15 +184,15 @@ class environment():
             return True
 
         elif action_idx == global_defs.Actions.LOAD:
-            #Approve a load decision if it is near an object.
+            #Approve a load decision if it is near an station.
 
-            for obj_pos in self.obj_pos:
-                if utils.is_neighbor(self.agents[agent_idx].pos,obj_pos):
-                    #If it neighbors any of the objects, then return True
+            for sttn_pos in self.sttn_pos:
+                if utils.is_neighbor(self.agents[agent_idx].pos,sttn_pos):
+                    #If it neighbors any of the stations, then return True
                     decision = True
                     return decision
 
-            #It means it isn't a neighbor to any object.
+            #It means it isn't a neighbor to any station.
             decision = False
             return False
 
@@ -199,9 +200,9 @@ class environment():
             #Look what can be approved.
             action_result = self.agents[agent_idx].pos+(global_defs.ACTIONS_TO_MOVES[action_idx])
 
-            #Check it isn't moving into a invalid location. Part 1: Objects
-            for obj_pos in self.obj_pos:
-                if obj_pos == action_result:
+            #Check it isn't moving into a invalid location. Part 1: Stations
+            for sttn_pos in self.sttn_pos:
+                if sttn_pos == action_result:
                     decision = False
                     return decision
 
@@ -221,14 +222,14 @@ class environment():
         a2 = agent_lifter.agent_lifter(agent_pos[1], 2)
         a3 = agent_adhoc.agent_adhoc(a2.pos)
 
-        env = environment.environment(global_defs.GRID_SIZE, obj_pos, False)
+        env = environment.environment(global_defs.GRID_SIZE, sttn_pos, False)
 
         env.register_agent(a1)
         env.register_agent(a2)
 
         n_steps = 0
         # print("Target Distance: {}".format(target_dist))
-        # print("Object location {}".format(object_location))
+        # print("Station location {}".format(station_location))
         print("A1 {}".format(a1.pos))
         print("A2 {}".format(a2.pos))
         while (not env.is_terminal):
@@ -257,71 +258,17 @@ class environment():
         self.history.append((observations,agent_proposals,decisions))
         if self.visualize:
             self.update_vis()
-
         return (self.is_terminal,reward)
 
     def check_for_termination(self,agent_proposals,decisions):
         """
         Checks for ending criterion and sends reward.
-        Reward structure = S-kT if successful, -kT if failed.
-        return: tuple(is_terminal, reward). The reward is None if the state isn't terminal.
+        
+        Since the task is dependent on leader agent finishing the set of stations, we ought to wait until the fist agent signals completition. There is no other way to see if it is finished.
 
         """
+        raise NotImplementedError
 
-        object_neighborhoods=[]
-        object_neighbor_count=[]
-
-        S = self.config.S
-        k = self.config.k
-        T = self.step_count
-        maxsteps = global_defs.MAX_ITERS
-        for obj_pos in self.obj_pos:
-            curr_obj_neighborhood = []
-            for agent,proposal,decision in zip(self.agents,agent_proposals,decisions):
-                #An object counts as being in the neighborhood if it has the load action.
-                proposed_action = proposal[1]
-                if (utils.is_neighbor(obj_pos,agent.pos) and (proposed_action == global_defs.Actions.LOAD) and (decision == True)):
-                    curr_obj_neighborhood.append(True)
-                else:
-                    curr_obj_neighborhood.append(False)
-            object_neighborhoods.append(curr_obj_neighborhood)
-            object_neighbor_count.append(sum(curr_obj_neighborhood))
-        #print(object_neighborhoods)
-
-        #Specific for our case, reward generation.
-        if (self.n_objects>=2) and (len(self.agents)==2):
-            #Either both agents are at one location.
-            if 2 in object_neighbor_count:
-                self.is_terminal = True
-                reward = (S - (k*T))
-                return (True,reward)
-
-            #Or both are not at one location.
-            elif object_neighbor_count.count(1)== 2:
-                self.is_terminal = True
-                reward = (0-(k*T))
-                return (True,reward)
-
-            #Both agents are not near the objects. So don't end the simulation yet if we still have steps left to go.
-            else:
-                if self.step_count == maxsteps:
-                    self.is_terminal = True
-                    reward = (0-(k*T))
-                    return (True,reward)
-                else:
-                    self.is_terminal = False
-                    return (False,None)
-
-        elif len(self.agents)==2 and (self.n_objects==1):
-            #If both agents are surrounding the object.
-            if sum(object_neighborhoods[0])==2:
-                self.is_terminal = True
-                reward = (S - (k*T))
-                return (True,reward)
-            else:
-                self.is_terminal = False
-                reward = (0 - (k*T))
-                return (False,reward)
 
     def __copy__(self):
         selfstate = self.__getstate__()
@@ -329,7 +276,7 @@ class environment():
         return new_env
 
     def __init_from_state__(self,selfstate):
-        new_env = environment(selfstate.size,selfstate.obj_pos,False,selfstate.config)
+        new_env = environment(selfstate.size,selfstate.sttn_pos,False,selfstate.config)
         for agent in self.agents:
             new_agent = agent.__copy__()
             new_env.register_agent(new_agent)
@@ -339,7 +286,7 @@ class environment():
 
     def __getstate__(self):
         asl = [agent.__getstate__() for agent in self.agents]
-        curr_state = env_state_def(self.size,self.n_objects,self.obj_pos,self.is_terminal,self.step_count,self.config,asl)
+        curr_state = env_state_def(self.size,self.n_stations,self.sttn_pos,self.is_terminal,self.step_count,self.config,asl)
         curr_state = copy.deepcopy(curr_state)
         return curr_state
 
@@ -347,8 +294,8 @@ class environment():
         s = copy.deepcopy(s)
         if not isinstance(s,env_state_def):
             raise Exception("Invalid state sent")
-        self.n_objects = s.n_objects
-        self.obj_pos = s.obj_pos
+        self.n_stations = s.n_stations
+        self.sttn_pos = s.sttn_pos
         self.is_terminal = s.is_terminal
         self.step_count = s.step_count
         self.config = s.config
@@ -359,7 +306,7 @@ class environment():
     def __repr__(self):
         pstr = ''
         pstr += 'n_agents: {} '.format(len(self.agents))
-        pstr += 'n_objects: {} '.format(self.n_objects)
+        pstr += 'n_stations: {} '.format(self.n_stations)
         pstr += 'curr_step: {} '.format(self.step_count)
         pstr += 'Agents: {} '.format([id(agent) for agent in self.agents])
         return pstr
