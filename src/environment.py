@@ -3,10 +3,10 @@ import matplotlib.pyplot as plt
 from collections import namedtuple
 from src import global_defs
 from src import utils
-import pdb
+#import pdb
 debug = global_defs.DEBUG
 import random
-from src.agents import agent_lifter
+from src.agents import agent_leader
 import copy
 
 from profilehooks import profile
@@ -30,7 +30,7 @@ class environment():
 
         self.is_terminal = False
         self.step_count = 0
-        self.visualize = visualize
+        self.isualize = visualize
         if self.visualize:
             import pygame
             import threading
@@ -115,14 +115,14 @@ class environment():
                 assert(len(agent_proposals)==len(self.agents))
             except:
                 print("Exception here")
-                pdb.set_trace()
+                #pdb.set_trace()
             for agent_proposal,action_idx in agent_proposals:
                 try:
                     np.testing.assert_almost_equal(sum(agent_proposal),1,5)
                     assert(isinstance(agent_proposal,np.ndarray))
                     assert(action_idx<6 and action_idx>=0)
                 except:
-                    pdb.set_trace()
+                    #pdb.set_trace()
                     print("exception here")
 
         return agent_proposals,observations
@@ -143,7 +143,8 @@ class environment():
                     assert(isinstance(proposal,tuple))
                     assert(isinstance(proposal[0],np.ndarray))
                 except:
-                    pdb.set_trace()
+                    #pdb.set_trace()
+                    print("exception")
         decisions = []
 
         n_agents = len(self.agents)
@@ -176,7 +177,8 @@ class environment():
         action_probs,action_idx = proposal
         if debug:
             if action_idx>5 or action_idx<0:
-                pdb.set_trace()
+                #pdb.set_trace()
+                print("error")
 
         if action_idx == global_defs.Actions.NOOP:
             #Approve NOOP always.

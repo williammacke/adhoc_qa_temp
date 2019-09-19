@@ -5,7 +5,7 @@ from abc import ABC, abstractmethod, abstractproperty
 from .. import global_defs
 import numpy as np
 from itertools import count
-from enum import En
+from enum import Enum
 
 
 class AbstractAgent(ABC):
@@ -16,6 +16,7 @@ class AbstractAgent(ABC):
         self.id = next(self._ids)
         if pos[0]<0 or pos[1]<0:
             raise Exception("Positions going beyond edges.")
+        self.tp = tp
 
 
     @abstractmethod

@@ -2,7 +2,7 @@ import numpy as np
 from enum import IntEnum
 from recordclass import recordclass
 from collections import namedtuple
-import pdb
+#import pdb
 import math
 import logging
 
@@ -39,7 +39,19 @@ obs = recordclass('obs','allActions allPos leaderInd adhocInd stationIndices')
 
 
 _point2d = recordclass('_point2d','x y')
-class Point2D(_point2d):
+class Point2D:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+    def __getitem__(self, i):
+        if i == 0:
+            return self.x
+        elif i == 1:
+            return self.y
+    def __iter__(self):
+        yield x
+        yield y
     def __add__(self,other):
         x = self.x+other[0]
         y = self.y+other[1]

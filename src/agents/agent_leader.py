@@ -1,8 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from src.agents import agent
-from src.astar import astar
+from src.astar import pyastar
 from collections import namedtuple
+from src import global_defs
 
 #TODO:
 """
@@ -39,8 +40,8 @@ If neighboring a station:
 3) Repeat until all stations are marked done.  
 
 """
-logger = logging.getLogger('aamas')
-logger.setLevel(global_defs.debug_level)
+#logger = logging.getLogger('aamas')
+#logger.setLevel(global_defs.debug_level)
 
 Agent_state = namedtuple('AgentState','type pos target')
 
@@ -50,7 +51,7 @@ class agent_leader(agent.AbstractAgent):
         super().__init__(pos,tp=None)
         self.pos = pos
         self.name = self.name+'_leader_'+str(self.id)
-        if tp==None:
+        if True:
             self.tp = agent.AgentType(global_defs.n_stations) #Initializing type from settings derived from global_defs.
         else:
             self.tp = tp
@@ -85,11 +86,11 @@ class agent_leader(agent.AbstractAgent):
             #Then we are allowed to execute the action.
             #First, apply the movement.
             self.pos += global_defs.ACTIONS_TO_MOVES[action]
-            logger.debug("Agent {} executed action: {}".format(self.name,action))
+            #logger.debug("Agent {} executed action: {}".format(self.name,action))
             if action == global_defs.Actions.WORK:
                 #Which means we were approved to go ahead and do the work action, because the other agent had the right tool with it. It's time to move onto the next station.
                 self.tp.set_status(self.__target) #mark the station's status as done. 
-                logger.debug("Agent {} finished target station id {}".format(self.name,self.__target))
+                #logger.debug("Agent {} finished target station id {}".format(self.name,self.__target))
         else:
             pass
 
