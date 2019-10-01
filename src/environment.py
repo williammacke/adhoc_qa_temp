@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from collections import namedtuple
 from src import global_defs
-from src import utils
+# from src import utils
 #import pdb
 debug = global_defs.DEBUG
 import random
@@ -22,7 +22,7 @@ class environment():
         :param size: Dimension of the grid in which the environment is assumed to live.
         :param sttn_positions: Positions of the station inside the grid. The positions are in regular axes, and not numpy notations.
         """
-        
+
         self.size = size
         self.n_stations = len(sttn_positions)
         self.sttn_pos = sttn_positions
@@ -30,7 +30,7 @@ class environment():
 
         self.is_terminal = False
         self.step_count = 0
-        self.isualize = visualize
+        self.visualize = visualize
         if self.visualize:
             import pygame
             import threading
@@ -265,7 +265,7 @@ class environment():
     def check_for_termination(self,agent_proposals,decisions):
         """
         Checks for ending criterion and sends reward.
-        
+
         Since the task is dependent on leader agent finishing the set of stations, we ought to wait until the fist agent signals completition. There is no other way to see if it is finished.
 
         """
@@ -312,6 +312,3 @@ class environment():
         pstr += 'curr_step: {} '.format(self.step_count)
         pstr += 'Agents: {} '.format([id(agent) for agent in self.agents])
         return pstr
-
-
-

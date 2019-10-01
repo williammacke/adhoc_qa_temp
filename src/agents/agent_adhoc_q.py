@@ -1,23 +1,21 @@
-from src.agents.agent import Agent
+from src.agents.agent import AbstractAgent
 from src import global_defs
 import numpy as np
-from src.agents import agent_random
 from collections import namedtuple
 from enum import Enum
 import copy
 import pdb
 import ipdb
-from src import utils
+# from src import utils
 import warnings
-from src.agents import agent_lifter
 import logging
-from adhoc_utils import Knowledge, inference_engine
+from src.agents.adhoc_utils import Knowledge, inference_engine
 
 logger = logging.getLogger('aamas')
 logger.setLevel(global_defs.debug_level)
 
 
-class agent_adhoc(Agent):
+class agent_adhoc(AbstractAgent):
     def __init__(self,pos,tp=-2):
         super().__init__(pos,tp)
         self.pos = pos
@@ -51,8 +49,8 @@ class agent_adhoc(Agent):
           -Go to knowledge and ask which one we are working on right now and what's the source. If we have it from QA, then skip inference.
           -If we have it from QA, perform inference, and get the latest estimate.
         #Then navigate.
-          - If we have the tool, simply go forward. 
-          - Else, go to get the tool first. 
+          - If we have the tool, simply go forward.
+          - Else, go to get the tool first.
         """
         if obs.timestep == 0:
             #If it's the first timestep, we have no clue.
@@ -96,7 +94,7 @@ class agent_adhoc(Agent):
                      destination: base
         else:
              destination: base
-       
+
         Are we near our destination?
              Yes:
                 Is it the base?
@@ -104,8 +102,8 @@ class agent_adhoc(Agent):
                 else:
                     execute work action.
              No:
-                keep moving. 
-        """  
+                keep moving.
+        """
 
         if self.tool is not None:
             if self.tool == target_station:
@@ -139,6 +137,4 @@ class agent_adhoc(Agent):
                 #We have been approved to work, station work is finished.
                 #Signal Knowledge that the work is finished.
                 curr_k_id = self.knowledge.get_current_job_station_id()
-                self.knowledge.
-            
-        
+                # self.knowledge.

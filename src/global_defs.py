@@ -38,7 +38,6 @@ obs = recordclass('obs','allActions allPos leaderInd adhocInd stationIndices')
 #obs_history = namedtuple('trajectory','listOfObservations')
 
 
-_point2d = recordclass('_point2d','x y')
 class Point2D:
     def __init__(self, x, y):
         self.x = x
@@ -119,5 +118,3 @@ MOVES_SET = set(MOVES)
 #Actions_8 = IntEnum('Actions_8','RIGHT LEFT UP DOWN RIGHT-UP RIGHT-DOWN LEFT-UP LEFT-DOWN NOOP')
 #ACTIONS_TO_MOVES_8 = {0:Point2D(1,0),1:Point2D(-1,0),2:Point2D(0,1),3:Point2D(0,-1),4:Point2D(1,1),5:Point2D(1,-1),6:Point2D(-1,1),7:Point2D(-1,-1),8:Point2D(0,0)}
 #MOVES_8 = ACTIONS_TO_MOVES_8.values()
-
-

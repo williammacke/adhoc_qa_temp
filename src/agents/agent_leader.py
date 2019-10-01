@@ -1,43 +1,43 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from src.agents import agent
-from src.astar import pyastar
+# from src.astar import pyastar
 from collections import namedtuple
 from src import global_defs
 
 #TODO:
 """
-Leader: 
+Leader:
 
-Modifications from original: 
+Modifications from original:
 
-Init: 
+Init:
 
-1) Generate a random order of stations and tools.  
+1) Generate a random order of stations and tools.
 
-At each step: 
+At each step:
 
-1) If a question is asked, pause and answer it.  
+1) If a question is asked, pause and answer it.
 
-2) Else: 
+2) Else:
 
-If neighboring a station: 
+If neighboring a station:
 
-    If station task not completed: 
+    If station task not completed:
 
-        If next agent is here: 
+        If next agent is here:
 
-            Mark the task finished  
+            Mark the task finished
 
-        else 
+        else
 
-            Wait until next agent arrives. 
+            Wait until next agent arrives.
 
- Else 
+ Else
 
-        Navigate to the next station. 
+        Navigate to the next station.
 
-3) Repeat until all stations are marked done.  
+3) Repeat until all stations are marked done.
 
 """
 #logger = logging.getLogger('aamas')
@@ -52,13 +52,15 @@ class agent_leader(agent.AbstractAgent):
         self.pos = pos
         self.name = self.name+'_leader_'+str(self.id)
         if True:
-            self.tp = agent.AgentType(global_defs.n_stations) #Initializing type from settings derived from global_defs.
+            self.tp = agent.AgentType(global_defs.N_STATIONS) #Initializing type from settings derived from global_defs.
+            target = self.tp.get_current_job_station()
+            self.__target = target
         else:
             self.tp = tp
 
     def respond(self,observation: global_defs.obs)-> tuple:
         obs = observation
-        target = self.tp.get_next_job_station()
+        target = self.tp.get_current_job_station()
         self.__target = target
         target_pos = obs.allPos[stationIndices[target]]
         obstacles = copy.deepcopy(obs.allPos).remove(self.pos)
@@ -75,11 +77,11 @@ class agent_leader(agent.AbstractAgent):
                 desired_action = global_defs.Actions.NOOP
         else:
             #Meaning we yet have to reach our target station.
-            desired_action = None 
+            desired_action = None
 
         proposal = utils.generate_proposal(self.pos,target_pos,obstacles,desired_action)
         return proposal
-        
+
     def act(self,proposal,decision):
         _,action = proposal
         if decision is True:
@@ -89,7 +91,7 @@ class agent_leader(agent.AbstractAgent):
             #logger.debug("Agent {} executed action: {}".format(self.name,action))
             if action == global_defs.Actions.WORK:
                 #Which means we were approved to go ahead and do the work action, because the other agent had the right tool with it. It's time to move onto the next station.
-                self.tp.set_status(self.__target) #mark the station's status as done. 
+                self.tp.set_status(self.__target) #mark the station's status as done.
                 #logger.debug("Agent {} finished target station id {}".format(self.name,self.__target))
         else:
             pass
@@ -103,7 +105,7 @@ class agent_leader(agent.AbstractAgent):
 
     def __copy__(self):
         """
-        Make a copy of the agent. Copying the following is enough to make a good copy of the agent. We don't differentiate between deepcopy and copy. All are the same. 
+        Make a copy of the agent. Copying the following is enough to make a good copy of the agent. We don't differentiate between deepcopy and copy. All are the same.
         """
         new_tp = copy.deepcopy(self.tp)
         new_pos = copy.deepcopy(self.pos)
@@ -115,12 +117,9 @@ class agent_leader(agent.AbstractAgent):
 
     def make_identical_to(self,new_agent):
         """
-        This makes the agents' identical to each other. 
+        This makes the agents' identical to each other.
         """
-        
+
         self.tp = copy.deepcopy(new_agent.tp)
         self.pos = copy.deepcopy(new_agent.pos)
         return True
-
-        
-

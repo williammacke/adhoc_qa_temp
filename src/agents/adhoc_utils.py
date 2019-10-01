@@ -1,15 +1,13 @@
-from src.agents.agent import Agent, AgentType
+from src.agents.agent import AbstractAgent, AgentType
 from src import global_defs
 import numpy as np
-from src.agents import agent_random
 from collections import namedtuple
 from enum import Enum
 import copy
 import pdb
 import ipdb
-from src import utils
+# from src import utils
 import warnings
-from src.agents import agent_lifter
 import logging
 
 logger = logging.getLogger('aamas')
@@ -21,13 +19,13 @@ agent_adhoc_state_def = namedtuple('adhoc_state','tp name pos')
 class inference_engine():
     """
     This class helps us do inference on the agent. Given an observation/series of observations we should be able to derive a posterior probability on the type. However, in the current setting, since we only identify the next immediate station as a part of the type and not the entire sequence, we derive posterior probabilities for just that.
-   
-    So, basically, we have an obs. This contains the leader agent's position as well as the action it took. From this, we want to be able to infer which station the leader would be going to next. 
-   
+
+    So, basically, we have an obs. This contains the leader agent's position as well as the action it took. From this, we want to be able to infer which station the leader would be going to next.
+
     We want to do this by feeding the observation to a bunch of dummy agents with different station targets and see which station target explains the action the most. This way we can derive the posterior probabilities.
 
-    We can obtain the set of dummy agents with different station targets by copying the original agent, and setting it's type accordingly. 
-    
+    We can obtain the set of dummy agents with different station targets by copying the original agent, and setting it's type accordingly.
+
     We delete and create a new inference engine everytime we finish working on a station
     """
     def __init__(self,tracking_agent,tracking_stations):
@@ -60,7 +58,7 @@ class inference_engine():
 
         We want to get the likelihood of seeing the action performed by the leader-agent (contained in obs), give it's position (contained in obs), for each of the possible stations it was targeting
 
-        For this to work, we require a modified_obs, which will include positions from a previous time-step instead of current-time steps. Because, the action was decided when the agent's were in the previous-time step's position and not their current position. 
+        For this to work, we require a modified_obs, which will include positions from a previous time-step instead of current-time steps. Because, the action was decided when the agent's were in the previous-time step's position and not their current position.
 
         """
         #First set the tracking_agent's position to the observation reported position.
@@ -69,7 +67,7 @@ class inference_engine():
 
         likelihood_vector = np.zeros(len(self.tracking_stations))
         action_performed = obs.allActions[obs.leaderInd]
-        
+
         def create_dummy_type(station_id):
             """Create a dummy type with only one station to work on"""
             dummy_tp = AgentType(1)
@@ -101,13 +99,13 @@ class inference_engine():
 class Knowledge(AgentType):
     """
     Class to represent the knowledge an Adhoc agent has about the other agent. Knowledge here is about the type, specifically, which is why it inehrits the AgentType class.
-    
+
     The following elements make up knowledge.
-    
+
     a) Origin - Inference/QA.- Inference is volatile, QA is trustworthy since the agent doesn't lie.
     b) station_order - What is your current guess/estimate of the staion_order in which the adhoc agent is proceeding. If you don't have a estimate, keep it None. It's None.
-    c) station_work_status - Does anything in the history indicate whether work has been done at this station or not. If the work has been marked done, then do not bother about editing the station_order's 
-    
+    c) station_work_status - Does anything in the history indicate whether work has been done at this station or not. If the work has been marked done, then do not bother about editing the station_order's
+
     """
     origin = Enum('KnowledgeSource',[('Inference',1),('Answer',2)])
 
@@ -122,10 +120,10 @@ class Knowledge(AgentType):
         With the current knowledge, get the current station where work is proceeding/needs to proceed. With this, the adhoc agent can either retrieve the tool if it doesn't have it, or simply go assist the leader agent.
 
         Note: This overrides the get_current_job_station in the agent.AgentType method.
-        
+
         In future, this should support returning tool assignments too.
 
-        returns: station_id to work on. 
+        returns: station_id to work on.
         """
 
         return super().get_current_job_station()
@@ -135,14 +133,14 @@ class Knowledge(AgentType):
         Recieve knowledge from the QA system.
 
         The QA system is expected to return a station_order that is understood/derived from the answer given. This knowledge is absolute and trusted and true, since the agent doesn't lie.
-        
+
         We append this knowledge to what we already have, since questions refer to future and not the past, i.e., a question is asked for a dilemma that is in present or in future.
         """
 
         #seek the current confusing station, which should be the station we are working on right now.
 
         curr_sttn_idx = 0
-        while(self.station_work_status[curr_sttn_idx] is AgentType.status.done):
+        while(self.station_work_status[curr_sttn_idx] is AgentType.Status.done):
             curr_sttn_idx+=1
 
         #Now append the knowledge.
@@ -162,5 +160,3 @@ class Knowledge(AgentType):
             curr_sttn_idx+=1
         self.station_order[curr_sttn_idx] = station
         self.source[curr_sttn_idx] = Knowledge.origin.Inference
-
- 
