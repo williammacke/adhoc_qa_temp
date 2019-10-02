@@ -1,20 +1,18 @@
 from src.agents.agent import AbstractAgent, AgentType
-from src import global_defs
+from src import global_defs as gd
 import numpy as np
 from collections import namedtuple
 from enum import Enum
 import copy
-import pdb
-import ipdb
 # from src import utils
 import warnings
 import logging
 
 logger = logging.getLogger('aamas')
-logger.setLevel(global_defs.debug_level)
+logger.setLevel(gd.debug_level)
 
 #GLOBAL DEFINTIONS ABOUT THE AGENT_LIFTER.py
-agent_adhoc_state_def = namedtuple('adhoc_state','tp name pos')
+# agent_adhoc_state_def = namedtuple('adhoc_state','tp name pos')
 
 class inference_engine():
     """
@@ -49,6 +47,7 @@ class inference_engine():
         cobs = current_obs
         newobs = copy.deepcopy(pobs) #copy previous observations.
         newobs.allActions = cobs.allActions #swap actions.
+        return newobs
 
 
     def get_likelihood(self,mobs):
@@ -63,10 +62,10 @@ class inference_engine():
         """
         #First set the tracking_agent's position to the observation reported position.
         obs = mobs
-        self.tracking_agent.pos = obs.allPos[obs.leaderInd]
+        self.tracking_agent.pos = obs.allPos[gd.LEADER_IDX]
 
         likelihood_vector = np.zeros(len(self.tracking_stations))
-        action_performed = obs.allActions[obs.leaderInd]
+        action_performed = obs.allActions[gd.LEADER_IDX]
 
         def create_dummy_type(station_id):
             """Create a dummy type with only one station to work on"""
@@ -110,9 +109,9 @@ class Knowledge(AgentType):
     origin = Enum('KnowledgeSource',[('Inference',1),('Answer',2)])
 
     def __init__(self):
-        super().__init__(global_defs.N_STATIONS) #Initiaize the underlying type.
+        super().__init__(gd.N_STATIONS) #Initiaize the underlying type.
         self.station_order = [None for sttn in self.station_order]
-        self.knowledge = self.station_order #We call station_orer as knowledge
+        self.knowledge = self.station_order #We call station_order as knowledge
         self.source = [None for sttn in self.knowledge] #We don't have knowledge yet, so it's no source.
 
     def get_current_job_station(self):
@@ -128,7 +127,7 @@ class Knowledge(AgentType):
 
         return super().get_current_job_station()
 
-    def update_knowlege_from_qa(self,station_order):
+    def update_knowledge_from_qa(self,station_order):
         """
         Recieve knowledge from the QA system.
 
@@ -156,7 +155,7 @@ class Knowledge(AgentType):
 #seek the current confusing station, which should be the station we are working on right now.
 
         curr_sttn_idx = 0
-        while(self.station_work_status[curr_sttn_idx] is status.done):
-            curr_sttn_idx+=1
+        while(self.station_work_status[curr_sttn_idx] is AgentType.status.done):
+            curr_sttn_idx += 1
         self.station_order[curr_sttn_idx] = station
         self.source[curr_sttn_idx] = Knowledge.origin.Inference

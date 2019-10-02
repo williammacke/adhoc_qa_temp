@@ -1,27 +1,33 @@
-from src import global_defs
+from src import global_defs as gd
 from src.global_defs import Point2D
 from src.environment import environment
+from src.agents import agent
 from src.agents.agent_leader import agent_leader
 from src.agents.agent_adhoc_q import agent_adhoc
 
-size = global_defs.GRID_SIZE
-stn_pos = [(1,2), (0,4), (4,4)]
+size = gd.GRID_SIZE
+stn_pos = [(1,2), (0,4), (4,4)] # Does this need to be a list of Point2Ds?
+# Need to implement tool box
 env = environment(size, stn_pos)
 
 l_pos = Point2D(2, 3)
+# l_tp = agent.AgentType([1,0,2]) # Optional fixed order of stations to pass to agent_leader()
 leader = agent_leader(l_pos)
 
 a_pos = Point2D(2, 2)
-a_tp = 1 # Not sure why type is a init parameter for adhoc and not leader. Type not even used in adhoc.__init__()
-adhoc = agent_adhoc(a_pos, a_tp)
+adhoc = agent_adhoc(a_pos)
 adhoc.register_tracking_agent(leader)
 
 env.register_agent(leader)
 env.register_adhoc_agent(adhoc)
 
+env.step()
+
+
 # iteration = 0
-# while(env.check_for_termination() and iteration < global_defs.MAX_ITERS):
-#     env.step()
+# terminated = False
+# while(not terminated and iteration < gd.MAX_ITERS):
+#     terminated, reward = env.step()
 #     iteration += 1
 
 
@@ -29,4 +35,5 @@ env.register_adhoc_agent(adhoc)
 # A lot of things:
 #   haven't checked environment that much yet
 #   agent_adhoc.act() is incomplete
+#   environment.check_for_termination() not completed
 #   in agent_leader, Agent_state namedtuple not used?

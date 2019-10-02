@@ -2,7 +2,7 @@
 Defines abstract base clsas of what an Agent should be like. It can get more and more complicated as time passes, with complications inside agent models.
 """
 from abc import ABC, abstractmethod, abstractproperty
-from .. import global_defs
+from .. import global_defs as gd
 import numpy as np
 from itertools import count
 from enum import Enum
@@ -61,14 +61,25 @@ class AbstractAgent(ABC):
 class AgentType():
     "Supporting class that holds a agent's type. This will help easy sharing/comparing/constructing of new types"
 
-    class Status(Enum):
-        done = True
-        pending = False
+    status = Enum('Status', [('done', True), ('pending', False)])
 
-    def __init__(self,n_stations):
-        self.n_stations = n_stations
-        self.station_order = np.random.permutation(self.n_stations) #The order in which stations would be worked on.
-        self.station_work_status = np.array([AgentType.Status.pending]*self.n_stations) #The status of work on these stations. Everytime a station is worked on, it's work_status will be converted to True.
+    def __init__(self,stations):
+        # If stations is an integer, randomly create station order to visit
+        if isinstance(stations, int):
+            self.n_stations = stations
+            self.station_order = np.random.permutation(self.n_stations) #The order in which stations would be worked on.
+            self.station_work_status = np.array([AgentType.status.pending]*self.n_stations) #The status of work on these stations. Everytime a station is worked on, it's work_status will be converted to True.
+        # If stations is a list of integers (station indices), set station order to given list
+        elif isinstance(stations, list):
+            assert len(stations) == gd.N_STATIONS
+            for stn in stations:
+                # Elements of list must be station indices
+                assert isinstance(stn, int)
+                assert stn in range(gd.N_STATIONS)
+
+            self.n_stations = len(stations)
+            self.station_order = np.array(stations)
+            self.station_work_status = np.array([AgentType.status.pending]*self.n_stations)
 
 
     def get_status(self):
@@ -80,7 +91,7 @@ class AgentType():
         """
         next_station = 0
         stn_idx = 0
-        while(self.station_work_status[stn_idx] is AgentType.Status.done):
+        while(self.station_work_status[stn_idx] is AgentType.status.done):
             stn_idx += 1
         return self.station_order[stn_idx]
 
@@ -89,7 +100,7 @@ class AgentType():
         Adjust status of station's work.
         latest_station_id describes the latest station marked as done. This is the index of the station in the station_order vector. This method then marks it as True (done)
         """
-        self.station_work_status[latest_station_id] = AgentType.Status.done
+        self.station_work_status[latest_station_id] = AgentType.status.done
         return True
 
 
@@ -97,7 +108,7 @@ class AgentType():
         stg = ''
         for sttn,status in zip(self.station_order,self.station_work_status):
             stg += str(sttn)
-            if status == AgentType.Status.done:
+            if status == AgentType.status.done:
                 stg += '*'
         return stg
 

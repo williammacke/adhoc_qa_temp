@@ -1,10 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from collections import namedtuple
-from src import global_defs
+from src import global_defs as gd
 # from src import utils
 #import pdb
-debug = global_defs.DEBUG
+debug = gd.DEBUG
 import random
 from src.agents import agent_leader
 import copy
@@ -26,7 +26,8 @@ class environment():
         self.size = size
         self.n_stations = len(sttn_positions)
         self.sttn_pos = sttn_positions
-        self.agents = [] #initializing with a empty list of agents.
+        self.agents = [None, None] # Assumed only 2 agents, leader and adhoc respectively
+        self.allActions = None
 
         self.is_terminal = False
         self.step_count = 0
@@ -47,15 +48,14 @@ class environment():
         self.history = []
 
     def register_agent(self,agent):
-        self.agents.append(agent)
+        self.agents[gd.LEADER_IDX] = agent
 
     def register_adhoc_agent(self,adhoc_agent):
         """
-        The adhoc agent should always be the last one.
         :param adhoc_agent: The adhoc agent's interface.
         :return:
         """
-        self.agents.append(adhoc_agent)
+        self.agents[gd.ADHOC_IDX] = adhoc_agent
 
 
     def generate_observation(self,agent_index):
@@ -64,7 +64,7 @@ class environment():
         all_locs = agent_locs+station_locs
 
         load_indices = range(len(self.agents),len(all_locs))
-        obs = global_defs.obs(all_locs,agent_index,load_indices)
+        obs = gd.obs(self.allActions,all_locs,load_indices)
 
         return obs
 
@@ -149,9 +149,9 @@ class environment():
 
         n_agents = len(self.agents)
         #random_agent_order = random.sample(range(n_agents),n_agents) #Randomize all agent's priority.
-        random_agent_order = range(n_agents)
+        agent_order = range(n_agents)
 
-        for agent_idx in random_agent_order:
+        for agent_idx in agent_order:
             #Checks go in here, if the proposal can be valid or not.
             proposal = agent_proposals[agent_idx]
             decision = self._proposal_check(agent_idx,proposal)
@@ -164,6 +164,7 @@ class environment():
                 assert(isinstance(decision,bool))
             assert(len(decisions)==len(self.agents))
 
+        self.allActions = decisions
         return decisions
 
     def _proposal_check(self,agent_idx:int ,proposal:tuple) -> bool:
@@ -180,12 +181,12 @@ class environment():
                 #pdb.set_trace()
                 print("error")
 
-        if action_idx == global_defs.Actions.NOOP:
+        if action_idx == gd.Actions.NOOP:
             #Approve NOOP always.
             decision = True
             return True
 
-        elif action_idx == global_defs.Actions.LOAD:
+        elif action_idx == gd.Actions.LOAD:
             #Approve a load decision if it is near an station.
 
             for sttn_pos in self.sttn_pos:
@@ -200,7 +201,7 @@ class environment():
 
         else:
             #Look what can be approved.
-            action_result = self.agents[agent_idx].pos+(global_defs.ACTIONS_TO_MOVES[action_idx])
+            action_result = self.agents[agent_idx].pos+(gd.ACTIONS_TO_MOVES[action_idx])
 
             #Check it isn't moving into a invalid location. Part 1: Stations
             for sttn_pos in self.sttn_pos:
@@ -224,7 +225,7 @@ class environment():
         a2 = agent_lifter.agent_lifter(agent_pos[1], 2)
         a3 = agent_adhoc.agent_adhoc(a2.pos)
 
-        env = environment.environment(global_defs.GRID_SIZE, sttn_pos, False)
+        env = environment.environment(gd.GRID_SIZE, sttn_pos, False)
 
         env.register_agent(a1)
         env.register_agent(a2)

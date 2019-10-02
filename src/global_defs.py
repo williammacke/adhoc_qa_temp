@@ -32,9 +32,13 @@ GRID_SIZE = 10
 MAX_ITERS = 100
 N_STATIONS = 3
 
+# Code already had tools in this file though it didn't exist. Should move to environment
+# TOOL_BASE = Point2D(0, 0)
 
 #An observation should have all positions, my index to get my position from all of them, station indices, and finally, the most recent actions performed by all the agents in the arena.
-obs = recordclass('obs','allActions allPos leaderInd adhocInd stationIndices')
+obs = recordclass('obs','allActions allPos stationInd')
+LEADER_IDX = 0
+ADHOC_IDX = 1
 #obs_history = namedtuple('trajectory','listOfObservations')
 
 

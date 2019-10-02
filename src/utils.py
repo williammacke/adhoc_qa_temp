@@ -1,30 +1,30 @@
 import numpy as np
-from src import global_defs
+from src import global_defs as gd
 #import ipdb
 #import pdb
 from profilehooks import profile
 import copy
-from src.astar.pyastar import astar
+# from src.astar.pyastar import astar
 
-debug = global_defs.DEBUG
+debug = gd.DEBUG
 
 def is_neighbor(pos1, pos2):
     if debug:
         #pdb.set_trace()
-        if not isinstance(pos1,global_defs.Point2D):
+        if not isinstance(pos1,gd.Point2D):
             pdb.set_trace()
-        if not isinstance(pos2,global_defs.Point2D):
+        if not isinstance(pos2,gd.Point2D):
             pdb.set_trace()
-        assert isinstance(pos1,global_defs.Point2D)
-        assert isinstance(pos2,global_defs.Point2D)
+        assert isinstance(pos1,gd.Point2D)
+        assert isinstance(pos2,gd.Point2D)
     found_match = False
     #pdb.set_trace()
-    if pos1-pos2 in global_defs.MOVES_SET:
+    if pos1-pos2 in gd.MOVES_SET:
         return True
     else:
         return False
 
-def check_within_boundaries(pos,dim=(global_defs.GRID_SIZE,global_defs.GRID_SIZE)):
+def check_within_boundaries(pos,dim=(gd.GRID_SIZE,gd.GRID_SIZE)):
     dim_x,dim_y = dim
     pos_x,pos_y = pos
     if (pos_x<0 or pos_x>dim_x-1):
@@ -48,13 +48,13 @@ def get_valid_move_actions(pos,obstacles):
     Helper functions to get valid movement actions (up,down,left,right,noop).
     pos: Current position.
     obstacles: List of position on the grid that the agent can't move. Could be placed anywhere in the grid.
-    
+
     returns: A numpy array of True/False the size of global_defs.Action that indicates whether an action is valid or not.
     """
 
-    valid_actions = [False]*len(global_defs.Actions)
-    for idx,action in enumerate(global_defs.Actions[:-1]):
-        valid = check_valid(pos+global_defs.ACTIONS_TO_MOVES[action])
+    valid_actions = [False]*len(gd.Actions)
+    for idx,action in enumerate(gd.Actions[:-1]):
+        valid = check_valid(pos+gd.ACTIONS_TO_MOVES[action])
         if valid:
             valid_actions[idx] = True
     #The last action, i.e. WORK, is set to False, since we don't have any idea about deciding it.
@@ -63,22 +63,22 @@ def get_valid_move_actions(pos,obstacles):
 def generate_proposal(pos,destination,obstacles,desired_action=None):
     "Given obstacles and a destination and an optional desired_action, return a proposal"
     if desired_action is None:
-        (path_found,path_tuple) = get_path_astar(pos,destination,obstacles,global_defs.GRID_SIZE)
+        (path_found,path_tuple) = get_path_astar(pos,destination,obstacles,gd.GRID_SIZE)
         if path_found:
             desired_action,movement,path = path_tuple
         else:
             desired_action = np.random.choice(np.arange(5))
     all_valid_move_actions = get_valid_move_actions(pos,obstacles)
-    action_probs = np.zeros(len(global_defs.Actions),dtype='float')
-    action_probs[desired_action] = global_defs.BIAS_PROB 
+    action_probs = np.zeros(len(gd.Actions),dtype='float')
+    action_probs[desired_action] = gd.BIAS_PROB
 
     #Now fill the rest of actions with minimal probability, called the base_probability. This is simply to add a non-zero possibilty to each valid action, just in case to make it non-deterministic.
     base_probs = np.ones_like(action_probs)*all_valid_move_actions
     base_probs/=np.sum(base_probs)
-    base_probs*=(1-global_defs.BIAS_PROB) #now the base probs will sum up wit 0.05
+    base_probs*=(1-gd.BIAS_PROB) #now the base probs will sum up wit 0.05
 
     action_probs+=base_probs
-    sampled_action = np.random.choice(global_defs.Actions,p=action_probs)
+    sampled_action = np.random.choice(gd.Actions,p=action_probs)
     assert(np.sum(action_probs))
     proposal = (action_probs,sampled_action)
     return proposal
@@ -88,7 +88,7 @@ def get_MAP(prior,likelihood):
     Given prior and likelihood, return the MAP index as well as the posterior distibution
     """
     pr = np.array(prior)
-    ll = np.array(likelihood) 
+    ll = np.array(likelihood)
 
     ps = np.dot(pr*ll)
     ps /= np.sum(ps)
@@ -156,12 +156,12 @@ def compare_agent_states(s1,s2):
     return are_same
 
 def copy_lifter_to_random(a1,a2):
-    a2.pos = global_defs.Point2D(a1.pos[0],a1.pos[1])
+    a2.pos = gd.Point2D(a1.pos[0],a1.pos[1])
     a2.name += ('_copy_'+a1.name)
 
 def generate_initial_conditions(n_objects,n_agents):
     #First generate objects.
-    grid_size = global_defs.GRID_SIZE
+    grid_size = gd.GRID_SIZE
 
     angfactor = 0.9
     radius = int((grid_size//2)*angfactor)
@@ -183,7 +183,7 @@ def generate_initial_conditions(n_objects,n_agents):
     object_positions = []
     for idx in range(n_objects):
         ang_pos = angular_positions[idx]
-        pos = global_defs.Point2D(int(radius*np.cos(ang_pos)),int(radius*np.sin(ang_pos)))
+        pos = gd.Point2D(int(radius*np.cos(ang_pos)),int(radius*np.sin(ang_pos)))
         pos += ((grid_size-1)//2,(grid_size-1)//2)
         object_positions.append(pos)
 
@@ -194,7 +194,7 @@ def generate_initial_conditions(n_objects,n_agents):
     agent_ang_pos += offset_angles_deviation
     rfactor = 0.2
     rad = radius*rfactor
-    agent_pos = [global_defs.Point2D(int(rad*np.cos(angpos)),int(rad*np.sin(angpos))) for angpos in agent_ang_pos]
+    agent_pos = [gd.Point2D(int(rad*np.cos(angpos)),int(rad*np.sin(angpos))) for angpos in agent_ang_pos]
     agent_pos = [apos+((grid_size-1)//2,(grid_size-1)//2) for apos in agent_pos]
     return (object_positions,agent_pos)
 
@@ -205,11 +205,11 @@ def get_path_astar(pos1,pos2,obstacles,grid_size):
     pos2: To position in point2d object.
     obstacles: list of tuples of obstacles in the grid. Obtained by point2d.to_tuple() function.
     grid_size: Assuming a square grid, the size of the grid.
-    
+
     returns a tuple of (path_found,(action,movement,path))
     path_found: Boolean indicating whether a path is found or not.
     if a path is found, the following have values. Else, they are None.
-    action: The action to take to execute the first movement 
+    action: The action to take to execute the first movement
     movement: The first movement in the path.
     path: A list of movements to the final destination.
 
@@ -222,30 +222,5 @@ def get_path_astar(pos1,pos2,obstacles,grid_size):
         return (False,(None,None,None))
     else:
         movement = path[1]-path[0]
-        action = global_defs.MOVES_TO_ACTIONS[(movement[0],movement[1])]
+        action = gd.MOVES_TO_ACTIONS[(movement[0],movement[1])]
         return(True,(action,movement,path))
-        
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
