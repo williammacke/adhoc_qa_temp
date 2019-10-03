@@ -156,7 +156,7 @@ class environment():
             proposal = agent_proposals[agent_idx]
             decision = self._proposal_check(agent_idx,proposal)
             decisions.append(decision)
-            self.agents[agent_idx].act(proposal,decision) #Previous agent's proposal and decision are sent.
+            self.agents[agent_idx].act(proposal,decision)
 
 
         if debug:
@@ -164,7 +164,7 @@ class environment():
                 assert(isinstance(decision,bool))
             assert(len(decisions)==len(self.agents))
 
-        self.allActions = decisions
+        self.allActions = [prop[1] for prop, dec in zip(proposal, decision) if dec else gd.Actions.NOOP]
         return decisions
 
     def _proposal_check(self,agent_idx:int ,proposal:tuple) -> bool:
@@ -214,6 +214,8 @@ class environment():
                 if agent.pos == action_result:
                     decision = False
                     return decision
+
+            # TODO: CHECK COLLISION WITH TOOL BOX
 
             #Allclear, send a yes.
             decision = True
@@ -270,8 +272,12 @@ class environment():
         Since the task is dependent on leader agent finishing the set of stations, we ought to wait until the fist agent signals completition. There is no other way to see if it is finished.
 
         """
-        raise NotImplementedError
-
+        leader = self.agents[gd.LEADER_IDX]
+        terminated = False
+        reward = 1
+        if Agent.status.pending not in leader.tp.station_work_status:
+            terminated = True
+        return (terminated, 1)
 
     def __copy__(self):
         selfstate = self.__getstate__()

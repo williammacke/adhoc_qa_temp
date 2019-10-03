@@ -127,3 +127,12 @@ class AgentType():
         res = res and (np.all(self.station_order == new_tp.station_order))
         res = res and (np.all(self.station_work_status == new_tp.station_work_status))
         return res
+
+    @abstractmethod
+    def __getstate(self):
+        raise NotImplementedError
+
+    @abstractmethod
+    def __setstate(self):
+        raise NotImplementedError
+        

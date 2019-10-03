@@ -53,8 +53,8 @@ def get_valid_move_actions(pos,obstacles):
     """
 
     valid_actions = [False]*len(gd.Actions)
-    for idx,action in enumerate(gd.Actions[:-1]):
-        valid = check_valid(pos+gd.ACTIONS_TO_MOVES[action])
+    for idx,action in enumerate(gd.Actions_list[:-1]):
+        valid = check_valid(pos+gd.ACTIONS_TO_MOVES[action], obstacles)
         if valid:
             valid_actions[idx] = True
     #The last action, i.e. WORK, is set to False, since we don't have any idea about deciding it.
@@ -74,12 +74,12 @@ def generate_proposal(pos,destination,obstacles,desired_action=None):
 
     #Now fill the rest of actions with minimal probability, called the base_probability. This is simply to add a non-zero possibilty to each valid action, just in case to make it non-deterministic.
     base_probs = np.ones_like(action_probs)*all_valid_move_actions
-    base_probs/=np.sum(base_probs)
-    base_probs*=(1-gd.BIAS_PROB) #now the base probs will sum up wit 0.05
+    base_probs /= np.sum(base_probs)
+    base_probs *= (1-gd.BIAS_PROB) #now the base probs will sum up wit 0.05
 
     action_probs+=base_probs
+    assert(np.sum(action_probs) == 1)
     sampled_action = np.random.choice(gd.Actions,p=action_probs)
-    assert(np.sum(action_probs))
     proposal = (action_probs,sampled_action)
     return proposal
 

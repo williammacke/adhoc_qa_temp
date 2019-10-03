@@ -41,6 +41,8 @@ LEADER_IDX = 0
 ADHOC_IDX = 1
 #obs_history = namedtuple('trajectory','listOfObservations')
 
+BIAS_PROB = 1 # Leader is always optimal. This is the probability most optimal decision is made.
+
 
 class Point2D:
     def __init__(self, x, y):
@@ -52,9 +54,11 @@ class Point2D:
             return self.x
         elif i == 1:
             return self.y
+
     def __iter__(self):
-        yield x
-        yield y
+        yield self.x
+        yield self.y
+
     def __add__(self,other):
         x = self.x+other[0]
         y = self.y+other[1]
