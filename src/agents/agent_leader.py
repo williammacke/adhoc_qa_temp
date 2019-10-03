@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from src.agents import agent
-# from src.astar import pyastar
+from src.astar import pyastar
 from collections import namedtuple
 from src import global_defs as gd
 from src import utils
@@ -69,7 +69,8 @@ class agent_leader(agent.AbstractAgent):
         target = self.tp.get_current_job_station()
         self.__target = target
         target_pos = obs.allPos[obs.stationInd[target]]
-        obstacles = copy.deepcopy(obs.allPos).remove(self.pos)
+        obstacles = copy.deepcopy(obs.allPos)
+        obstacles.remove(self.pos)
 
         desired_action = None
         if utils.is_neighbor(self.pos,target_pos):

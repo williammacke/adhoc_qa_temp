@@ -4,7 +4,7 @@ import numpy as np
 from collections import namedtuple
 from enum import Enum
 import copy
-# from src import utils
+from src import utils
 import warnings
 import logging
 from src.agents.adhoc_utils import Knowledge, inference_engine
@@ -125,7 +125,8 @@ class agent_adhoc(AbstractAgent):
             #Navigate to destination.
             desired_action = None
 
-        obstacles = copy.deepcopy(obs.allPos).remove(self.pos)
+        obstacles = copy.deepcopy(obs.allPos)
+        obstacles.remove(self.pos)
         proposal = utils.generate_proposal(self.pos,destination,obstacles,desired_action)
         return proposal
 

@@ -4,7 +4,7 @@ from src import global_defs as gd
 #import pdb
 from profilehooks import profile
 import copy
-# from src.astar.pyastar import astar
+from src.astar.pyastar import astar
 
 debug = gd.DEBUG
 
@@ -214,8 +214,13 @@ def get_path_astar(pos1,pos2,obstacles,grid_size):
     path: A list of movements to the final destination.
 
     """
+    # Obstacles needs to be reformatted to pass to numpy.ravel_multi_index
+    obs_multi_index = [[], []]
+    for ob in obstacles:
+        obs_multi_index[0].append(ob[0])
+        obs_multi_index[1].append(ob[1])
 
-    astar_solver = astar(pos1.as_tuple(),pos2.as_tuple(),obstacles,grid_size,False)
+    astar_solver = astar(pos1.as_tuple(),pos2.as_tuple(),obs_multi_index,grid_size,False)
     path_found,path = astar_solver.find_minimumpath()
 
     if not path_found:

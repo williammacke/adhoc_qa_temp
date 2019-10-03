@@ -42,12 +42,14 @@ class astar():
             n_locs = 0
             #ipdb.set_trace()
         else:
-            try:
-                obstacle_locs_idx = np.ravel_multi_index(np.array(obstacle_loc).T,(height,width))
-                obstacle_locs_idx = obstacle_locs_idx.astype('int32')
-            except ValueError:
-                print("DEBUG FAIL")
-                raise ValueError
+            obstacle_locs_idx = np.ravel_multi_index(np.array(obstacle_loc),(height,width))
+            obstacle_locs_idx = obstacle_locs_idx.astype('int32')
+#             try:
+#                 obstacle_locs_idx = np.ravel_multi_index(np.array(obstacle_loc).T,(height,width))
+#                 obstacle_locs_idx = obstacle_locs_idx.astype('int32')
+#             except ValueError:
+#                 print("DEBUG FAIL")
+#                 raise ValueError
             n_locs = len(obstacle_loc)
 
         #FOR now, we are assuming only 4 actions.

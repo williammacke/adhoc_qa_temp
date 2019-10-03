@@ -6,7 +6,7 @@ from src.agents.agent_leader import agent_leader
 from src.agents.agent_adhoc_q import agent_adhoc
 
 size = gd.GRID_SIZE
-stn_pos = [(1,2), (0,4), (4,4)] # Does this need to be a list of Point2Ds?
+stn_pos = [Point2D(1,2), Point2D(0,4), Point2D(4,4)] # Does this need to be a list of Point2Ds?
 # Need to implement tool box
 env = environment(size, stn_pos)
 
