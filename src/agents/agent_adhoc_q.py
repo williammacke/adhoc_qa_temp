@@ -12,6 +12,7 @@ from src.agents.adhoc_utils import Knowledge, inference_engine
 logger = logging.getLogger('aamas')
 logger.setLevel(gd.debug_level)
 
+adhoc_agent_state = namedtuple('AgentState','type pos target')
 
 class agent_adhoc(AbstractAgent):
     def __init__(self,pos):
@@ -35,11 +36,10 @@ class agent_adhoc(AbstractAgent):
         self.tracking_agent = tagent
 
     def get_remaining_stations(self,cobs):
-        stations_left =[]
-        n_stations = len(cobs.stationInd) #Total number of stations
-        for sttnidx in range(n_stations):
+        stations_left = []
+        for sttnidx in range(gd.N_STATIONS):
             if cobs.stationStatus[sttnidx] is False:
-                #This means this station hasn't been closed yeat.
+                #This means this station hasn't been closed yet.
                 stations_left.append(sttnidx)
         return np.array(stations_left)
 
@@ -52,7 +52,7 @@ class agent_adhoc(AbstractAgent):
           - If we have the tool, simply go forward.
           - Else, go to get the tool first.
         """
-        self.p_obs_temp = copy.deepcopy(obs)
+        self.p_obs_temp = obs
         if obs.timestep == 0:
             #If it's the first timestep, we have no clue.
             self.tracking_stations = self.get_remaining_stations(obs)
@@ -144,3 +144,12 @@ class agent_adhoc(AbstractAgent):
     def __repr__(self):
         st = '{}_at_{}_goingto_{}'.format(self.name,self.pos,self.knowledge.get_current_job_station())
         return st
+
+    # def __copy__(self):
+
+
+    # def __getstate__(self):
+    #     pass
+    #
+    # def __setstate__(self):
+    #     pass

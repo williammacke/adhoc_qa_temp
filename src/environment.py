@@ -6,14 +6,14 @@ from src import utils
 #import pdb
 debug = gd.DEBUG
 import random
-from src.agents import agent_leader
+from src.agents.agent import AgentType
 import copy
 
 from profilehooks import profile
 config = namedtuple("cfg",'S k maxstep')
 config_env = config(1000,1,150)
 
-env_state_def = namedtuple('env_state_def','size n_stations sttn_pos is_terminal step_count config agent_state_list')
+env_state_def = namedtuple('env_state_def','size n_stations sttn_pos all_actions is_terminal step_count config adhoc_state')
 
 class environment():
     def __init__(self,size,sttn_positions,visualize=False,config_environment=config_env):
@@ -23,11 +23,15 @@ class environment():
         :param sttn_positions: Positions of the station inside the grid. The positions are in regular axes, and not numpy notations.
         """
 
+        # Initialize global variables
+        gd.GRID_SIZE = size
+        gs.N_STATIONS = len(sttn_positions)
+
         self.size = size
         self.n_stations = len(sttn_positions)
         self.sttn_pos = sttn_positions
         self.agents = [None, None] # Assumed only 2 agents, leader and adhoc respectively
-        self.allActions = None
+        self.allActions = []
 
         self.is_terminal = False
         self.step_count = 0
@@ -58,22 +62,30 @@ class environment():
         self.agents[gd.ADHOC_IDX] = adhoc_agent
 
 
-    def generate_observation(self,agent_index):
+    def generate_observation(self):
         agent_locs = [agent.pos for agent in self.agents]
+        toolbox_locs = [None] # TODO
         station_locs = [pos for pos in self.sttn_pos]
-        all_locs = agent_locs+station_locs
+        all_locs = agent_locs + toolbox_locs + station_locs
 
-        load_indices = range(len(self.agents),len(all_locs))
-        obs = gd.obs(self.allActions,all_locs,load_indices)
+        leader_tp = self.agents[gd.LEADER_IDX].tp
+        station_status_ordered = [AgentType.status.pending] * gd.N_STATIONS
+        for station, status in zip(leader_tp.station_order, leader_tp.station_work_status):
+            station_status_ordered[station] = status
+
+        station_ind = range(len(agent_locs) + len(toolbox_locs), len(station_locs))
+        obs = gd.obs(self.allActions, all_locs, station_status_ordered, station_ind)
 
         return obs
 
-    def generate_adhoc_observation(self):
-        """
-        Return AdHoc observation. For Adhoc observation, you return the environment itself and not any specific observation.
-        :return:
-        """
-        return self
+    # THIS IS MANISH'S CODE, BUT HE TREATED AND IMPLEMENTED THE OBSERVATIONS AS LEADER OBSERVATIONS
+    # CHANGED: ADHOC AGENT NOW RECEIVES SAME OBSERVATIONS AS LEADER
+    # def generate_adhoc_observation(self):
+    #     """
+    #     Return AdHoc observation. For Adhoc observation, you return the environment itself and not any specific observation.
+    #     :return:
+    #     """
+    #     return self
 
     def update_vis(self):
         #TODO: Agent Orientation Attribute to Agents
@@ -95,16 +107,17 @@ class environment():
         n_agents = len(self.agents)
         observations=[]
         for (agent_idx,agent) in enumerate(self.agents):
-            curr_observation = self.generate_observation(agent_idx)
+            curr_observation = self.generate_observation()
 
-            if agent_idx==n_agents-1:
-                #Check if the last agent is adhoc or not.
-                if agent.is_adhoc:
-                    #Adhoc agent
-                    curr_observation = self.generate_adhoc_observation()
-                else:
-                    #Not adhoc agent.
-                    curr_observation = self.generate_observation(agent_idx)
+            # CHANGED: THIS ISN'T NEEDED SINCE ADHOC OBSERVATIONS HAS BEEN CHANGED TO BE SAME AS LEADER OBSERVATIONS
+            # if agent_idx==n_agents-1:
+            #     #Check if the last agent is adhoc or not.
+            #     if agent.is_adhoc:
+            #         #Adhoc agent
+            #         curr_observation = self.generate_observation()
+            #     else:
+            #         #Not adhoc agent.
+            #         curr_observation = self.generate_observation(agent_idx)
 
             proposal = agent.respond(curr_observation)
             agent_proposals.append(proposal)
@@ -158,13 +171,12 @@ class environment():
             decisions.append(decision)
             self.agents[agent_idx].act(proposal,decision)
 
-
         if debug:
             for decision in decisions:
                 assert(isinstance(decision,bool))
             assert(len(decisions)==len(self.agents))
 
-        self.allActions = [prop[1] for prop, dec in zip(proposal, decision) if dec else gd.Actions.NOOP]
+        self.allActions = [prop[1] if dec else gd.Actions.NOOP for prop, dec in zip(proposal, decision)]
         return decisions
 
     def _proposal_check(self,agent_idx:int ,proposal:tuple) -> bool:
@@ -223,7 +235,8 @@ class environment():
 
     def step(self):
         """
-        Performs one ste       a1 = agent_lifter.agent_lifter(agent_pos[0], 2)
+        Performs one step
+        a1 = agent_lifter.agent_lifter(agent_pos[0], 2)
         a2 = agent_lifter.agent_lifter(agent_pos[1], 2)
         a3 = agent_adhoc.agent_adhoc(a2.pos)
 
@@ -275,10 +288,12 @@ class environment():
         leader = self.agents[gd.LEADER_IDX]
         terminated = False
         reward = 1
-        if Agent.status.pending not in leader.tp.station_work_status:
+        if AgentType.status.pending not in leader.tp.get_status():
             terminated = True
         return (terminated, 1)
 
+    # TODO: THIS FUNCTION DOESN'T WORK. ADHOC_AGENT HAS NO COPY FUNCTION
+    #       EVERYTHING ELSE OF COPY SHOULD BE FINE
     def __copy__(self):
         selfstate = self.__getstate__()
         new_env = self.__init_from_state__(selfstate)
@@ -286,16 +301,23 @@ class environment():
 
     def __init_from_state__(self,selfstate):
         new_env = environment(selfstate.size,selfstate.sttn_pos,False,selfstate.config)
-        for agent in self.agents:
-            new_agent = agent.__copy__()
-            new_env.register_agent(new_agent)
+        # OLD CODE
+        # for agent in self.agents:
+        #     new_agent = agent.__copy__()
+        #     new_env.register_agent(new_agent)
+
+        # ASSUME ONLY LEADER AND ADHOC AGENTS
+        new_env.register_agent(self.agents[gd.LEADER_IDX].__copy__())
+        new_env.register_adhoc_agent(self.agents[gd.ADHOC_IDX].__copy__())
 
         new_env.__setstate__(selfstate)
         return new_env
 
     def __getstate__(self):
-        asl = [agent.__getstate__() for agent in self.agents]
-        curr_state = env_state_def(self.size,self.n_stations,self.sttn_pos,self.is_terminal,self.step_count,self.config,asl)
+        # Only need to get state of adhoc agent. For leader agent, __copy__() already fully preserves state
+        adhoc_state = self.agents[gd.ADHOC_IDX].__getstate__()
+        curr_state = env_state_def(self.size,self.n_stations,self.sttn_pos,self.allActions,\
+                self.is_terminal,self.step_count,self.config,adhoc_state)
         curr_state = copy.deepcopy(curr_state)
         return curr_state
 
@@ -305,11 +327,12 @@ class environment():
             raise Exception("Invalid state sent")
         self.n_stations = s.n_stations
         self.sttn_pos = s.sttn_pos
+        self.allActions = s.all_actions
         self.is_terminal = s.is_terminal
         self.step_count = s.step_count
         self.config = s.config
-        for agent,ast in zip(self.agents,s.agent_state_list):
-            agent.__setstate__(ast)
+        # Set state for only the adhoc agent. State of leader agent already set with __copy__()
+        self.agents[gd.ADHOC_IDX].__setstate__(ast)
         return
 
     def __repr__(self):

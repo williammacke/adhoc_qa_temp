@@ -38,19 +38,21 @@ class AbstractAgent(ABC):
         """
         raise NotImplementedError
 
-    """
-    @abstractmethod
-    def __copy__(self):
-        raise NotImplementedError
+    # @abstractmethod
+    # def __copy__(self):
+    #     raise NotImplementedError
+    #
+    # @abstractmethod
+    # def __deepcopy__(self):
+    #     raise NotImplementedError
 
-    @abstractmethod
-    def __getstate__(self):
-        raise NotImplementedError
-
-    @abstractmethod
-    def __setstate__(self, state):
-        raise NotImplementedError
-    """
+    # @abstractmethod
+    # def __getstate__(self):
+    #     raise NotImplementedError
+    #
+    # @abstractmethod
+    # def __setstate__(self, state):
+    #     raise NotImplementedError
 
     @abstractmethod
     def __repr__(self):
@@ -103,7 +105,6 @@ class AgentType():
         self.station_work_status[latest_station_id] = AgentType.status.done
         return True
 
-
     def __str__(self):
         stg = ''
         for sttn,status in zip(self.station_order,self.station_work_status):
@@ -127,12 +128,3 @@ class AgentType():
         res = res and (np.all(self.station_order == new_tp.station_order))
         res = res and (np.all(self.station_work_status == new_tp.station_work_status))
         return res
-
-    @abstractmethod
-    def __getstate(self):
-        raise NotImplementedError
-
-    @abstractmethod
-    def __setstate(self):
-        raise NotImplementedError
-        

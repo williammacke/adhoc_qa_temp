@@ -45,7 +45,7 @@ If neighboring a station:
 #logger = logging.getLogger('aamas')
 #logger.setLevel(gd.debug_level)
 
-Agent_state = namedtuple('AgentState','type pos target')
+# leader_agent_state = namedtuple('LeaderAgentState','type pos target')
 
 
 class agent_leader(agent.AbstractAgent):
@@ -130,3 +130,10 @@ class agent_leader(agent.AbstractAgent):
         self.tp = copy.deepcopy(new_agent.tp)
         self.pos = copy.deepcopy(new_agent.pos)
         return True
+
+    # def __getstate__(self):
+    #
+    #     return leader_agent_state
+    #
+    # def __setstate__(self):
+    #     pass
