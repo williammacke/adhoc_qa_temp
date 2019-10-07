@@ -109,18 +109,23 @@ class agent_adhoc(AbstractAgent):
             if self.tool == target_station:
                 destination = obs.allPos[obs.stationInd[target_station]]
             else:
-                destination = gd.TOOL_BASE
+                destination = obs.allPos[gd.TOOLS_IDX]
         else:
-            destination = gd.TOOL_BASE
+            destination = obs.allPos[gd.TOOLS_IDX]
 
         if utils.is_neighbor(self.pos,destination):
-            if destination == gd.TOOL_BASE:
+            if destination == obs.allPos[gd.TOOLS_IDX]:
                 #We are at the base to pick up a tool.
                 desired_action = gd.Actions.NOOP
                 self.tool = target_station
             else:
                 #we are the station to work.
-                desired_action = gd.Actions.WORK
+                if utils.is_neighbor(target_pos,obs.allPos[gd.LEADER_IDX]):
+                    #Meaning, if the other agent is also neighoring the station, execute the work action
+                    desired_action = gd.Actions.WORK
+                else:
+                    #Else, wait for other agent to get to station
+                    desired_action = gd.Actions.NOOP
         else:
             #Navigate to destination.
             desired_action = None
@@ -134,11 +139,12 @@ class agent_adhoc(AbstractAgent):
         if decision is True:
             #If the decision was to work, then we have some bookkeeping to do.
             _,action = proposal
+            self.pos += gd.ACTIONS_TO_MOVES[action]
             if action == gd.Actions.WORK:
                 #We have been approved to work, station work is finished.
                 #Signal Knowledge that the work is finished.
-                curr_k_id = self.knowledge.get_current_job_station_id()
-                # self.knowledge.
+                curr_k_id = self.knowledge.get_current_job_station()
+                self.knowledge.set_status(curr_k_id)
             self.p_obs = self.p_obs_temp
 
     def __repr__(self):

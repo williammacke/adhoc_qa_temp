@@ -16,7 +16,7 @@ config_env = config(1000,1,150)
 env_state_def = namedtuple('env_state_def','size n_stations sttn_pos all_actions is_terminal step_count config adhoc_state')
 
 class environment():
-    def __init__(self,size,sttn_positions,visualize=False,config_environment=config_env):
+    def __init__(self,size,sttn_positions,tools_pos,visualize=False,config_environment=config_env):
 
         """
         :param size: Dimension of the grid in which the environment is assumed to live.
@@ -30,6 +30,7 @@ class environment():
         self.size = size
         self.n_stations = len(sttn_positions)
         self.sttn_pos = sttn_positions
+        self.tools_pos = tools_pos
         self.agents = [None, None] # Assumed only 2 agents, leader and adhoc respectively
         self.allActions = []
 
@@ -64,16 +65,14 @@ class environment():
 
     def generate_observation(self):
         agent_locs = [agent.pos for agent in self.agents]
-        toolbox_locs = [None] # TODO
-        station_locs = [pos for pos in self.sttn_pos]
-        all_locs = agent_locs + toolbox_locs + station_locs
+        all_locs = agent_locs + tools_pos + self.sttn_pos
 
         leader_tp = self.agents[gd.LEADER_IDX].tp
         station_status_ordered = [AgentType.status.pending] * gd.N_STATIONS
         for station, status in zip(leader_tp.station_order, leader_tp.station_work_status):
             station_status_ordered[station] = status
 
-        station_ind = range(len(agent_locs) + len(toolbox_locs), len(station_locs))
+        station_ind = range(len(agent_locs) + len(tools_pos), len(station_locs))
         obs = gd.obs(self.allActions, all_locs, station_status_ordered, station_ind)
 
         return obs

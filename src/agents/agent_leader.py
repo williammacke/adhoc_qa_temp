@@ -90,8 +90,8 @@ class agent_leader(agent.AbstractAgent):
         return proposal
 
     def act(self,proposal,decision):
-        _,action = proposal
         if decision is True:
+            _,action = proposal
             #Then we are allowed to execute the action.
             #First, apply the movement.
             self.pos += gd.ACTIONS_TO_MOVES[action]

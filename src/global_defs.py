@@ -34,8 +34,7 @@ MAX_ITERS = 100
 GRID_SIZE = 0
 N_STATIONS = 0
 
-# Code already had tools in other files though it didn't exist. Should move to environment?
-# TOOL_BASE = Point2D(0, 0)
+TOOLS_IDX = 3
 
 #An observation should have all positions, my index to get my position from all of them, station indices, and finally, the most recent actions performed by all the agents in the arena.
 obs = recordclass('obs','allActions allPos stationStatus stationInd')

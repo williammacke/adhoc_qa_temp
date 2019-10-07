@@ -7,8 +7,8 @@ from src.agents.agent_adhoc_q import agent_adhoc
 
 size = 10
 stn_pos = [Point2D(1,2), Point2D(0,4), Point2D(4,4)]
-# Need to implement tool box
-env = environment(size, stn_pos)
+tools_pos = [Point2D(3,1)] # tools_pos needs to be an array but only one tool box is supported so far
+env = environment(size, stn_pos, tools_pos)
 
 l_pos = Point2D(2, 3)
 # l_tp = agent.AgentType([1,0,2]) # Optional fixed order of stations to pass to agent_leader()
