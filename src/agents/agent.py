@@ -6,6 +6,7 @@ from .. import global_defs as gd
 import numpy as np
 from itertools import count
 from enum import Enum
+import copy
 
 
 class AbstractAgent(ABC):
@@ -69,8 +70,9 @@ class AgentType():
         # If stations is an integer, randomly create station order to visit
         if isinstance(stations, int):
             self.n_stations = stations
-            self.station_order = np.random.permutation(self.n_stations) #The order in which stations would be worked on.
+            self.station_order = list(np.random.permutation(self.n_stations)) #The order in which stations would be worked on.
             self.station_work_status = np.array([AgentType.status.pending]*self.n_stations) #The status of work on these stations. Everytime a station is worked on, it's work_status will be converted to True.
+            print(self.station_work_status)
         # If stations is a list of integers (station indices), set station order to given list
         elif isinstance(stations, list):
             assert len(stations) == gd.N_STATIONS
@@ -114,7 +116,7 @@ class AgentType():
         return stg
 
     def __copy__(self):
-        new_agent_type = agent_type(self.n_stations)
+        new_agent_type = AgentType(self.n_stations)
         new_agent_type.station_order = copy.deepcopy(self.station_order)
         new_agent_type.station_work_status = copy.deepcopy(self.station_work_status)
         return new_agent_type

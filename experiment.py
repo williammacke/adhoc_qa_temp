@@ -11,8 +11,9 @@ tools_pos = [Point2D(3,1)] # tools_pos needs to be an array but only one tool bo
 env = environment(size, stn_pos, tools_pos)
 
 l_pos = Point2D(2, 3)
+atype = agent.AgentType(len(stn_pos))
 # l_tp = agent.AgentType([1,0,2]) # Optional fixed order of stations to pass to agent_leader()
-leader = agent_leader(l_pos)
+leader = agent_leader(l_pos, atype)
 
 a_pos = Point2D(2, 2)
 adhoc = agent_adhoc(a_pos)

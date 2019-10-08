@@ -31,7 +31,7 @@ class inference_engine():
         tracking_agent: The agent that we are tracking.
         tracking_stations: The stations that we are considering between. Should be a list/numpy
         """
-        self.tracking_agent = copy.deepcopy(tracking_agent)
+        self.tracking_agent = tracking_agent.__deepcopy__()
         self.tracking_stations = copy.deepcopy(tracking_stations)
         self.prior = np.ones(len(self.tracking_stations))
         self.prior/=np.sum(self.prior)

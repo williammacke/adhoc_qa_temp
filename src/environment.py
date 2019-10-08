@@ -25,7 +25,7 @@ class environment():
 
         # Initialize global variables
         gd.GRID_SIZE = size
-        gs.N_STATIONS = len(sttn_positions)
+        gd.N_STATIONS = len(sttn_positions)
 
         self.size = size
         self.n_stations = len(sttn_positions)
@@ -65,15 +65,16 @@ class environment():
 
     def generate_observation(self):
         agent_locs = [agent.pos for agent in self.agents]
-        all_locs = agent_locs + tools_pos + self.sttn_pos
+        all_locs = agent_locs + self.tools_pos + self.sttn_pos
 
         leader_tp = self.agents[gd.LEADER_IDX].tp
         station_status_ordered = [AgentType.status.pending] * gd.N_STATIONS
+        station_locs = self.sttn_pos
         for station, status in zip(leader_tp.station_order, leader_tp.station_work_status):
             station_status_ordered[station] = status
 
-        station_ind = range(len(agent_locs) + len(tools_pos), len(station_locs))
-        obs = gd.obs(self.allActions, all_locs, station_status_ordered, station_ind)
+        station_ind = list(range(len(agent_locs) + len(self.tools_pos), len(all_locs)))
+        obs = gd.obs(self.allActions, all_locs, station_status_ordered, station_ind, self.step_count)
 
         return obs
 
@@ -158,6 +159,7 @@ class environment():
                     #pdb.set_trace()
                     print("exception")
         decisions = []
+        proposals = []
 
         n_agents = len(self.agents)
         #random_agent_order = random.sample(range(n_agents),n_agents) #Randomize all agent's priority.
@@ -168,6 +170,7 @@ class environment():
             proposal = agent_proposals[agent_idx]
             decision = self._proposal_check(agent_idx,proposal)
             decisions.append(decision)
+            proposals.append(proposal)
             self.agents[agent_idx].act(proposal,decision)
 
         if debug:
@@ -175,7 +178,8 @@ class environment():
                 assert(isinstance(decision,bool))
             assert(len(decisions)==len(self.agents))
 
-        self.allActions = [prop[1] if dec else gd.Actions.NOOP for prop, dec in zip(proposal, decision)]
+        print(proposal)
+        self.allActions = [prop[1] if dec else gd.Actions.NOOP for prop, dec in zip(proposals, decisions)]
         return decisions
 
     def _proposal_check(self,agent_idx:int ,proposal:tuple) -> bool:
@@ -197,7 +201,7 @@ class environment():
             decision = True
             return True
 
-        elif action_idx == gd.Actions.LOAD:
+        elif action_idx == gd.Actions.WORK:
             #Approve a load decision if it is near an station.
 
             for sttn_pos in self.sttn_pos:

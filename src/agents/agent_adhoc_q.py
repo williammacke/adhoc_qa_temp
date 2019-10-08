@@ -1,4 +1,5 @@
 from src.agents.agent import AbstractAgent
+from src.agents import agent
 from src import global_defs as gd
 import numpy as np
 from collections import namedtuple
@@ -38,9 +39,10 @@ class agent_adhoc(AbstractAgent):
     def get_remaining_stations(self,cobs):
         stations_left = []
         for sttnidx in range(gd.N_STATIONS):
-            if cobs.stationStatus[sttnidx] is False:
+            if cobs.stationStatus[sttnidx]  == agent.AgentType.status.pending:
                 #This means this station hasn't been closed yet.
                 stations_left.append(sttnidx)
+        print(stations_left)
         return np.array(stations_left)
 
     def respond(self,obs):

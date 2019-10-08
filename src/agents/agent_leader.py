@@ -68,6 +68,10 @@ class agent_leader(agent.AbstractAgent):
         obs = observation
         target = self.tp.get_current_job_station()
         self.__target = target
+        print(target)
+        print(len(obs.stationInd))
+        print(obs.stationInd[target])
+        print(len(obs.allPos))
         target_pos = obs.allPos[obs.stationInd[target]]
         obstacles = copy.deepcopy(obs.allPos)
         obstacles.remove(self.pos)
@@ -114,9 +118,9 @@ class agent_leader(agent.AbstractAgent):
         """
         Make a copy of the agent. Copying the following is enough to make a good copy of the agent. We don't differentiate between deepcopy and copy. All are the same.
         """
-        new_tp = copy.deepcopy(self.tp)
+        new_tp = self.tp.__deepcopy__()
         new_pos = copy.deepcopy(self.pos)
-        new_agent = agent.AbstractAgent(new_pos,new_tp)
+        new_agent = agent_leader(new_pos,new_tp)
         return new_agent
 
     def __deepcopy__(self):

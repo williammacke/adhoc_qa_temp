@@ -26,6 +26,7 @@ def is_neighbor(pos1, pos2):
 
 def check_within_boundaries(pos,dim=(gd.GRID_SIZE,gd.GRID_SIZE)):
     dim_x,dim_y = dim
+    print(dim_x)
     pos_x,pos_y = pos
     if (pos_x<0 or pos_x>dim_x-1):
         return False
@@ -73,11 +74,14 @@ def generate_proposal(pos,destination,obstacles,desired_action=None):
     action_probs[desired_action] = gd.BIAS_PROB
 
     #Now fill the rest of actions with minimal probability, called the base_probability. This is simply to add a non-zero possibilty to each valid action, just in case to make it non-deterministic.
+    print(all_valid_move_actions)
     base_probs = np.ones_like(action_probs)*all_valid_move_actions
+    print(base_probs)
     base_probs /= np.sum(base_probs)
     base_probs *= (1-gd.BIAS_PROB) #now the base probs will sum up wit 0.05
 
     action_probs+=base_probs
+    print(action_probs)
     assert(np.sum(action_probs) == 1)
     sampled_action = np.random.choice(gd.Actions,p=action_probs)
     proposal = (action_probs,sampled_action)

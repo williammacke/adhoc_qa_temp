@@ -31,13 +31,13 @@ DEBUG = False
 MAX_ITERS = 100
 
 # These parameters are initialized when evironment is initialized.
-GRID_SIZE = 0
+GRID_SIZE = 10
 N_STATIONS = 0
 
 TOOLS_IDX = 3
 
 #An observation should have all positions, my index to get my position from all of them, station indices, and finally, the most recent actions performed by all the agents in the arena.
-obs = recordclass('obs','allActions allPos stationStatus stationInd')
+obs = recordclass('obs','allActions allPos stationStatus stationInd timestep')
 LEADER_IDX = 0
 ADHOC_IDX = 1
 #obs_history = namedtuple('trajectory','listOfObservations')
