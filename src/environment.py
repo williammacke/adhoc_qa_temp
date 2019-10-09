@@ -32,7 +32,7 @@ class environment():
         self.sttn_pos = sttn_positions
         self.tools_pos = tools_pos
         self.agents = [None, None] # Assumed only 2 agents, leader and adhoc respectively
-        self.allActions = []
+        self.allActions = [None, None]
 
         self.is_terminal = False
         self.step_count = 0
@@ -178,7 +178,6 @@ class environment():
                 assert(isinstance(decision,bool))
             assert(len(decisions)==len(self.agents))
 
-        print(proposal)
         self.allActions = [prop[1] if dec else gd.Actions.NOOP for prop, dec in zip(proposals, decisions)]
         return decisions
 
@@ -229,8 +228,6 @@ class environment():
                 if agent.pos == action_result:
                     decision = False
                     return decision
-
-            # TODO: CHECK COLLISION WITH TOOL BOX
 
             #Allclear, send a yes.
             decision = True

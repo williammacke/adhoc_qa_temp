@@ -72,7 +72,7 @@ class AgentType():
             self.n_stations = stations
             self.station_order = list(np.random.permutation(self.n_stations)) #The order in which stations would be worked on.
             self.station_work_status = np.array([AgentType.status.pending]*self.n_stations) #The status of work on these stations. Everytime a station is worked on, it's work_status will be converted to True.
-            print(self.station_work_status)
+
         # If stations is a list of integers (station indices), set station order to given list
         elif isinstance(stations, list):
             assert len(stations) == gd.N_STATIONS

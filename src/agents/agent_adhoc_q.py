@@ -42,7 +42,6 @@ class agent_adhoc(AbstractAgent):
             if cobs.stationStatus[sttnidx]  == agent.AgentType.status.pending:
                 #This means this station hasn't been closed yet.
                 stations_left.append(sttnidx)
-        print(stations_left)
         return np.array(stations_left)
 
     def respond(self,obs):
@@ -61,22 +60,25 @@ class agent_adhoc(AbstractAgent):
             self.inference_engine = inference_engine(self.tracking_agent,self.tracking_stations)
 
             target_station = np.random.choice(self.tracking_stations) #pick a station at random.
+            self.knowledge.update_knowledge_from_inference(target_station)
 
         else:
-            curr_k_id = self.knowledge.get_current_job_station_id()
+            curr_k_idx = self.knowledge.get_current_job_station_idx()
+            print('CURRENT IDX:', curr_k_idx)
             #Checking what knowledge we have.
-            if (self.knowledge.source[curr_k_id]==Knowledge.origin.Answer):
+            if (self.knowledge.source[curr_k_idx]==Knowledge.origin.Answer):
 
                 #Then we simply work on the station because we have an answer telling us that that's the station to work on.
                 target_station = self.knowledge.station_order[curr_k_id]
 
-            elif (self.knowledge.source[curr_k_id] == None):
+            elif (self.knowledge.source[curr_k_idx] == None):
                 #which means we just finished a station in the last time-step. This calls for re-initalizing the inference_engine
                 self.tracking_stations = self.get_remaining_stations(obs)
                 self.inference_engine = inference_engine(self.tracking_agent,self.tracking_stations)
                 target_station = np.random.choice(self.tracking_stations)
+                self.knowledge.update_knowledge_from_inference(target_station)
 
-            elif (self.knowledge.source[curr_k_id]==Knowledge.origin.Inference):
+            elif (self.knowledge.source[curr_k_idx]==Knowledge.origin.Inference):
                 #Which means we have been working on a inference for a station.
                 target_station = self.inference_engine.inference_step(self.p_obs,obs)
                 self.knowledge.update_knowledge_from_inference(target_station)
@@ -122,7 +124,7 @@ class agent_adhoc(AbstractAgent):
                 self.tool = target_station
             else:
                 #we are the station to work.
-                if utils.is_neighbor(target_pos,obs.allPos[gd.LEADER_IDX]):
+                if utils.is_neighbor(destination,obs.allPos[gd.LEADER_IDX]):
                     #Meaning, if the other agent is also neighoring the station, execute the work action
                     desired_action = gd.Actions.WORK
                 else:
@@ -145,8 +147,8 @@ class agent_adhoc(AbstractAgent):
             if action == gd.Actions.WORK:
                 #We have been approved to work, station work is finished.
                 #Signal Knowledge that the work is finished.
-                curr_k_id = self.knowledge.get_current_job_station()
-                self.knowledge.set_status(curr_k_id)
+                curr_k_idx = self.knowledge.get_current_job_station_idx()
+                self.knowledge.set_status(curr_k_idx)
             self.p_obs = self.p_obs_temp
 
     def __repr__(self):

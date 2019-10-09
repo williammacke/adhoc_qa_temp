@@ -77,7 +77,7 @@ class inference_engine():
         for idx,sttn in enumerate(self.tracking_stations):
             dummy_tp = create_dummy_type(sttn)
             self.tracking_agent.set_tp(dummy_tp)
-            action_probs = self.tracking_agent.respond(obs)
+            action_probs, action = self.tracking_agent.respond(obs)
             likelihood_vector[idx] = action_probs[action_performed]
         return likelihood_vector
 
@@ -89,6 +89,7 @@ class inference_engine():
         mobs = self.get_modified_obs(pobs,cobs)
         ll = self.get_likelihood(mobs)
         (map_idx,ps) = utils.get_MAP(self.prior,ll)
+        print(ps, ll)
         assert(np.all(ps.shape==ll.shape))
         self.prior = ps
         return self.tracking_stations[map_idx]
@@ -127,6 +128,12 @@ class Knowledge(AgentType):
 
         return super().get_current_job_station()
 
+    def get_current_job_station_idx(self):
+        curr_sttn_idx = 0
+        while(self.station_work_status[curr_sttn_idx] is AgentType.status.done):
+            curr_sttn_idx += 1
+        return curr_sttn_idx
+
     def update_knowledge_from_qa(self,station_order):
         """
         Recieve knowledge from the QA system.
@@ -138,9 +145,7 @@ class Knowledge(AgentType):
 
         #seek the current confusing station, which should be the station we are working on right now.
 
-        curr_sttn_idx = 0
-        while(self.station_work_status[curr_sttn_idx] is AgentType.Status.done):
-            curr_sttn_idx+=1
+        curr_sttn_idx = self.get_current_job_station_idx()
 
         #Now append the knowledge.
         for idx in range(0,len(station_order)):
@@ -154,8 +159,6 @@ class Knowledge(AgentType):
         """
 #seek the current confusing station, which should be the station we are working on right now.
 
-        curr_sttn_idx = 0
-        while(self.station_work_status[curr_sttn_idx] is AgentType.status.done):
-            curr_sttn_idx += 1
+        curr_sttn_idx = self.get_current_job_station_idx()
         self.station_order[curr_sttn_idx] = station
         self.source[curr_sttn_idx] = Knowledge.origin.Inference

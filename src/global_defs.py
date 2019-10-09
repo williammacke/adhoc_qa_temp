@@ -28,11 +28,11 @@ logger.addHandler(ch)
 
 DEBUG = False
 
-MAX_ITERS = 100
+MAX_ITERS = 15
 
 # These parameters are initialized when evironment is initialized.
 GRID_SIZE = 10
-N_STATIONS = 0
+N_STATIONS = 3
 
 TOOLS_IDX = 3
 

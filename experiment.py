@@ -5,36 +5,60 @@ from src.agents import agent
 from src.agents.agent_leader import agent_leader
 from src.agents.agent_adhoc_q import agent_adhoc
 
+
+# DEBUG CODE
+def debug_output(timestep=None):
+    print('------------------------------------------\n')
+    print('TIME STEP:            ', timestep)
+    station_positions = [str(station) for station in stn_pos]
+    print('\nStation Positions:    ', station_positions)
+    toolbox_positions = [str(toolbox) for toolbox in tools_pos]
+    print('Toolbox Position:     ', toolbox_positions)
+    print('\nLeader Pos:           ', leader.pos)
+    leader_action = env.allActions[gd.LEADER_IDX]
+    if leader_action is not None:
+        leader_action = gd.Actions_list[leader_action]
+    print('Leader Action:        ', leader_action)
+    print('Leader Station Order: ', leader.tp.station_order)
+    leader_station_status = [status.value for status in leader.tp.station_work_status]
+    print('Leader Station Status:', leader_station_status)
+    print('\nAdhoc Pos:            ', adhoc.pos)
+    adhoc_action = env.allActions[gd.ADHOC_IDX]
+    if adhoc_action is not None:
+        adhoc_action = gd.Actions_list[adhoc_action]
+    print('Adhoc Action:         ', adhoc_action)
+    print('Adhoc Tool:           ', adhoc.tool)
+    print('Adhoc Station Order:  ', adhoc.knowledge.station_order)
+    print('Adhoc Source:         ', adhoc.knowledge.source)
+    adhoc_station_status = [status.value for status in adhoc.knowledge.station_work_status]
+    print('Adhoc Station Status: ', adhoc_station_status)
+    print('\n')
+    return
+
+
 size = 10
-stn_pos = [Point2D(1,2), Point2D(0,4), Point2D(4,4)]
-tools_pos = [Point2D(3,1)] # tools_pos needs to be an array but only one tool box is supported so far
+stn_pos = [Point2D(2,7), Point2D(5,7), Point2D(9,7)]
+tools_pos = [Point2D(1,3)] # tools_pos needs to be an array but only one tool box is supported so far
 env = environment(size, stn_pos, tools_pos)
 
-l_pos = Point2D(2, 3)
-atype = agent.AgentType(len(stn_pos))
-# l_tp = agent.AgentType([1,0,2]) # Optional fixed order of stations to pass to agent_leader()
-leader = agent_leader(l_pos, atype)
+l_pos = Point2D(2, 0)
+atype = agent.AgentType(len(stn_pos)) # Optional random order of stations to pass to agen_leader()
+l_tp = agent.AgentType([1,0,2]) # Optional fixed order of stations to pass to agent_leader()
+leader = agent_leader(l_pos, l_tp)
 
-a_pos = Point2D(2, 2)
+a_pos = Point2D(0, 0)
 adhoc = agent_adhoc(a_pos)
 adhoc.register_tracking_agent(leader)
 
 env.register_agent(leader)
 env.register_adhoc_agent(adhoc)
 
-env.step()
+step_count = 0
+terminated = False
+debug_output(step_count)
+while(not terminated and step_count < gd.MAX_ITERS):
+    terminated, reward = env.step()
 
+    step_count = env.step_count
 
-# iteration = 0
-# terminated = False
-# while(not terminated and iteration < gd.MAX_ITERS):
-#     terminated, reward = env.step()
-#     iteration += 1
-
-
-# TODO:
-# A lot of things:
-#   haven't checked environment that much yet
-#   agent_adhoc.act() is incomplete
-#   environment.check_for_termination() not completed
-#   in agent_leader, Agent_state namedtuple not used?
+    debug_output(step_count)

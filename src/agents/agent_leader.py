@@ -68,10 +68,6 @@ class agent_leader(agent.AbstractAgent):
         obs = observation
         target = self.tp.get_current_job_station()
         self.__target = target
-        print(target)
-        print(len(obs.stationInd))
-        print(obs.stationInd[target])
-        print(len(obs.allPos))
         target_pos = obs.allPos[obs.stationInd[target]]
         obstacles = copy.deepcopy(obs.allPos)
         obstacles.remove(self.pos)
