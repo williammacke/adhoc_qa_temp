@@ -15,6 +15,7 @@ def debug_output(timestep=None):
     toolbox_positions = [str(toolbox) for toolbox in tools_pos]
     print('Toolbox Position:     ', toolbox_positions)
     print('\nLeader Pos:           ', leader.pos)
+    # print('Leader Target:        ', leader.tp.get_current_job_station()) # This throws index out of range error when all stations are complete
     leader_action = env.allActions[gd.LEADER_IDX]
     if leader_action is not None:
         leader_action = gd.Actions_list[leader_action]
@@ -37,16 +38,16 @@ def debug_output(timestep=None):
 
 
 size = 10
-stn_pos = [Point2D(2,7), Point2D(5,7), Point2D(9,7)]
-tools_pos = [Point2D(1,3)] # tools_pos needs to be an array but only one tool box is supported so far
+stn_pos = [Point2D(7,3), Point2D(7,8), Point2D(3,8)]
+tools_pos = [Point2D(2,3)] # tools_pos needs to be an array but only one tool box is supported so far
 env = environment(size, stn_pos, tools_pos)
 
-l_pos = Point2D(2, 0)
+l_pos = Point2D(5, 0)
 atype = agent.AgentType(len(stn_pos)) # Optional random order of stations to pass to agen_leader()
 l_tp = agent.AgentType([1,0,2]) # Optional fixed order of stations to pass to agent_leader()
 leader = agent_leader(l_pos, l_tp)
 
-a_pos = Point2D(0, 0)
+a_pos = Point2D(4, 0)
 adhoc = agent_adhoc(a_pos)
 adhoc.register_tracking_agent(leader)
 

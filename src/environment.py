@@ -203,8 +203,8 @@ class environment():
         elif action_idx == gd.Actions.WORK:
             #Approve a load decision if it is near an station.
 
-            for sttn_pos in self.sttn_pos:
-                if utils.is_neighbor(self.agents[agent_idx].pos,sttn_pos):
+            for sttn_id, sttn_pos in enumerate(self.sttn_pos):
+                if utils.is_neighbor(self.agents[agent_idx].pos,sttn_pos) and self.agents[gd.ADHOC_IDX].tool == sttn_id:
                     #If it neighbors any of the stations, then return True
                     decision = True
                     return decision
@@ -217,17 +217,18 @@ class environment():
             #Look what can be approved.
             action_result = self.agents[agent_idx].pos+(gd.ACTIONS_TO_MOVES[action_idx])
 
+            # THESE CHECKS NO LONGER NEEDED. AGENTS CAN OVERLAP STATIONS AND OTHER AGENTS.
             #Check it isn't moving into a invalid location. Part 1: Stations
-            for sttn_pos in self.sttn_pos:
-                if sttn_pos == action_result:
-                    decision = False
-                    return decision
+            #for sttn_pos in self.sttn_pos:
+            #    if sttn_pos == action_result:
+            #        decision = False
+            #        return decision
 
             #Check it isn't moving into a invalid location. Part 1: Agents
-            for agent in self.agents:
-                if agent.pos == action_result:
-                    decision = False
-                    return decision
+            #for agent in self.agents:
+            #    if agent.pos == action_result:
+            #        decision = False
+            #        return decision
 
             #Allclear, send a yes.
             decision = True

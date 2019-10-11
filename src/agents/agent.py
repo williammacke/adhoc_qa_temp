@@ -99,6 +99,12 @@ class AgentType():
             stn_idx += 1
         return self.station_order[stn_idx]
 
+    def get_current_job_station_idx(self):
+        curr_sttn_idx = 0
+        while(self.station_work_status[curr_sttn_idx] is AgentType.status.done):
+            curr_sttn_idx += 1
+        return curr_sttn_idx
+
     def set_status(self,latest_station_id):
         """
         Adjust status of station's work.

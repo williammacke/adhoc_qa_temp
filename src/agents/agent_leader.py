@@ -58,6 +58,7 @@ class agent_leader(agent.AbstractAgent):
         if tp is not None:
             assert isinstance(tp, agent.AgentType)
             self.tp = tp
+            self.__target = tp.get_current_job_station()
         # If type is not provided, set agent to random type
         else:
             self.tp = agent.AgentType(gd.N_STATIONS) #Initializing type from settings derived from global_defs.
@@ -69,14 +70,16 @@ class agent_leader(agent.AbstractAgent):
         target = self.tp.get_current_job_station()
         self.__target = target
         target_pos = obs.allPos[obs.stationInd[target]]
-        obstacles = copy.deepcopy(obs.allPos)
-        obstacles.remove(self.pos)
+        # obstacles = copy.deepcopy(obs.allPos)
+        # obstacles.remove(self.pos)
+        obstacles = []
 
         desired_action = None
         if utils.is_neighbor(self.pos,target_pos):
             #We are neighboring the station we want to work at.
             if utils.is_neighbor(target_pos,obs.allPos[gd.ADHOC_IDX]):
                 #Meaning, if the other agent is also neighoring the station, execute the work action
+                # Environment _proposal_check() checks if adhoc has the right tool
                 desired_action = gd.Actions.WORK
                 #now, if the other agent also executed a WORK action, and happens to have the same tool, then we can safely move to the next station. This change will happen if the environment approves the work action, since, for the action to run, the agent needs a way to know if the other agent also has thetool to operate in this station. This tool checking will be done by the environment.
             else:
@@ -98,7 +101,7 @@ class agent_leader(agent.AbstractAgent):
             #logger.debug("Agent {} executed action: {}".format(self.name,action))
             if action == gd.Actions.WORK:
                 #Which means we were approved to go ahead and do the work action, because the other agent had the right tool with it. It's time to move onto the next station.
-                self.tp.set_status(self.__target) #mark the station's status as done.
+                self.tp.set_status(self.tp.get_current_job_station_idx()) #mark the station's status as done.
                 #logger.debug("Agent {} finished target station id {}".format(self.name,self.__target))
         else:
             pass

@@ -9,6 +9,10 @@ from src.astar.pyastar import astar
 debug = gd.DEBUG
 
 def is_neighbor(pos1, pos2):
+    """
+    NOTE: NOT NEIGHBOR FUNCTION. REWRITTEN CODE TO CHECK IF TWO POSITIONS ARE ON TOP OF EACH OTHER.
+          I DID THIS SO I WOULDNT HAVE TO CHANGE NAME OF ALL LOCATIONS OF THIS FUNCTION.
+    """
     if debug:
         #pdb.set_trace()
         if not isinstance(pos1,gd.Point2D):
@@ -19,7 +23,7 @@ def is_neighbor(pos1, pos2):
         assert isinstance(pos2,gd.Point2D)
     found_match = False
     #pdb.set_trace()
-    if pos1-pos2 in gd.MOVES_SET:
+    if pos1 == pos2:
         return True
     else:
         return False
@@ -90,9 +94,8 @@ def get_MAP(prior,likelihood):
     pr = np.array(prior)
     ll = np.array(likelihood)
 
-    ps = np.dot(pr, ll) # Original ps. Threw error
+    # ps = np.dot(pr, ll) # Original ps. Threw error
     ps = pr * ll    
-    print(ps)
     ps /= np.sum(ps)
 
     map_idx = np.argmax(ps)
@@ -216,12 +219,12 @@ def get_path_astar(pos1,pos2,obstacles,grid_size):
 
     """
     # Obstacles needs to be reformatted to pass to numpy.ravel_multi_index
-    obs_multi_index = [[], []]
-    for ob in obstacles:
-        obs_multi_index[0].append(ob[0])
-        obs_multi_index[1].append(ob[1])
+    #obs_multi_index = [[], []]
+    #for ob in obstacles:
+    #    obs_multi_index[0].append(ob[0])
+    #    obs_multi_index[1].append(ob[1])
 
-    astar_solver = astar(pos1.as_tuple(),pos2.as_tuple(),obs_multi_index,grid_size,False)
+    astar_solver = astar(pos1.as_tuple(),pos2.as_tuple(),obstacles,grid_size,False)
     path_found,path = astar_solver.find_minimumpath()
 
     if not path_found:

@@ -89,7 +89,6 @@ class inference_engine():
         mobs = self.get_modified_obs(pobs,cobs)
         ll = self.get_likelihood(mobs)
         (map_idx,ps) = utils.get_MAP(self.prior,ll)
-        print(ps, ll)
         assert(np.all(ps.shape==ll.shape))
         self.prior = ps
         return self.tracking_stations[map_idx]

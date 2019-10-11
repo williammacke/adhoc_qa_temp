@@ -28,13 +28,13 @@ logger.addHandler(ch)
 
 DEBUG = False
 
-MAX_ITERS = 15
+MAX_ITERS = 100
 
 # These parameters are initialized when evironment is initialized.
 GRID_SIZE = 10
 N_STATIONS = 3
 
-TOOLS_IDX = 3
+TOOLS_IDX = 2
 
 #An observation should have all positions, my index to get my position from all of them, station indices, and finally, the most recent actions performed by all the agents in the arena.
 obs = recordclass('obs','allActions allPos stationStatus stationInd timestep')

@@ -64,7 +64,6 @@ class agent_adhoc(AbstractAgent):
 
         else:
             curr_k_idx = self.knowledge.get_current_job_station_idx()
-            print('CURRENT IDX:', curr_k_idx)
             #Checking what knowledge we have.
             if (self.knowledge.source[curr_k_idx]==Knowledge.origin.Answer):
 
@@ -108,7 +107,6 @@ class agent_adhoc(AbstractAgent):
              No:
                 keep moving.
         """
-
         if self.tool is not None:
             if self.tool == target_station:
                 destination = obs.allPos[obs.stationInd[target_station]]
@@ -134,8 +132,9 @@ class agent_adhoc(AbstractAgent):
             #Navigate to destination.
             desired_action = None
 
-        obstacles = copy.deepcopy(obs.allPos)
-        obstacles.remove(self.pos)
+        # obstacles = copy.deepcopy(obs.allPos)
+        # obstacles.remove(self.pos)
+        obstacles = []
         proposal = utils.generate_proposal(self.pos,destination,obstacles,desired_action)
         return proposal
 
