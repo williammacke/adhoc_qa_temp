@@ -148,8 +148,9 @@ class Knowledge(AgentType):
 
         #Now append the knowledge.
         for idx in range(0,len(station_order)):
-            self.station_order[idx+curr_sttn_idx] = station_order[idx]
-            self.source[idx+curr_sttn_idx] = Knowledge.origin.Answer
+            if idx + curr_sttn_idx < self.n_stations:
+                self.station_order[idx+curr_sttn_idx] = station_order[idx]
+                self.source[idx+curr_sttn_idx] = Knowledge.origin.Answer
 
     def update_knowledge_from_inference(self,station):
         """

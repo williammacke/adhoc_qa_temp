@@ -44,7 +44,7 @@ env = environment(size, stn_pos, tools_pos)
 
 l_pos = Point2D(5, 0)
 atype = agent.AgentType(len(stn_pos)) # Optional random order of stations to pass to agen_leader()
-l_tp = agent.AgentType([1,0,2]) # Optional fixed order of stations to pass to agent_leader()
+l_tp = agent.AgentType([2,0,1]) # Optional fixed order of stations to pass to agent_leader()
 leader = agent_leader(l_pos, l_tp)
 
 a_pos = Point2D(4, 0)
@@ -53,6 +53,8 @@ adhoc.register_tracking_agent(leader)
 
 env.register_agent(leader)
 env.register_adhoc_agent(adhoc)
+
+env.register_communication_time_steps([1]) # list of time steps that communication occurs
 
 step_count = 0
 terminated = False

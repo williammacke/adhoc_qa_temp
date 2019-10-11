@@ -68,7 +68,7 @@ class agent_adhoc(AbstractAgent):
             if (self.knowledge.source[curr_k_idx]==Knowledge.origin.Answer):
 
                 #Then we simply work on the station because we have an answer telling us that that's the station to work on.
-                target_station = self.knowledge.station_order[curr_k_id]
+                target_station = self.knowledge.station_order[curr_k_idx]
 
             elif (self.knowledge.source[curr_k_idx] == None):
                 #which means we just finished a station in the last time-step. This calls for re-initalizing the inference_engine

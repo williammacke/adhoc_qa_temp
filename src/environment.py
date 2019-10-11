@@ -34,6 +34,8 @@ class environment():
         self.agents = [None, None] # Assumed only 2 agents, leader and adhoc respectively
         self.allActions = [None, None]
 
+        self.communication_time_steps = []
+
         self.is_terminal = False
         self.step_count = 0
         self.visualize = visualize
@@ -62,6 +64,14 @@ class environment():
         """
         self.agents[gd.ADHOC_IDX] = adhoc_agent
 
+    def register_communication_time_steps(self, communication_time_steps):
+        """
+        :param communication_time_steps: a list of step_count ints that communication happens
+        :return:
+
+        Whenever communication happens, both agents do Action.NOOP.
+        """
+        self.communication_time_steps = communication_time_steps
 
     def generate_observation(self):
         agent_locs = [agent.pos for agent in self.agents]
@@ -105,9 +115,8 @@ class environment():
         """
         agent_proposals = [] #Probability distributions over actions
         n_agents = len(self.agents)
-        observations=[]
+        observation = self.generate_observation()
         for (agent_idx,agent) in enumerate(self.agents):
-            curr_observation = self.generate_observation()
 
             # CHANGED: THIS ISN'T NEEDED SINCE ADHOC OBSERVATIONS HAS BEEN CHANGED TO BE SAME AS LEADER OBSERVATIONS
             # if agent_idx==n_agents-1:
@@ -119,9 +128,8 @@ class environment():
             #         #Not adhoc agent.
             #         curr_observation = self.generate_observation(agent_idx)
 
-            proposal = agent.respond(curr_observation)
+            proposal = agent.respond(observation)
             agent_proposals.append(proposal)
-            observations.append(curr_observation)
 
         if debug:
             try:
@@ -138,7 +146,7 @@ class environment():
                     #pdb.set_trace()
                     print("exception here")
 
-        return agent_proposals,observations
+        return agent_proposals,observation
 
     def _step_decide_and_apply(self,agent_proposals):
         """
@@ -270,16 +278,29 @@ class environment():
             print("N_iters {}".format(n_steps))p of the simulation.
         :return:
         """
-        agent_proposals,observations = self._step_dispatch()
-        decisions = self._step_decide_and_apply(agent_proposals)
         self.step_count+=1
-        (self.is_terminal,reward) = self.check_for_termination(agent_proposals,decisions)
-        self.history.append((observations,agent_proposals,decisions))
+
+        if self.step_count not in self.communication_time_steps:
+            agent_proposals,observation = self._step_dispatch()
+            decisions = self._step_decide_and_apply(agent_proposals)
+            self.history.append((observation,agent_proposals,decisions))
+        else:
+            # Give all actions Action.NOOP for communication. Also adds to history just for consistency
+            agent_proposals = [(np.zeros(len(gd.Actions),dtype='float'), gd.Actions.NOOP)] * 2
+            observation = self.generate_observation()
+            decisions = self._step_decide_and_apply(agent_proposals)
+            self.history.append((observation, agent_proposals, decisions))
+
+            # Update adhoc knowledge: give adhoc agent the current target of the leader agent
+            leader_target = self.agents[gd.LEADER_IDX].tp.get_current_job_station()
+            self.agents[gd.ADHOC_IDX].knowledge.update_knowledge_from_qa([leader_target])
+
+        (self.is_terminal,reward) = self.check_for_termination()
         if self.visualize:
             self.update_vis()
         return (self.is_terminal,reward)
 
-    def check_for_termination(self,agent_proposals,decisions):
+    def check_for_termination(self):
         """
         Checks for ending criterion and sends reward.
 
