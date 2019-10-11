@@ -43,6 +43,8 @@ def wcd_astar(graph, start, finish, h):
         if state in visited: continue
         visited.add(state)
         for cost, sp in graph(state):
+            if sp in visited:
+                continue
             heappush(q, (val+cost+h(sp,finish), val+cost, sp, plan+[sp]))
 
 def pruned_reduce(state, loc):
