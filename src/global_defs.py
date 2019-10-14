@@ -30,7 +30,7 @@ DEBUG = False
 
 MAX_ITERS = 100
 
-# These parameters are initialized when evironment is initialized.
+# These parameters need to be consistent with init parameters of environment
 GRID_SIZE = 10
 N_STATIONS = 3
 

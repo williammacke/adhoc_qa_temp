@@ -22,6 +22,8 @@ class environment():
         :param size: Dimension of the grid in which the environment is assumed to live.
         :param sttn_positions: Positions of the station inside the grid. The positions are in regular axes, and not numpy notations.
         """
+        assert size == gd.GRID_SIZE
+        assert len(sttn_positions) == gd.N_STATIONS
 
         # Initialize global variables
         gd.GRID_SIZE = size
@@ -71,7 +73,7 @@ class environment():
 
         Whenever communication happens, both agents do Action.NOOP.
         """
-        self.communication_time_steps = communication_time_steps
+        self.communication_time_steps.extend(communication_time_steps)
 
     def generate_observation(self):
         agent_locs = [agent.pos for agent in self.agents]
