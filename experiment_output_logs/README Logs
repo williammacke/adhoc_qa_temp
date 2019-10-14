@@ -1,0 +1,11 @@
+README Logs:
+
+This directory has a folder for every experimented layout of the domain (changing agent/station/toolbox positions).
+
+Within every folder contains experiment output logs for that certain domain with specific naming conventions as to what parameters the experiment used. Each name has 3 parts separated by an underscore:
+
+Part 1 - full/stop - whether the experiment terminated after all stations are complete or after the first station is complete
+
+Part 2 - stn### - the station order of the leader agent (only one number for a stopped run experiment)
+
+Part 3 - com### - the time steps that communication occurs (Na for no communication for experiment)

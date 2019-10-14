@@ -16,11 +16,14 @@ config_env = config(1000,1,150)
 env_state_def = namedtuple('env_state_def','size n_stations sttn_pos all_actions is_terminal step_count config adhoc_state')
 
 class environment():
-    def __init__(self,size,sttn_positions,tools_pos,visualize=False,config_environment=config_env):
+    def __init__(self,size,sttn_positions,tools_pos,first_completion_termination=True,visualize=False,config_environment=config_env):
 
         """
         :param size: Dimension of the grid in which the environment is assumed to live.
         :param sttn_positions: Positions of the station inside the grid. The positions are in regular axes, and not numpy notations.
+        :param first_completion_termination: stop program when first station is completed (station order past first station are irrelevant)
+
+        TODO: toolbox and termination setting not included in env_state_def object yet (used for copying and initializing another environment instance)
         """
         assert size == gd.GRID_SIZE
         assert len(sttn_positions) == gd.N_STATIONS
@@ -38,6 +41,7 @@ class environment():
 
         self.communication_time_steps = []
 
+        self.first_completion_termination = first_completion_termination
         self.is_terminal = False
         self.step_count = 0
         self.visualize = visualize
@@ -312,8 +316,12 @@ class environment():
         leader = self.agents[gd.LEADER_IDX]
         terminated = False
         reward = 1
-        if AgentType.status.pending not in leader.tp.get_status():
-            terminated = True
+        if self.first_completion_termination:
+            if AgentType.status.done in leader.tp.get_status():
+                terminated = True
+        else:        
+            if AgentType.status.pending not in leader.tp.get_status():
+                terminated = True
         return (terminated, 1)
 
     # TODO: THIS FUNCTION DOESN'T WORK. ADHOC_AGENT HAS NO COPY FUNCTION

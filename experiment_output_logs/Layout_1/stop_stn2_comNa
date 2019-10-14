@@ -1,0 +1,344 @@
+RUN TYPE: STOPPED
+STATIONS: 2
+COMMUNICATION: NONE
+TOTAL TIME STEPS: 16
+
+------------------------------------------
+
+TIME STEP:             0
+
+Station Positions:     ['(7, 3)', '(7, 8)', '(3, 8)']
+Toolbox Position:      ['(2, 3)']
+
+Leader Pos:            (5, 0)
+Leader Action:         None
+Leader Station Order:  [2 0 1]
+Leader Station Status: [False, False, False]
+
+Adhoc Pos:             (4, 0)
+Adhoc Action:          None
+Adhoc Tool:            None
+Adhoc Station Order:   [None, None, None]
+Adhoc Source:          [None, None, None]
+Adhoc Station Status:  [False, False, False]
+
+
+------------------------------------------
+
+TIME STEP:             1
+
+Station Positions:     ['(7, 3)', '(7, 8)', '(3, 8)']
+Toolbox Position:      ['(2, 3)']
+
+Leader Pos:            (5, 1)
+Leader Action:         Actions.UP
+Leader Station Order:  [2 0 1]
+Leader Station Status: [False, False, False]
+
+Adhoc Pos:             (4, 1)
+Adhoc Action:          Actions.UP
+Adhoc Tool:            None
+Adhoc Station Order:   [0, None, None]
+Adhoc Source:          [<KnowledgeSource.Inference: 1>, None, None]
+Adhoc Station Status:  [False, False, False]
+
+
+------------------------------------------
+
+TIME STEP:             2
+
+Station Positions:     ['(7, 3)', '(7, 8)', '(3, 8)']
+Toolbox Position:      ['(2, 3)']
+
+Leader Pos:            (5, 2)
+Leader Action:         Actions.UP
+Leader Station Order:  [2 0 1]
+Leader Station Status: [False, False, False]
+
+Adhoc Pos:             (3, 1)
+Adhoc Action:          Actions.LEFT
+Adhoc Tool:            None
+Adhoc Station Order:   [0, None, None]
+Adhoc Source:          [<KnowledgeSource.Inference: 1>, None, None]
+Adhoc Station Status:  [False, False, False]
+
+
+------------------------------------------
+
+TIME STEP:             3
+
+Station Positions:     ['(7, 3)', '(7, 8)', '(3, 8)']
+Toolbox Position:      ['(2, 3)']
+
+Leader Pos:            (5, 3)
+Leader Action:         Actions.UP
+Leader Station Order:  [2 0 1]
+Leader Station Status: [False, False, False]
+
+Adhoc Pos:             (3, 2)
+Adhoc Action:          Actions.UP
+Adhoc Tool:            None
+Adhoc Station Order:   [0, None, None]
+Adhoc Source:          [<KnowledgeSource.Inference: 1>, None, None]
+Adhoc Station Status:  [False, False, False]
+
+
+------------------------------------------
+
+TIME STEP:             4
+
+Station Positions:     ['(7, 3)', '(7, 8)', '(3, 8)']
+Toolbox Position:      ['(2, 3)']
+
+Leader Pos:            (5, 4)
+Leader Action:         Actions.UP
+Leader Station Order:  [2 0 1]
+Leader Station Status: [False, False, False]
+
+Adhoc Pos:             (2, 2)
+Adhoc Action:          Actions.LEFT
+Adhoc Tool:            None
+Adhoc Station Order:   [1, None, None]
+Adhoc Source:          [<KnowledgeSource.Inference: 1>, None, None]
+Adhoc Station Status:  [False, False, False]
+
+
+------------------------------------------
+
+TIME STEP:             5
+
+Station Positions:     ['(7, 3)', '(7, 8)', '(3, 8)']
+Toolbox Position:      ['(2, 3)']
+
+Leader Pos:            (5, 5)
+Leader Action:         Actions.UP
+Leader Station Order:  [2 0 1]
+Leader Station Status: [False, False, False]
+
+Adhoc Pos:             (2, 3)
+Adhoc Action:          Actions.UP
+Adhoc Tool:            None
+Adhoc Station Order:   [1, None, None]
+Adhoc Source:          [<KnowledgeSource.Inference: 1>, None, None]
+Adhoc Station Status:  [False, False, False]
+
+
+------------------------------------------
+
+TIME STEP:             6
+
+Station Positions:     ['(7, 3)', '(7, 8)', '(3, 8)']
+Toolbox Position:      ['(2, 3)']
+
+Leader Pos:            (5, 6)
+Leader Action:         Actions.UP
+Leader Station Order:  [2 0 1]
+Leader Station Status: [False, False, False]
+
+Adhoc Pos:             (2, 3)
+Adhoc Action:          Actions.NOOP
+Adhoc Tool:            1
+Adhoc Station Order:   [1, None, None]
+Adhoc Source:          [<KnowledgeSource.Inference: 1>, None, None]
+Adhoc Station Status:  [False, False, False]
+
+
+------------------------------------------
+
+TIME STEP:             7
+
+Station Positions:     ['(7, 3)', '(7, 8)', '(3, 8)']
+Toolbox Position:      ['(2, 3)']
+
+Leader Pos:            (4, 6)
+Leader Action:         Actions.LEFT
+Leader Station Order:  [2 0 1]
+Leader Station Status: [False, False, False]
+
+Adhoc Pos:             (2, 4)
+Adhoc Action:          Actions.UP
+Adhoc Tool:            1
+Adhoc Station Order:   [1, None, None]
+Adhoc Source:          [<KnowledgeSource.Inference: 1>, None, None]
+Adhoc Station Status:  [False, False, False]
+
+
+------------------------------------------
+
+TIME STEP:             8
+
+Station Positions:     ['(7, 3)', '(7, 8)', '(3, 8)']
+Toolbox Position:      ['(2, 3)']
+
+Leader Pos:            (4, 7)
+Leader Action:         Actions.UP
+Leader Station Order:  [2 0 1]
+Leader Station Status: [False, False, False]
+
+Adhoc Pos:             (2, 3)
+Adhoc Action:          Actions.DOWN
+Adhoc Tool:            1
+Adhoc Station Order:   [2, None, None]
+Adhoc Source:          [<KnowledgeSource.Inference: 1>, None, None]
+Adhoc Station Status:  [False, False, False]
+
+
+------------------------------------------
+
+TIME STEP:             9
+
+Station Positions:     ['(7, 3)', '(7, 8)', '(3, 8)']
+Toolbox Position:      ['(2, 3)']
+
+Leader Pos:            (3, 7)
+Leader Action:         Actions.LEFT
+Leader Station Order:  [2 0 1]
+Leader Station Status: [False, False, False]
+
+Adhoc Pos:             (2, 3)
+Adhoc Action:          Actions.NOOP
+Adhoc Tool:            2
+Adhoc Station Order:   [2, None, None]
+Adhoc Source:          [<KnowledgeSource.Inference: 1>, None, None]
+Adhoc Station Status:  [False, False, False]
+
+
+------------------------------------------
+
+TIME STEP:             10
+
+Station Positions:     ['(7, 3)', '(7, 8)', '(3, 8)']
+Toolbox Position:      ['(2, 3)']
+
+Leader Pos:            (3, 8)
+Leader Action:         Actions.UP
+Leader Station Order:  [2 0 1]
+Leader Station Status: [False, False, False]
+
+Adhoc Pos:             (2, 4)
+Adhoc Action:          Actions.UP
+Adhoc Tool:            2
+Adhoc Station Order:   [2, None, None]
+Adhoc Source:          [<KnowledgeSource.Inference: 1>, None, None]
+Adhoc Station Status:  [False, False, False]
+
+
+------------------------------------------
+
+TIME STEP:             11
+
+Station Positions:     ['(7, 3)', '(7, 8)', '(3, 8)']
+Toolbox Position:      ['(2, 3)']
+
+Leader Pos:            (3, 8)
+Leader Action:         Actions.NOOP
+Leader Station Order:  [2 0 1]
+Leader Station Status: [False, False, False]
+
+Adhoc Pos:             (2, 5)
+Adhoc Action:          Actions.UP
+Adhoc Tool:            2
+Adhoc Station Order:   [2, None, None]
+Adhoc Source:          [<KnowledgeSource.Inference: 1>, None, None]
+Adhoc Station Status:  [False, False, False]
+
+
+------------------------------------------
+
+TIME STEP:             12
+
+Station Positions:     ['(7, 3)', '(7, 8)', '(3, 8)']
+Toolbox Position:      ['(2, 3)']
+
+Leader Pos:            (3, 8)
+Leader Action:         Actions.NOOP
+Leader Station Order:  [2 0 1]
+Leader Station Status: [False, False, False]
+
+Adhoc Pos:             (2, 6)
+Adhoc Action:          Actions.UP
+Adhoc Tool:            2
+Adhoc Station Order:   [2, None, None]
+Adhoc Source:          [<KnowledgeSource.Inference: 1>, None, None]
+Adhoc Station Status:  [False, False, False]
+
+
+------------------------------------------
+
+TIME STEP:             13
+
+Station Positions:     ['(7, 3)', '(7, 8)', '(3, 8)']
+Toolbox Position:      ['(2, 3)']
+
+Leader Pos:            (3, 8)
+Leader Action:         Actions.NOOP
+Leader Station Order:  [2 0 1]
+Leader Station Status: [False, False, False]
+
+Adhoc Pos:             (2, 7)
+Adhoc Action:          Actions.UP
+Adhoc Tool:            2
+Adhoc Station Order:   [2, None, None]
+Adhoc Source:          [<KnowledgeSource.Inference: 1>, None, None]
+Adhoc Station Status:  [False, False, False]
+
+
+------------------------------------------
+
+TIME STEP:             14
+
+Station Positions:     ['(7, 3)', '(7, 8)', '(3, 8)']
+Toolbox Position:      ['(2, 3)']
+
+Leader Pos:            (3, 8)
+Leader Action:         Actions.NOOP
+Leader Station Order:  [2 0 1]
+Leader Station Status: [False, False, False]
+
+Adhoc Pos:             (2, 8)
+Adhoc Action:          Actions.UP
+Adhoc Tool:            2
+Adhoc Station Order:   [2, None, None]
+Adhoc Source:          [<KnowledgeSource.Inference: 1>, None, None]
+Adhoc Station Status:  [False, False, False]
+
+
+------------------------------------------
+
+TIME STEP:             15
+
+Station Positions:     ['(7, 3)', '(7, 8)', '(3, 8)']
+Toolbox Position:      ['(2, 3)']
+
+Leader Pos:            (3, 8)
+Leader Action:         Actions.NOOP
+Leader Station Order:  [2 0 1]
+Leader Station Status: [False, False, False]
+
+Adhoc Pos:             (3, 8)
+Adhoc Action:          Actions.RIGHT
+Adhoc Tool:            2
+Adhoc Station Order:   [2, None, None]
+Adhoc Source:          [<KnowledgeSource.Inference: 1>, None, None]
+Adhoc Station Status:  [False, False, False]
+
+
+------------------------------------------
+
+TIME STEP:             16
+
+Station Positions:     ['(7, 3)', '(7, 8)', '(3, 8)']
+Toolbox Position:      ['(2, 3)']
+
+Leader Pos:            (3, 8)
+Leader Action:         Actions.WORK
+Leader Station Order:  [2 0 1]
+Leader Station Status: [True, False, False]
+
+Adhoc Pos:             (3, 8)
+Adhoc Action:          Actions.WORK
+Adhoc Tool:            2
+Adhoc Station Order:   [2, None, None]
+Adhoc Source:          [<KnowledgeSource.Inference: 1>, None, None]
+Adhoc Station Status:  [True, False, False]
+
