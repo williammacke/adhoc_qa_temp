@@ -1,0 +1,284 @@
+RUN TYPE: STOPPED
+STATIONS: 0
+COMMUNICATION: 1
+TOTAL TIME STEPS: 13
+
+------------------------------------------
+
+TIME STEP:             0
+
+Station Positions:     ['(7, 3)', '(7, 8)', '(3, 8)']
+Toolbox Position:      ['(2, 3)']
+
+Leader Pos:            (5, 0)
+Leader Action:         None
+Leader Station Order:  [0 2 1]
+Leader Station Status: [False, False, False]
+
+Adhoc Pos:             (4, 0)
+Adhoc Action:          None
+Adhoc Tool:            None
+Adhoc Station Order:   [None, None, None]
+Adhoc Source:          [None, None, None]
+Adhoc Station Status:  [False, False, False]
+
+
+------------------------------------------
+
+TIME STEP:             1
+
+Station Positions:     ['(7, 3)', '(7, 8)', '(3, 8)']
+Toolbox Position:      ['(2, 3)']
+
+Leader Pos:            (5, 0)
+Leader Action:         Actions.NOOP
+Leader Station Order:  [0 2 1]
+Leader Station Status: [False, False, False]
+
+Adhoc Pos:             (4, 0)
+Adhoc Action:          Actions.NOOP
+Adhoc Tool:            None
+Adhoc Station Order:   [0, None, None]
+Adhoc Source:          [<KnowledgeSource.Answer: 2>, None, None]
+Adhoc Station Status:  [False, False, False]
+
+
+------------------------------------------
+
+TIME STEP:             2
+
+Station Positions:     ['(7, 3)', '(7, 8)', '(3, 8)']
+Toolbox Position:      ['(2, 3)']
+
+Leader Pos:            (5, 1)
+Leader Action:         Actions.UP
+Leader Station Order:  [0 2 1]
+Leader Station Status: [False, False, False]
+
+Adhoc Pos:             (4, 1)
+Adhoc Action:          Actions.UP
+Adhoc Tool:            None
+Adhoc Station Order:   [0, None, None]
+Adhoc Source:          [<KnowledgeSource.Answer: 2>, None, None]
+Adhoc Station Status:  [False, False, False]
+
+
+------------------------------------------
+
+TIME STEP:             3
+
+Station Positions:     ['(7, 3)', '(7, 8)', '(3, 8)']
+Toolbox Position:      ['(2, 3)']
+
+Leader Pos:            (5, 2)
+Leader Action:         Actions.UP
+Leader Station Order:  [0 2 1]
+Leader Station Status: [False, False, False]
+
+Adhoc Pos:             (3, 1)
+Adhoc Action:          Actions.LEFT
+Adhoc Tool:            None
+Adhoc Station Order:   [0, None, None]
+Adhoc Source:          [<KnowledgeSource.Answer: 2>, None, None]
+Adhoc Station Status:  [False, False, False]
+
+
+------------------------------------------
+
+TIME STEP:             4
+
+Station Positions:     ['(7, 3)', '(7, 8)', '(3, 8)']
+Toolbox Position:      ['(2, 3)']
+
+Leader Pos:            (6, 2)
+Leader Action:         Actions.RIGHT
+Leader Station Order:  [0 2 1]
+Leader Station Status: [False, False, False]
+
+Adhoc Pos:             (3, 2)
+Adhoc Action:          Actions.UP
+Adhoc Tool:            None
+Adhoc Station Order:   [0, None, None]
+Adhoc Source:          [<KnowledgeSource.Answer: 2>, None, None]
+Adhoc Station Status:  [False, False, False]
+
+
+------------------------------------------
+
+TIME STEP:             5
+
+Station Positions:     ['(7, 3)', '(7, 8)', '(3, 8)']
+Toolbox Position:      ['(2, 3)']
+
+Leader Pos:            (6, 3)
+Leader Action:         Actions.UP
+Leader Station Order:  [0 2 1]
+Leader Station Status: [False, False, False]
+
+Adhoc Pos:             (2, 2)
+Adhoc Action:          Actions.LEFT
+Adhoc Tool:            None
+Adhoc Station Order:   [0, None, None]
+Adhoc Source:          [<KnowledgeSource.Answer: 2>, None, None]
+Adhoc Station Status:  [False, False, False]
+
+
+------------------------------------------
+
+TIME STEP:             6
+
+Station Positions:     ['(7, 3)', '(7, 8)', '(3, 8)']
+Toolbox Position:      ['(2, 3)']
+
+Leader Pos:            (7, 3)
+Leader Action:         Actions.RIGHT
+Leader Station Order:  [0 2 1]
+Leader Station Status: [False, False, False]
+
+Adhoc Pos:             (2, 3)
+Adhoc Action:          Actions.UP
+Adhoc Tool:            None
+Adhoc Station Order:   [0, None, None]
+Adhoc Source:          [<KnowledgeSource.Answer: 2>, None, None]
+Adhoc Station Status:  [False, False, False]
+
+
+------------------------------------------
+
+TIME STEP:             7
+
+Station Positions:     ['(7, 3)', '(7, 8)', '(3, 8)']
+Toolbox Position:      ['(2, 3)']
+
+Leader Pos:            (7, 3)
+Leader Action:         Actions.NOOP
+Leader Station Order:  [0 2 1]
+Leader Station Status: [False, False, False]
+
+Adhoc Pos:             (2, 3)
+Adhoc Action:          Actions.NOOP
+Adhoc Tool:            0
+Adhoc Station Order:   [0, None, None]
+Adhoc Source:          [<KnowledgeSource.Answer: 2>, None, None]
+Adhoc Station Status:  [False, False, False]
+
+
+------------------------------------------
+
+TIME STEP:             8
+
+Station Positions:     ['(7, 3)', '(7, 8)', '(3, 8)']
+Toolbox Position:      ['(2, 3)']
+
+Leader Pos:            (7, 3)
+Leader Action:         Actions.NOOP
+Leader Station Order:  [0 2 1]
+Leader Station Status: [False, False, False]
+
+Adhoc Pos:             (3, 3)
+Adhoc Action:          Actions.RIGHT
+Adhoc Tool:            0
+Adhoc Station Order:   [0, None, None]
+Adhoc Source:          [<KnowledgeSource.Answer: 2>, None, None]
+Adhoc Station Status:  [False, False, False]
+
+
+------------------------------------------
+
+TIME STEP:             9
+
+Station Positions:     ['(7, 3)', '(7, 8)', '(3, 8)']
+Toolbox Position:      ['(2, 3)']
+
+Leader Pos:            (7, 3)
+Leader Action:         Actions.NOOP
+Leader Station Order:  [0 2 1]
+Leader Station Status: [False, False, False]
+
+Adhoc Pos:             (4, 3)
+Adhoc Action:          Actions.RIGHT
+Adhoc Tool:            0
+Adhoc Station Order:   [0, None, None]
+Adhoc Source:          [<KnowledgeSource.Answer: 2>, None, None]
+Adhoc Station Status:  [False, False, False]
+
+
+------------------------------------------
+
+TIME STEP:             10
+
+Station Positions:     ['(7, 3)', '(7, 8)', '(3, 8)']
+Toolbox Position:      ['(2, 3)']
+
+Leader Pos:            (7, 3)
+Leader Action:         Actions.NOOP
+Leader Station Order:  [0 2 1]
+Leader Station Status: [False, False, False]
+
+Adhoc Pos:             (5, 3)
+Adhoc Action:          Actions.RIGHT
+Adhoc Tool:            0
+Adhoc Station Order:   [0, None, None]
+Adhoc Source:          [<KnowledgeSource.Answer: 2>, None, None]
+Adhoc Station Status:  [False, False, False]
+
+
+------------------------------------------
+
+TIME STEP:             11
+
+Station Positions:     ['(7, 3)', '(7, 8)', '(3, 8)']
+Toolbox Position:      ['(2, 3)']
+
+Leader Pos:            (7, 3)
+Leader Action:         Actions.NOOP
+Leader Station Order:  [0 2 1]
+Leader Station Status: [False, False, False]
+
+Adhoc Pos:             (6, 3)
+Adhoc Action:          Actions.RIGHT
+Adhoc Tool:            0
+Adhoc Station Order:   [0, None, None]
+Adhoc Source:          [<KnowledgeSource.Answer: 2>, None, None]
+Adhoc Station Status:  [False, False, False]
+
+
+------------------------------------------
+
+TIME STEP:             12
+
+Station Positions:     ['(7, 3)', '(7, 8)', '(3, 8)']
+Toolbox Position:      ['(2, 3)']
+
+Leader Pos:            (7, 3)
+Leader Action:         Actions.NOOP
+Leader Station Order:  [0 2 1]
+Leader Station Status: [False, False, False]
+
+Adhoc Pos:             (7, 3)
+Adhoc Action:          Actions.RIGHT
+Adhoc Tool:            0
+Adhoc Station Order:   [0, None, None]
+Adhoc Source:          [<KnowledgeSource.Answer: 2>, None, None]
+Adhoc Station Status:  [False, False, False]
+
+
+------------------------------------------
+
+TIME STEP:             13
+
+Station Positions:     ['(7, 3)', '(7, 8)', '(3, 8)']
+Toolbox Position:      ['(2, 3)']
+
+Leader Pos:            (7, 3)
+Leader Action:         Actions.WORK
+Leader Station Order:  [0 2 1]
+Leader Station Status: [True, False, False]
+
+Adhoc Pos:             (7, 3)
+Adhoc Action:          Actions.WORK
+Adhoc Tool:            0
+Adhoc Station Order:   [0, None, None]
+Adhoc Source:          [<KnowledgeSource.Answer: 2>, None, None]
+Adhoc Station Status:  [True, False, False]
+

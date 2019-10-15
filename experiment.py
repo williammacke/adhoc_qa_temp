@@ -54,7 +54,7 @@ adhoc.register_tracking_agent(leader)
 env.register_agent(leader)
 env.register_adhoc_agent(adhoc)
 
-#env.register_communication_time_steps([1]) # list of time steps that communication occurs
+env.register_communication_time_steps([1]) # list of time steps that communication occurs
 
 step_count = 0
 terminated = False
