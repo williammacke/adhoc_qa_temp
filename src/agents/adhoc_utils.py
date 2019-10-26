@@ -62,23 +62,35 @@ class inference_engine():
         """
         #First set the tracking_agent's position to the observation reported position.
         obs = mobs
-        self.tracking_agent.pos = obs.allPos[gd.LEADER_IDX]
+        # self.tracking_agent.pos = obs.allPos[gd.LEADER_IDX]
 
         likelihood_vector = np.zeros(len(self.tracking_stations))
         action_performed = obs.allActions[gd.LEADER_IDX]
 
-        def create_dummy_type(station_id):
-            """Create a dummy type with only one station to work on"""
-            dummy_tp = AgentType(1)
-            dummy_tp.station_order[0] = station_id
-            return dummy_tp
+        # def create_dummy_type(station_id):
+        #     """Create a dummy type with only one station to work on"""
+        #     dummy_tp = AgentType(1)
+        #     dummy_tp.station_order[0] = station_id
+        #     return dummy_tp
 
+        # for idx,sttn in enumerate(self.tracking_stations):
+        #     dummy_tp = create_dummy_type(sttn)
+        #     self.tracking_agent.set_tp(dummy_tp)
+        #     action_probs, action = self.tracking_agent.respond(obs)
+        #     likelihood_vector[idx] = action_probs[action_performed]
 
-        for idx,sttn in enumerate(self.tracking_stations):
-            dummy_tp = create_dummy_type(sttn)
-            self.tracking_agent.set_tp(dummy_tp)
-            action_probs, action = self.tracking_agent.respond(obs)
-            likelihood_vector[idx] = action_probs[action_performed]
+        move = gd.ACTION_TO_MOVES[action_performed]
+
+        for idx, sttn in enumerate(self.tracking_stations):
+            sttn_pos = obs.allPos[obs.stationInd[0] + sttn]
+            agent_pos = obs.allPos[gd.LEADER_IDX]
+
+            prev_dist = agent_pos.manhattan_dist(sttn_pos)
+            curr_dist = (agent_pos + move).manhattan_dist(sttn_pos)
+
+            if curr_dist <= prev_dist:
+                likelihood_vector[idx] = 1
+
         return likelihood_vector
 
     def inference_step(self,pobs,cobs):
