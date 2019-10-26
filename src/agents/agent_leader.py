@@ -49,10 +49,11 @@ If neighboring a station:
 
 
 class agent_leader(agent.AbstractAgent):
-    def __init__(self,pos,tp=None):
+    def __init__(self,pos,tp=None,path=[]):
         super().__init__(pos,tp)
         self.pos = pos
         self.name = self.name+'_leader_'+str(self.id)
+        self.path = path.copy()
 
         # If type is provided, set agent to that type
         if tp is not None:
@@ -74,20 +75,23 @@ class agent_leader(agent.AbstractAgent):
         # obstacles.remove(self.pos)
         obstacles = []
 
-        desired_action = None
-        if utils.is_neighbor(self.pos,target_pos):
-            #We are neighboring the station we want to work at.
-            if utils.is_neighbor(target_pos,obs.allPos[gd.ADHOC_IDX]):
-                #Meaning, if the other agent is also neighoring the station, execute the work action
-                # Environment _proposal_check() checks if adhoc has the right tool
-                desired_action = gd.Actions.WORK
-                #now, if the other agent also executed a WORK action, and happens to have the same tool, then we can safely move to the next station. This change will happen if the environment approves the work action, since, for the action to run, the agent needs a way to know if the other agent also has thetool to operate in this station. This tool checking will be done by the environment.
-            else:
-                #Else, just wait.
-                desired_action = gd.Actions.NOOP
+        if len(self.path):
+           desired_action = self.path.pop(0)
         else:
-            #Meaning we yet have to reach our target station.
             desired_action = None
+            if utils.is_neighbor(self.pos,target_pos):
+                #We are neighboring the station we want to work at.
+                if utils.is_neighbor(target_pos,obs.allPos[gd.ADHOC_IDX]):
+                    #Meaning, if the other agent is also neighoring the station, execute the work action
+                    # Environment _proposal_check() checks if adhoc has the right tool
+                    desired_action = gd.Actions.WORK
+                    #now, if the other agent also executed a WORK action, and happens to have the same tool, then we can safely move to the next station. This change will happen if the environment approves the work action, since, for the action to run, the agent needs a way to know if the other agent also has thetool to operate in this station. This tool checking will be done by the environment.
+                else:
+                    #Else, just wait.
+                    desired_action = gd.Actions.NOOP
+            else:
+                #Meaning we yet have to reach our target station.
+                desired_action = None
 
         proposal = utils.generate_proposal(self.pos,target_pos,obstacles,desired_action)
         return proposal
