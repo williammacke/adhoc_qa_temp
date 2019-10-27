@@ -1,6 +1,3 @@
-Value of Question/Answers in Adhoc Teamwork
+CAT
 
-Todo: 
-1) Add Experiments Code
-2) Finish ENV code.
-
+Communication in Ad Hoc Teamwork
