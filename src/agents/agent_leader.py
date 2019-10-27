@@ -58,8 +58,8 @@ class agent_leader(agent.AbstractAgent):
         # If type is provided, set agent to that type
         if tp is not None:
             assert isinstance(tp, agent.AgentType)
-            self.tp = tp
-            self.__target = tp.get_current_job_station()
+            self.tp = tp.__copy__()
+            self.__target = self.tp.get_current_job_station()
         # If type is not provided, set agent to random type
         else:
             self.tp = agent.AgentType(gd.N_STATIONS) #Initializing type from settings derived from global_defs.

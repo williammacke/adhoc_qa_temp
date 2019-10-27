@@ -79,7 +79,7 @@ class inference_engine():
         #     action_probs, action = self.tracking_agent.respond(obs)
         #     likelihood_vector[idx] = action_probs[action_performed]
 
-        move = gd.ACTION_TO_MOVES[action_performed]
+        move = gd.ACTIONS_TO_MOVES[action_performed]
 
         for idx, sttn in enumerate(self.tracking_stations):
             sttn_pos = obs.allPos[obs.stationInd[0] + sttn]
