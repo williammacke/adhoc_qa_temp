@@ -28,7 +28,7 @@ logger.addHandler(ch)
 
 DEBUG = False
 
-MAX_ITERS = 100
+MAX_ITERS = 50
 
 # These parameters need to be consistent with init parameters of environment
 GRID_SIZE = 10

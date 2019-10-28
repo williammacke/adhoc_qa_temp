@@ -8,6 +8,7 @@ from itertools import permutations
 import matplotlib.pyplot as plt
 
 
+# Runs a single simulation
 def experiment(size, stn_pos, tools_pos, l_pos, a_pos, l_tp=None, l_path=[], communication_timesteps=[], debug=False):
     # DEBUG CODE
     def debug_output(timestep=None):
@@ -69,8 +70,45 @@ def experiment(size, stn_pos, tools_pos, l_pos, a_pos, l_tp=None, l_path=[], com
     return step_count - 1 # Not including last time step that agents are doing Action.WORK on station
 
 
+# Returns a permutation of all unique optimal paths from leader agent to target station
+def opt_path_perm(stn_pos, l_pos, l_station_order):
+    l_path = []
+    offset = stn_pos[l_station_order[0]] - l_pos
+
+    if offset.x >= 0:
+        l_path += [gd.Actions.RIGHT] * offset.x
+    else:
+        l_path += [gd.Actions.LEFT] * -offset.x
+    if offset.y >= 0:
+        l_path += [gd.Actions.UP] * offset.y
+    else:
+        l_path += [gd.Actions.DOWN] * -offset.y
+
+    return set(permutations(l_path))
+
+
+# Returns lists of timesteps to complete simulation for each query timestep
+def get_query_timesteps(size, stn_pos, tools_pos, l_pos, a_pos, l_tp, all_leader_paths, debug=False):
+    max_query = 1
+    query = 0
+
+    query_timesteps = []
+    while query <= max_query:
+        timesteps = []
+        for path in all_leader_paths:
+            steps = experiment(size, stn_pos, tools_pos, l_pos, a_pos, l_tp, list(path), [query], debug=debug)
+            timesteps.append(steps)
+
+        query_timesteps.append(timesteps)
+
+        if query == 0:
+            max_query = max(timesteps)
+        query += 1
+
+    return query_timesteps
+
+
 size = 10
-stn_pos = [Point2D(7,3), Point2D(3,8), Point2D(7,8)]
 tools_pos = [Point2D(2,3)] # tools_pos needs to be an array but only one tool box is supported so far
 
 l_pos = Point2D(5, 0)
@@ -82,37 +120,21 @@ a_pos = Point2D(4, 0)
 
 communication_timesteps = [] # list of time steps that communication occurs
 
-# Automatically obtains a path from leader agent to first station
-l_path = []
-offset = stn_pos[l_station_order[0]] - l_pos
-if offset.x >= 0:
-    l_path += [gd.Actions.RIGHT] * offset.x
-else:
-    l_path += [gd.Actions.LEFT] * -offset.x
-if offset.y >= 0:
-    l_path += [gd.Actions.UP] * offset.y
-else:
-    l_path += [gd.Actions.DOWN] * -offset.y
-# A permutation of unique optimal paths from leader agent to first station
-all_leader_paths = set(permutations(l_path))
+# print('Number of path permutations:', len(all_leader_paths))
+# print('Starting experiment...')
 
-print('Number of path permutations:', len(all_leader_paths))
-print('Starting experiment...')
+stn_pos = [Point2D(7,3), Point2D(3,8), Point2D(7,8)] # target station needs to be last listed if you want worst case scenario with wrong inferencing
+all_leader_paths = opt_path_perm(stn_pos, l_pos, l_station_order)
+query_timesteps1 = get_query_timesteps(size, stn_pos, tools_pos, l_pos, a_pos, l_tp, all_leader_paths)
 
-max_query = 30
-query_timesteps = []
-for com_ts in range(max_query):
-    timesteps = []
-    for path in all_leader_paths:
-        steps = experiment(size, stn_pos, tools_pos, l_pos, a_pos, l_tp, list(path), [com_ts])
-        timesteps.append(steps)
+stn_pos = [Point2D(3,8), Point2D(7,8), Point2D(7,3)]
+all_leader_paths = opt_path_perm(stn_pos, l_pos, l_station_order)
+query_timesteps2 = get_query_timesteps(size, stn_pos, tools_pos, l_pos, a_pos, l_tp, all_leader_paths, True)
 
-    query_timesteps.append(timesteps)
+fig, ax = plt.subplots(figsize=(8, 5))
 
-
-fig, ax = plt.subplots()
-
-ax.boxplot(query_timesteps, positions=range(max_query), whis='range')
+ax.boxplot(query_timesteps1, positions=range(len(query_timesteps1)), whis='range')
+ax.boxplot(query_timesteps2, positions=range(len(query_timesteps2)), whis='range')
 ax.set_title('Timestep Range Based on Query Times')
 ax.set_xlabel('Query Timestep')
 ax.set_ylabel('Timesteps')
