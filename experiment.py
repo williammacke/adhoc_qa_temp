@@ -70,7 +70,7 @@ def experiment(size, stn_pos, tools_pos, l_pos, a_pos, l_tp=None, l_path=[], com
 
 
 size = 10
-stn_pos = [Point2D(7,3), Point2D(7,8), Point2D(3,8)]
+stn_pos = [Point2D(7,3), Point2D(3,8), Point2D(7,8)]
 tools_pos = [Point2D(2,3)] # tools_pos needs to be an array but only one tool box is supported so far
 
 l_pos = Point2D(5, 0)
@@ -99,8 +99,9 @@ all_leader_paths = set(permutations(l_path))
 print('Number of path permutations:', len(all_leader_paths))
 print('Starting experiment...')
 
+max_query = 30
 query_timesteps = []
-for com_ts in range(30):
+for com_ts in range(max_query):
     timesteps = []
     for path in all_leader_paths:
         steps = experiment(size, stn_pos, tools_pos, l_pos, a_pos, l_tp, list(path), [com_ts])
@@ -109,9 +110,9 @@ for com_ts in range(30):
     query_timesteps.append(timesteps)
 
 
-fig, ax = plt.subplot()
+fig, ax = plt.subplots()
 
-ax.boxplot(query_timesteps, whis=0)
+ax.boxplot(query_timesteps, positions=range(max_query), whis='range')
 ax.set_title('Timestep Range Based on Query Times')
 ax.set_xlabel('Query Timestep')
 ax.set_ylabel('Timesteps')
