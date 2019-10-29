@@ -88,7 +88,11 @@ class inference_engine():
             prev_dist = agent_pos.manhattan_dist(sttn_pos)
             curr_dist = (agent_pos + move).manhattan_dist(sttn_pos)
 
-            if curr_dist <= prev_dist:
+            # When agent moves closer to a station
+            if curr_dist < prev_dist:
+                likelihood_vector[idx] = 1
+            # When agent doesn't move and is on top of a station
+            elif curr_dist == prev_dist and agent_pos == sttn_pos:
                 likelihood_vector[idx] = 1
 
         return likelihood_vector

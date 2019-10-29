@@ -1,3 +1,7 @@
+import matplotlib
+matplotlib.use('Agg') # Prevents error when showing plot over ssh
+import matplotlib.pyplot as plt
+
 from src import global_defs as gd
 from src.global_defs import Point2D
 from src.environment import environment
@@ -5,8 +9,6 @@ from src.agents import agent
 from src.agents.agent_leader import agent_leader
 from src.agents.agent_adhoc_q import agent_adhoc
 from itertools import permutations
-import matplotlib.pyplot as plt
-
 
 # Runs a single simulation
 def experiment(size, stn_pos, tools_pos, l_pos, a_pos, l_tp=None, l_path=[], communication_timesteps=[], debug=False):
@@ -118,7 +120,7 @@ l_tp = agent.AgentType(l_station_order) # Optional fixed order of stations to pa
 
 a_pos = Point2D(4, 0)
 
-communication_timesteps = [] # list of time steps that communication occurs
+# communication_timesteps = [] # list of time steps that communication occurs
 
 # print('Number of path permutations:', len(all_leader_paths))
 # print('Starting experiment...')
@@ -129,14 +131,19 @@ query_timesteps1 = get_query_timesteps(size, stn_pos, tools_pos, l_pos, a_pos, l
 
 stn_pos = [Point2D(3,8), Point2D(7,8), Point2D(7,3)]
 all_leader_paths = opt_path_perm(stn_pos, l_pos, l_station_order)
-query_timesteps2 = get_query_timesteps(size, stn_pos, tools_pos, l_pos, a_pos, l_tp, all_leader_paths, True)
+query_timesteps2 = get_query_timesteps(size, stn_pos, tools_pos, l_pos, a_pos, l_tp, all_leader_paths)
 
-fig, ax = plt.subplots(figsize=(8, 5))
+fig, ax = plt.subplots(2, 1, figsize=(16, 5))
 
-ax.boxplot(query_timesteps1, positions=range(len(query_timesteps1)), whis='range')
-ax.boxplot(query_timesteps2, positions=range(len(query_timesteps2)), whis='range')
-ax.set_title('Timestep Range Based on Query Times')
-ax.set_xlabel('Query Timestep')
-ax.set_ylabel('Timesteps')
+ax[0].boxplot(query_timesteps1, positions=range(len(query_timesteps1)), whis='range')
+ax[0].set_title('Timestep Range Based on Query Times: Station 2')
+ax[0].set_xlabel('Query Timestep')
+ax[0].set_ylabel('Timesteps')
 
-plt.show()
+ax[1].boxplot(query_timesteps2, positions=range(len(query_timesteps2)), whis='range')
+ax[1].set_title('Timestep Range Based on Query Times: Station 3')
+ax[1].set_xlabel('Query Timestep')
+ax[1].set_ylabel('Timesteps')
+
+# plt.show()
+plt.savefig('testgraph3')
