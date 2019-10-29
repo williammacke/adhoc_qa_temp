@@ -1,5 +1,4 @@
 import ctypes
-#import ipdb
 import numpy as np
 from profilehooks import profile
 import inspect
@@ -40,7 +39,6 @@ class astar():
         if len(obstacle_loc) is 0:
             obstacle_locs_idx = np.array([],dtype=np.int32)
             n_locs = 0
-            #ipdb.set_trace()
         else:
             obstacle_locs_idx = np.ravel_multi_index(np.array(obstacle_loc),(height,width))
             obstacle_locs_idx = obstacle_locs_idx.astype('int32')
@@ -56,7 +54,6 @@ class astar():
         allow_diagonal = False
         # The C++ code writes the solution to the paths array
         paths = np.full(height * width, -1, dtype=np.int32)
-        #ipdb.set_trace()
         success = astar_c(
             obstacle_locs_idx.flatten(),n_locs, height, width, start_idx, goal_idx, allow_diagonal,
             paths  # output parameter

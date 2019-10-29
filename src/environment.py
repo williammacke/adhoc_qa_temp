@@ -3,8 +3,6 @@ import matplotlib.pyplot as plt
 from collections import namedtuple
 from src import global_defs as gd
 from src import utils
-#import pdb
-debug = gd.DEBUG
 import random
 from src.agents.agent import AgentType
 import copy
@@ -137,21 +135,6 @@ class environment():
             proposal = agent.respond(observation)
             agent_proposals.append(proposal)
 
-        if debug:
-            try:
-                assert(len(agent_proposals)==len(self.agents))
-            except:
-                print("Exception here")
-                #pdb.set_trace()
-            for agent_proposal,action_idx in agent_proposals:
-                try:
-                    np.testing.assert_almost_equal(sum(agent_proposal),1,5)
-                    assert(isinstance(agent_proposal,np.ndarray))
-                    assert(action_idx<6 and action_idx>=0)
-                except:
-                    #pdb.set_trace()
-                    print("exception here")
-
         return agent_proposals,observation
 
     def _step_decide_and_apply(self,agent_proposals):
@@ -161,17 +144,6 @@ class environment():
         :type agent_proposals: (np.ndarray(4),int)
         :return decisions: list of True/False
         """
-
-        if debug:
-            assert(isinstance(agent_proposals,list))
-            assert(len(agent_proposals)==len(self.agents))
-            for proposal in agent_proposals:
-                try:
-                    assert(isinstance(proposal,tuple))
-                    assert(isinstance(proposal[0],np.ndarray))
-                except:
-                    #pdb.set_trace()
-                    print("exception")
         decisions = []
         proposals = []
 
@@ -187,11 +159,6 @@ class environment():
             proposals.append(proposal)
             self.agents[agent_idx].act(proposal,decision)
 
-        if debug:
-            for decision in decisions:
-                assert(isinstance(decision,bool))
-            assert(len(decisions)==len(self.agents))
-
         self.allActions = [prop[1] if dec else gd.Actions.NOOP for prop, dec in zip(proposals, decisions)]
         return decisions
 
@@ -204,10 +171,6 @@ class environment():
         """
 
         action_probs,action_idx = proposal
-        if debug:
-            if action_idx>5 or action_idx<0:
-                #pdb.set_trace()
-                print("error")
 
         if action_idx == gd.Actions.NOOP:
             #Approve NOOP always.
@@ -319,7 +282,7 @@ class environment():
         if self.first_completion_termination:
             if AgentType.status.done in leader.tp.get_status():
                 terminated = True
-        else:        
+        else:
             if AgentType.status.pending not in leader.tp.get_status():
                 terminated = True
         return (terminated, 1)

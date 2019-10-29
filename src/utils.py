@@ -1,28 +1,16 @@
 import numpy as np
 from src import global_defs as gd
-#import ipdb
-#import pdb
 from profilehooks import profile
 import copy
 from src.astar.pyastar import astar
 
-debug = gd.DEBUG
 
 def is_neighbor(pos1, pos2):
     """
     NOTE: NOT NEIGHBOR FUNCTION. REWRITTEN CODE TO CHECK IF TWO POSITIONS ARE ON TOP OF EACH OTHER.
           I DID THIS SO I WOULDNT HAVE TO CHANGE NAME OF ALL LOCATIONS OF THIS FUNCTION.
     """
-    if debug:
-        #pdb.set_trace()
-        if not isinstance(pos1,gd.Point2D):
-            pdb.set_trace()
-        if not isinstance(pos2,gd.Point2D):
-            pdb.set_trace()
-        assert isinstance(pos1,gd.Point2D)
-        assert isinstance(pos2,gd.Point2D)
     found_match = False
-    #pdb.set_trace()
     if pos1 == pos2:
         return True
     else:
@@ -94,8 +82,7 @@ def get_MAP(prior,likelihood):
     pr = np.array(prior)
     ll = np.array(likelihood)
 
-    # ps = np.dot(pr, ll) # Original ps. Threw error
-    ps = pr * ll    
+    ps = pr * ll
     ps /= np.sum(ps)
 
     map_idx = np.argmax(ps)

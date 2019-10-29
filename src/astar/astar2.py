@@ -2,7 +2,6 @@ import numpy as np
 import time
 import matplotlib.pyplot as plt
 import copy
-import pdb
 from src.global_defs import *
 import heapq
 import math
@@ -137,7 +136,6 @@ class astar():
         for obstacle in self.obstacle_loc:
             self.closed_set.add(pos_node(obstacle,None,None,True))
 
-        #pdb.set_trace()
 
         '''if self.interactive:
             plt.ion()
@@ -180,13 +178,11 @@ class astar():
         """
         while(True):
             #loop init stuff
-            #pdb.set_trace()
             try:
                 #print(len(self.open_heap))
                 curr_node = heapq.heappop(self.open_heap)[2]
             except Exception as e:
                 print(e)
-                #pdb.set_trace()
                 raise Exception
             self.closed_set.add(curr_node)
             #print("Examining {}".format(curr_node.loc))

@@ -2,31 +2,8 @@ import numpy as np
 from enum import IntEnum
 from recordclass import recordclass
 from collections import namedtuple
-#import pdb
 import math
-import logging
 
-
-
-debug_level = logging.DEBUG
-# create logger with 'spam_application'
-logger = logging.getLogger('adhoc_qa')
-logger.setLevel(logging.DEBUG)
-# create file handler which logs even debug messages
-fh = logging.FileHandler('adhoc_qa.log')
-fh.setLevel(logging.CRITICAL)
-# create console handler with a higher log level
-ch = logging.StreamHandler()
-ch.setLevel(logging.CRITICAL)
-# create formatter and add it to the handlers
-formatter = logging.Formatter('%(name)s - %(levelname)s - %(message)s')
-fh.setFormatter(formatter)
-ch.setFormatter(formatter)
-# add the handlers to the logger
-logger.addHandler(fh)
-logger.addHandler(ch)
-
-DEBUG = False
 
 MAX_ITERS = 50
 

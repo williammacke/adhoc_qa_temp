@@ -6,13 +6,7 @@ from enum import Enum
 import copy
 from src import utils
 import warnings
-import logging
 
-logger = logging.getLogger('aamas')
-logger.setLevel(gd.debug_level)
-
-#GLOBAL DEFINTIONS ABOUT THE AGENT_LIFTER.py
-# agent_adhoc_state_def = namedtuple('adhoc_state','tp name pos')
 
 class inference_engine():
     """

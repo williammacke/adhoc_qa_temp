@@ -42,8 +42,7 @@ If neighboring a station:
 3) Repeat until all stations are marked done.
 
 """
-#logger = logging.getLogger('aamas')
-#logger.setLevel(gd.debug_level)
+
 
 # leader_agent_state = namedtuple('LeaderAgentState','type pos target')
 
@@ -102,11 +101,9 @@ class agent_leader(agent.AbstractAgent):
             #Then we are allowed to execute the action.
             #First, apply the movement.
             self.pos += gd.ACTIONS_TO_MOVES[action]
-            #logger.debug("Agent {} executed action: {}".format(self.name,action))
             if action == gd.Actions.WORK:
                 #Which means we were approved to go ahead and do the work action, because the other agent had the right tool with it. It's time to move onto the next station.
                 self.tp.set_status(self.tp.get_current_job_station_idx()) #mark the station's status as done.
-                #logger.debug("Agent {} finished target station id {}".format(self.name,self.__target))
         else:
             pass
 

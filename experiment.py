@@ -10,8 +10,10 @@ from src.agents.agent_leader import agent_leader
 from src.agents.agent_adhoc_q import agent_adhoc
 from itertools import permutations
 
+
 # Runs a single simulation
-def experiment(size, stn_pos, tools_pos, l_pos, a_pos, l_tp=None, l_path=[], communication_timesteps=[], debug=False):
+def experiment(grid_size, stn_pos, tools_pos, l_pos, a_pos, l_tp=None, l_path=[], communication_timesteps=[], debug=False):
+
     # DEBUG CODE
     def debug_output(timestep=None):
         print('------------------------------------------\n')
@@ -43,7 +45,7 @@ def experiment(size, stn_pos, tools_pos, l_pos, a_pos, l_tp=None, l_path=[], com
         return
 
 
-    env = environment(size, stn_pos, tools_pos)
+    env = environment(grid_size, stn_pos, tools_pos)
 
     leader = agent_leader(l_pos, l_tp, l_path)
 
@@ -90,7 +92,7 @@ def opt_path_perm(stn_pos, l_pos, l_station_order):
 
 
 # Returns lists of timesteps to complete simulation for each query timestep
-def get_query_timesteps(size, stn_pos, tools_pos, l_pos, a_pos, l_tp, all_leader_paths, num_query=None, debug=False):
+def get_query_timesteps(grid_size, stn_pos, tools_pos, l_pos, a_pos, l_tp, all_leader_paths, num_query=None, debug=False):
     max_query = 1
     query = 0
 
@@ -98,59 +100,65 @@ def get_query_timesteps(size, stn_pos, tools_pos, l_pos, a_pos, l_tp, all_leader
     while query <= max_query:
         timesteps = []
         for path in all_leader_paths:
-            steps = experiment(size, stn_pos, tools_pos, l_pos, a_pos, l_tp, list(path), [query], debug=debug)
+            steps = experiment(grid_size, stn_pos, tools_pos, l_pos, a_pos, l_tp, list(path), [query], debug=debug)
             timesteps.append(steps)
 
         query_timesteps.append(timesteps)
 
-        if query == 0:
+        if num_query:
+            max_query = num_query - 1
+        elif query == 0:
             max_query = max(timesteps)
         query += 1
 
     return query_timesteps
 
 
-size = 10
+def create_graphs(grid_size, stn_pos_perm, stn_names, tools_pos, l_pos, a_pos, l_tp_perm, num_query=None):
+    query_timesteps = []
+    for stn_pos, l_tp in zip(stn_pos_perm, l_tp_perm):
+        all_leader_paths = opt_path_perm(stn_pos, l_pos, l_tp.station_order)
+        qt = get_query_timesteps(grid_size, stn_pos, tools_pos, l_pos, a_pos, l_tp, all_leader_paths, num_query)
+        query_timesteps.append(qt)
+
+    num_graphs = len(stn_pos_perm)
+    fig_width = 10
+    fig_height = 3 * num_graphs
+
+    fig, ax = plt.subplots(num_graphs, 1, figsize=(fig_width, fig_height))
+
+    for i in range(num_graphs):
+        positions = range(len(query_timesteps[i]))
+        if num_query:
+            positions = range(num_query)
+
+        if num_graphs > 1:
+            axs = ax[i]
+        else:
+            axs = ax
+        axs.boxplot(query_timesteps[i], positions=positions, whis='range')
+        axs.set_title('Timestep Range Based on Query Times: Station %s' % (stn_names[i]))
+        axs.set_xlabel('Query Timestep')
+        axs.set_ylabel('Timesteps')
+
+    fig.tight_layout()
+
+    plt.show()
+    # plt.savefig('testgraph')
+
+
+grid_size = 10
+# target station needs to be last listed if you want worst case scenario with wrong inferencing
+stn_names = ['1', '2', '3']
+stn_pos_perm = [[Point2D(7,3), Point2D(7,8), Point2D(3,8)],
+                [Point2D(7,3), Point2D(3,8), Point2D(7,8)],
+                [Point2D(3,8), Point2D(7,8), Point2D(7,3)]]
 tools_pos = [Point2D(3,3)] # tools_pos needs to be an array but only one tool box is supported so far
 
 l_pos = Point2D(5, 0)
 # l_tp = agent.AgentType(len(stn_pos)) # Optional random order of stations to pass to agent_leader()
-l_station_order = [2]
-l_tp = agent.AgentType(l_station_order) # Optional fixed order of stations to pass to agent_leader()
+l_tp_perm = [agent.AgentType([2]), agent.AgentType([2]), agent.AgentType([2])] # Optional fixed order of stations to pass to agent_leader()
 
 a_pos = Point2D(4, 0)
 
-# communication_timesteps = [] # list of time steps that communication occurs
-
-# print('Number of path permutations:', len(all_leader_paths))
-# print('Starting experiment...')
-
-stn_pos = [Point2D(7,3), Point2D(3,8), Point2D(7,8)] # target station needs to be last listed if you want worst case scenario with wrong inferencing
-all_leader_paths = opt_path_perm(stn_pos, l_pos, l_station_order)
-query_timesteps1 = get_query_timesteps(size, stn_pos, tools_pos, l_pos, a_pos, l_tp, all_leader_paths)
-
-stn_pos = [Point2D(3,8), Point2D(7,8), Point2D(7,3)]
-all_leader_paths = opt_path_perm(stn_pos, l_pos, l_station_order)
-query_timesteps2 = get_query_timesteps(size, stn_pos, tools_pos, l_pos, a_pos, l_tp, all_leader_paths)
-
-# experiment(size, stn_pos, tools_pos, l_pos, a_pos, l_tp, debug=True)
-
-fig, ax = plt.subplots(2, 1, figsize=(8, 10))
-
-ax[0].boxplot(query_timesteps1, positions=range(len(query_timesteps1)), whis='range')
-ax[0].set_title('Timestep Range Based on Query Times: Station 2')
-ax[0].set_xlabel('Query Timestep')
-ax[0].set_ylabel('Timesteps')
-
-ax[1].boxplot(query_timesteps2, positions=range(len(query_timesteps2)), whis='range')
-ax[1].set_title('Timestep Range Based on Query Times: Station 3')
-ax[1].set_xlabel('Query Timestep')
-ax[1].set_ylabel('Timesteps')
-
-fig.tight_layout()
-
-plt.show()
-# plt.savefig('testgraph')
-
-# for i in query_timesteps2:
-#     print(min(i), max(i))
+create_graphs(grid_size, stn_pos_perm, stn_names, tools_pos, l_pos, a_pos, l_tp_perm)

@@ -5,7 +5,6 @@ import time
 import pygame
 import pygame.camera
 import time
-import pdb
 import threading
 from colour import Color
 
@@ -55,7 +54,6 @@ class Visualizer():
         """
         pygame.init()
         pygame.mixer.quit()
-        #pdb.set_trace()
         self.agent_pos = agent_pos
         self.agents_orientations = agent_orientations
         self.object_pos = object_pos
@@ -176,10 +174,3 @@ if __name__ == "__main__":
 
     vis = Visualizer(20,object_positions,agent_positions,agent_orientations)
     vis.visualize(object_positions,agent_positions,agent_orientations)
-
-
-
-
-
-
-

@@ -7,11 +7,8 @@ from enum import Enum
 import copy
 from src import utils
 import warnings
-import logging
 from src.agents.adhoc_utils import Knowledge, inference_engine
 
-logger = logging.getLogger('aamas')
-logger.setLevel(gd.debug_level)
 
 adhoc_agent_state = namedtuple('AgentState','type pos target')
 
@@ -21,7 +18,6 @@ class agent_adhoc(AbstractAgent):
         self.pos = pos
         self.name = self.name+'_adhoc'+str(self.id)
 
-        # logger.debug("Adhoc agent initialized  {}".format(self))
         if ((pos[0]<0 or pos[0]>gd.GRID_SIZE-1) or (pos[1]<0 or pos[1]>gd.GRID_SIZE-1)):
             # warnings.warn("Init positions out of bounds",UserWarning)
             logging.warning("Init positions out of bounds")
