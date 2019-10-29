@@ -133,7 +133,7 @@ stn_pos = [Point2D(3,8), Point2D(7,8), Point2D(7,3)]
 all_leader_paths = opt_path_perm(stn_pos, l_pos, l_station_order)
 query_timesteps2 = get_query_timesteps(size, stn_pos, tools_pos, l_pos, a_pos, l_tp, all_leader_paths)
 
-fig, ax = plt.subplots(2, 1, figsize=(16, 5))
+fig, ax = plt.subplots(2, 1, sharex=True, figsize=(8, 10))
 
 ax[0].boxplot(query_timesteps1, positions=range(len(query_timesteps1)), whis='range')
 ax[0].set_title('Timestep Range Based on Query Times: Station 2')
@@ -146,4 +146,4 @@ ax[1].set_xlabel('Query Timestep')
 ax[1].set_ylabel('Timesteps')
 
 # plt.show()
-plt.savefig('testgraph3')
+plt.savefig('testgraph')
