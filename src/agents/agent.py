@@ -66,7 +66,7 @@ class AgentType():
 
     status = Enum('Status', [('done', True), ('pending', False)])
 
-    def __init__(self,stations):
+    def __init__(self,stations,stop_first_completion=True):
         # If stations is an integer, randomly create station order to visit
         if isinstance(stations, int):
             self.n_stations = stations
@@ -75,7 +75,11 @@ class AgentType():
 
         # If stations is a list of integers (station indices), set station order to given list
         elif isinstance(stations, list):
-            assert len(stations) == gd.N_STATIONS
+            if stop_first_completion:
+                assert len(stations) >= 1
+            else:
+                assert len(stations) == gd.N_STATIONS
+
             for stn in stations:
                 # Elements of list must be station indices
                 assert isinstance(stn, int)

@@ -1,5 +1,5 @@
 import matplotlib
-matplotlib.use('Agg') # Prevents error when showing plot over ssh
+# matplotlib.use('Agg') # Prevents error when showing plot over ssh
 import matplotlib.pyplot as plt
 
 from src import global_defs as gd
@@ -90,7 +90,7 @@ def opt_path_perm(stn_pos, l_pos, l_station_order):
 
 
 # Returns lists of timesteps to complete simulation for each query timestep
-def get_query_timesteps(size, stn_pos, tools_pos, l_pos, a_pos, l_tp, all_leader_paths, debug=False):
+def get_query_timesteps(size, stn_pos, tools_pos, l_pos, a_pos, l_tp, all_leader_paths, num_query=None, debug=False):
     max_query = 1
     query = 0
 
@@ -111,11 +111,11 @@ def get_query_timesteps(size, stn_pos, tools_pos, l_pos, a_pos, l_tp, all_leader
 
 
 size = 10
-tools_pos = [Point2D(2,3)] # tools_pos needs to be an array but only one tool box is supported so far
+tools_pos = [Point2D(3,3)] # tools_pos needs to be an array but only one tool box is supported so far
 
 l_pos = Point2D(5, 0)
-# l_tp = agent.AgentType(len(stn_pos)) # Optional random order of stations to pass to agen_leader()
-l_station_order = [2, 0, 1]
+# l_tp = agent.AgentType(len(stn_pos)) # Optional random order of stations to pass to agent_leader()
+l_station_order = [2]
 l_tp = agent.AgentType(l_station_order) # Optional fixed order of stations to pass to agent_leader()
 
 a_pos = Point2D(4, 0)
@@ -149,8 +149,8 @@ ax[1].set_ylabel('Timesteps')
 
 fig.tight_layout()
 
-# plt.show()
+plt.show()
 # plt.savefig('testgraph')
 
-for i in query_timesteps2:
-    print(min(i), max(i))
+# for i in query_timesteps2:
+#     print(min(i), max(i))
