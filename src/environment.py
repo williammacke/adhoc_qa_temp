@@ -43,6 +43,7 @@ class environment():
         self.is_terminal = False
         self.step_count = 0
         self.visualize = visualize
+        self.query_type = None
         if self.visualize:
             import pygame
             import threading
@@ -68,7 +69,7 @@ class environment():
         """
         self.agents[gd.ADHOC_IDX] = adhoc_agent
 
-    def register_communication_time_steps(self, communication_time_steps):
+    def register_communication(self, communication_time_steps, query_type=None):
         """
         :param communication_time_steps: a list of step_count ints that communication happens
         :return:
@@ -76,6 +77,7 @@ class environment():
         Whenever communication happens, both agents do Action.NOOP.
         """
         self.communication_time_steps.extend(communication_time_steps)
+        self.query_type = query_type
 
     def generate_observation(self):
         agent_locs = [agent.pos for agent in self.agents]
@@ -257,15 +259,33 @@ class environment():
             self.history.append((observation,agent_proposals,decisions))
         else:
             # Give all actions Action.NOOP for communication. Also adds to history just for consistency
-            agent_proposals = [(np.zeros(len(gd.Actions),dtype='float'), gd.Actions.NOOP)] * 2
-            observation = self.generate_observation()
-            decisions = self._step_decide_and_apply(agent_proposals)
-            self.history.append((observation, agent_proposals, decisions))
+            if self.query_type is None:
+                agent_proposals = [(np.zeros(len(gd.Actions),dtype='float'), gd.Actions.NOOP)] * 2
+                observation = self.generate_observation()
+                decisions = self._step_decide_and_apply(agent_proposals)
+                self.history.append((observation, agent_proposals, decisions))
 
-            # Update adhoc knowledge: give adhoc agent the current target of the leader agent
-            leader_target = self.agents[gd.LEADER_IDX].tp.get_current_job_station()
-            self.agents[gd.ADHOC_IDX].knowledge.update_knowledge_from_qa([leader_target])
-
+                # Update adhoc knowledge: give adhoc agent the current target of the leader agent
+                leader_target = self.agents[gd.LEADER_IDX].tp.get_current_job_station()
+                self.agents[gd.ADHOC_IDX].knowledge.update_knowledge_from_qa([leader_target])
+            else:
+                if self.step_count == 1:
+                    possibleGoals = np.array(range(self.n_stations))
+                    prior = np.ones(self.n_stations)
+                else:
+                    possibleGoals = np.where(self.agents[gd.ADHOC_IDX].inference_engine.prior>0)[0]
+                    prior = self.agents[gd.ADHOC_IDX].inference_engine.prior
+                query_set = set(self.query_type(possibleGoals))
+                leader_target = self.agents[gd.LEADER_IDX].tp.get_current_job_station()
+                if leader_target in query_set:
+                    for g in range(len(prior)):
+                        if g in query_set: continue
+                        self.agents[gd.ADHOC_IDX].inference_engine.prior[g] = 0
+                    self.agents[gd.ADHOC_IDX].inference_engine.prior /= np.sum(self.agents[gd.ADHOC_IDX].inference_engine.prior)
+                else:
+                    for g in query_set:
+                        self.agents[gd.ADHOC_IDX].inference_engine.prior[g] = 0
+                    self.agents[gd.ADHOC_IDX].inference_engine.prior /= np.sum(self.agents[gd.ADHOC_IDX].inference_engine.prior)
         (self.is_terminal,reward) = self.check_for_termination()
         if self.visualize:
             self.update_vis()

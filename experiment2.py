@@ -2,6 +2,7 @@ import matplotlib
 #matplotlib.use('Agg') # Prevents error when 'showing' plot over ssh
 import matplotlib.pyplot as plt
 import math
+import numpy as np
 
 from src import global_defs as gd
 from src.global_defs import Point2D
@@ -97,23 +98,23 @@ def opt_path_perm(stn_pos, l_pos, l_station_order, repeat=1):
 # Returns lists of timesteps to complete simulation for each query timestep
 def get_query_timesteps(grid_size, stn_pos, tools_pos, l_pos, a_pos, l_tp, all_leader_paths, num_query=None, debug=False):
     max_query = 1
-    query = 0
+
+    queries = [0,1,5,-1] 
 
     query_timesteps = []
-    while query <= max_query:
+    for query in queries:
         timesteps = []
         for path in all_leader_paths:
-            steps = experiment(grid_size, stn_pos, tools_pos, l_pos, a_pos, l_tp, list(path), [query], debug=debug)
+            if query == -1:
+                qp = int(np.random.random()*(max_query-1))+1
+            else:
+                qp = query
+            steps = experiment(grid_size, stn_pos, tools_pos, l_pos, a_pos, l_tp, list(path), [qp], debug=debug)
             timesteps.append(steps)
 
-        query_timesteps.append(timesteps)
-
         if query == 0:
-            if num_query:
-                max_query = num_query - 1
-            else:
-                max_query = max(timesteps)
-        query += 1
+            max_query = max(timesteps)
+        query_timesteps.append(timesteps)
 
     return query_timesteps
 
@@ -138,6 +139,8 @@ def create_graphs(grid_size, stn_pos_perm, stn_names, tools_pos, l_pos, a_pos, l
             positions = list(range(num_query))
         labels = positions.copy()
         labels[0] = 'X'
+        labels[2] = 'Zq'
+        labels[3] = 'random'
 
         if num_graphs > 1:
             axs = ax[i]
@@ -162,7 +165,7 @@ def create_graphs(grid_size, stn_pos_perm, stn_names, tools_pos, l_pos, a_pos, l
         else:
             axs2 = ax2
 
-        axs2.errorbar(positions, avg, sd, fmt='o', capsize=10)
+        axs2.errorbar(positions, avg, sd)
         axs2.set_title('Timestep Average and Standard Deviation: Station %s' % (stn_names[i]))
         axs2.set_xlabel('Query Timestep')
         axs2.set_ylabel('Timesteps')

@@ -7,7 +7,7 @@ def adj(p):
     return [(x+1,y), (x-1, y), (x,y+1), (x,y-1), (x,y)]
 
 def genGraph(state):
-    epsilon = 1/(len(state)+len(state[0])+1)
+    epsilon = 1/(len(state)*len(state[0])+1)
     def graph(node):
         p1,p2 = node
         l = []
@@ -47,12 +47,12 @@ def wcd_astar(graph, start, finish, h):
                 continue
             heappush(q, (val+cost+h(sp,finish), val+cost, sp, plan+[sp]))
 
-def pruned_reduce(state, loc):
-    wcd = 0
-    plan = []
-    closed = set()
-    Q = deque()
-    Q.append(plan)
-    while Q:
-        A = Q.popleft()
+#def pruned_reduce(state, loc):
+#    wcd = 0
+#    plan = []
+#    closed = set()
+#    Q = deque()
+#    Q.append(plan)
+#    while Q:
+#        A = Q.popleft()
 

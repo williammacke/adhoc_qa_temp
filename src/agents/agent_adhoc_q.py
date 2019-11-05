@@ -32,6 +32,7 @@ class agent_adhoc(AbstractAgent):
 
     def register_tracking_agent(self,tagent):
         self.tracking_agent = tagent
+        self.inference_engine = inference_engine(self.tracking_agent,list(range(gd.N_STATIONS)))
 
     def get_remaining_stations(self,cobs):
         stations_left = []
@@ -53,8 +54,8 @@ class agent_adhoc(AbstractAgent):
         self.p_obs_temp = obs
         if obs.timestep == 0:
             #If it's the first timestep, we have no clue.
-            self.tracking_stations = self.get_remaining_stations(obs)
-            self.inference_engine = inference_engine(self.tracking_agent,self.tracking_stations)
+            #self.tracking_stations = self.get_remaining_stations(obs)
+            #self.inference_engine = inference_engine(self.tracking_agent,self.tracking_stations)
 
             target_station = np.random.choice(self.tracking_stations) #pick a station at random.
             self.knowledge.update_knowledge_from_inference(target_station)
