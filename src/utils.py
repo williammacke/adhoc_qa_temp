@@ -85,7 +85,12 @@ def get_MAP(prior,likelihood):
     ps = pr * ll
     ps /= np.sum(ps)
 
-    map_idx = np.argmax(ps)
+    # map_idx = np.argmax(ps)
+
+    # If there are ties, return random max index
+    maxes = np.where(ps == np.amax(ps))
+    map_idx = np.random.choice(maxes[0])
+
     return (map_idx,ps)
 
 def softmax(X, theta=1.0, axis=None):

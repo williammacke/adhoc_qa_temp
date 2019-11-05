@@ -1,5 +1,5 @@
 import matplotlib
-# matplotlib.use('Agg') # Prevents error when showing plot over ssh
+matplotlib.use('Agg') # Prevents error when 'showing' plot over ssh
 import matplotlib.pyplot as plt
 
 from src import global_defs as gd
