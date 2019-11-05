@@ -101,7 +101,14 @@ class inference_engine():
         (map_idx,ps) = utils.get_MAP(self.prior,ll)
         assert(np.all(ps.shape==ll.shape))
         self.prior = ps
-        return self.tracking_stations[map_idx]
+        
+        maxes = np.where(ps == np.amax(ps))
+        
+        certainty = False
+        if len(maxes[0]) == 1:
+            certainty = True
+        
+        return self.tracking_stations[map_idx], certainty
 
 
 

@@ -249,7 +249,9 @@ class environment():
         """
         self.step_count+=1
 
-        if self.step_count not in self.communication_time_steps:
+        certainty = self.agents[gd.ADHOC_IDX].certainty
+
+        if certainty or self.step_count not in self.communication_time_steps:
             agent_proposals,observation = self._step_dispatch()
             decisions = self._step_decide_and_apply(agent_proposals)
             self.history.append((observation,agent_proposals,decisions))

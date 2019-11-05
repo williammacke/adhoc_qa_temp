@@ -24,6 +24,7 @@ class agent_adhoc(AbstractAgent):
         self.is_adhoc=True
         self.tool = None #Start off with no tool.
         self.knowledge = Knowledge()
+        self.certainty = False # Set True if only one station has max likelihood. Lets environment know not to allow query.
         self.p_obs = None
         self.p_obs_temp = None # Holds previous observation temporarily in case action not approved by environment
         # warnings.WarningMessage("Make sure tracking agent is registered")
@@ -75,8 +76,10 @@ class agent_adhoc(AbstractAgent):
 
             elif (self.knowledge.source[curr_k_idx]==Knowledge.origin.Inference):
                 #Which means we have been working on a inference for a station.
-                target_station = self.inference_engine.inference_step(self.p_obs,obs)
+                target_station, certainty = self.inference_engine.inference_step(self.p_obs,obs)
                 self.knowledge.update_knowledge_from_inference(target_station)
+                if certainty:
+                    self.certainty = certainty
                 # warnings.WarningMessage("Provision resetting inference_engine when a station is finished")
 
             else:

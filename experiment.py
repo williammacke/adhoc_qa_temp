@@ -1,6 +1,7 @@
 import matplotlib
 matplotlib.use('Agg') # Prevents error when 'showing' plot over ssh
 import matplotlib.pyplot as plt
+import math
 
 from src import global_defs as gd
 from src.global_defs import Point2D
@@ -75,7 +76,7 @@ def experiment(grid_size, stn_pos, tools_pos, l_pos, a_pos, l_tp=None, l_path=[]
 
 
 # Returns a permutation of all unique optimal paths from leader agent to target station
-def opt_path_perm(stn_pos, l_pos, l_station_order):
+def opt_path_perm(stn_pos, l_pos, l_station_order, repeat=1):
     l_path = []
     offset = stn_pos[l_station_order[0]] - l_pos
 
@@ -88,7 +89,9 @@ def opt_path_perm(stn_pos, l_pos, l_station_order):
     else:
         l_path += [gd.Actions.DOWN] * -offset.y
 
-    return set(permutations(l_path))
+    paths = list(set(permutations(l_path))) * repeat
+
+    return paths
 
 
 # Returns lists of timesteps to complete simulation for each query timestep
@@ -105,10 +108,11 @@ def get_query_timesteps(grid_size, stn_pos, tools_pos, l_pos, a_pos, l_tp, all_l
 
         query_timesteps.append(timesteps)
 
-        if num_query:
-            max_query = num_query - 1
-        elif query == 0:
-            max_query = max(timesteps)
+        if query == 0:
+            if num_query:
+                max_query = num_query - 1
+            else:
+                max_query = max(timesteps)
         query += 1
 
     return query_timesteps
@@ -117,7 +121,7 @@ def get_query_timesteps(grid_size, stn_pos, tools_pos, l_pos, a_pos, l_tp, all_l
 def create_graphs(grid_size, stn_pos_perm, stn_names, tools_pos, l_pos, a_pos, l_tp_perm, num_query=None):
     query_timesteps = []
     for stn_pos, l_tp in zip(stn_pos_perm, l_tp_perm):
-        all_leader_paths = opt_path_perm(stn_pos, l_pos, l_tp.station_order)
+        all_leader_paths = opt_path_perm(stn_pos, l_pos, l_tp.station_order, 5)
         qt = get_query_timesteps(grid_size, stn_pos, tools_pos, l_pos, a_pos, l_tp, all_leader_paths, num_query)
         query_timesteps.append(qt)
 
@@ -126,22 +130,49 @@ def create_graphs(grid_size, stn_pos_perm, stn_names, tools_pos, l_pos, a_pos, l
     fig_height = 3 * num_graphs
 
     fig, ax = plt.subplots(num_graphs, 1, figsize=(fig_width, fig_height))
+    fig2, ax2 = plt.subplots(num_graphs, 1, figsize=(fig_width, fig_height))
 
     for i in range(num_graphs):
-        positions = range(len(query_timesteps[i]))
+        positions = list(range(len(query_timesteps[i])))
         if num_query:
-            positions = range(num_query)
+            positions = list(range(num_query))
+        labels = positions.copy()
+        labels[0] = 'X'
 
         if num_graphs > 1:
             axs = ax[i]
         else:
             axs = ax
-        axs.boxplot(query_timesteps[i], positions=positions, whis='range')
+        
+        axs.boxplot(query_timesteps[i], positions=positions, whis='range', labels=labels)
         axs.set_title('Timestep Range Based on Query Times: Station %s' % (stn_names[i]))
         axs.set_xlabel('Query Timestep')
         axs.set_ylabel('Timesteps')
 
+
+
+        avg = [sum(x) / len(x) for x in query_timesteps[i]]
+        sd = []
+        for d, mu in zip(query_timesteps[i], avg):
+            s = [(x - mu)**2 for x in d]
+            sd.append(math.sqrt(sum(s) / len(s)))
+
+        if num_graphs > 1:
+            axs2 = ax2[i]
+        else:
+            axs2 = ax2
+
+        axs2.errorbar(positions, avg, sd)
+        axs2.set_title('Timestep Average and Standard Deviation: Station %s' % (stn_names[i]))
+        axs2.set_xlabel('Query Timestep')
+        axs2.set_ylabel('Timesteps')
+
+        print('Graph', i, ': ')
+        print(avg)
+        print(sd)
+
     fig.tight_layout()
+    fig2.tight_layout()
 
     plt.show()
     # plt.savefig('testgraph')
@@ -162,3 +193,5 @@ l_tp_perm = [agent.AgentType([2]), agent.AgentType([2]), agent.AgentType([2])] #
 a_pos = Point2D(4, 0)
 
 create_graphs(grid_size, stn_pos_perm, stn_names, tools_pos, l_pos, a_pos, l_tp_perm)
+
+# experiment(grid_size, stn_pos_perm[0], tools_pos, l_pos, a_pos, l_tp_perm[0], [gd.Actions.LEFT], [3], debug=True)
