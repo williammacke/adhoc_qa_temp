@@ -23,7 +23,6 @@ class agent_adhoc(AbstractAgent):
             logging.warning("Init positions out of bounds")
         self.is_adhoc=True
         self.tool = None #Start off with no tool.
-        self.current_target = None        
         self.knowledge = Knowledge()
         self.certainty = False # Set True if only one station has max likelihood. Lets environment know not to allow query.
         self.p_obs = None
