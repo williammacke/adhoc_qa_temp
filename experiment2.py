@@ -187,7 +187,7 @@ stn_names = ['1', '2', '3']
 stn_pos_perm = [[Point2D(7,3), Point2D(7,8), Point2D(3,8)],
                 [Point2D(7,3), Point2D(3,8), Point2D(7,8)],
                 [Point2D(3,8), Point2D(7,8), Point2D(7,3)]]
-tools_pos = [Point2D(3,3)] # tools_pos needs to be an array but only one tool box is supported so far
+tools_pos = [Point2D(2,3)] # tools_pos needs to be an array but only one tool box is supported so far
 
 l_pos = Point2D(5, 0)
 # l_tp = agent.AgentType(len(stn_pos)) # Optional random order of stations to pass to agent_leader()

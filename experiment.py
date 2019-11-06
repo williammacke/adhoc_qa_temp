@@ -40,6 +40,7 @@ def experiment(grid_size, stn_pos, tools_pos, l_pos, a_pos, l_tp=None, l_path=[]
         print('Adhoc Tool:           ', adhoc.tool)
         print('Adhoc Station Order:  ', adhoc.knowledge.station_order)
         print('Adhoc Source:         ', adhoc.knowledge.source)
+        print('Adhoc Prior/Certainty:', adhoc.inference_engine.prior, adhoc.certainty)
         adhoc_station_status = [status.value for status in adhoc.knowledge.station_work_status]
         print('Adhoc Station Status: ', adhoc_station_status)
         print('\n')
@@ -121,7 +122,7 @@ def get_query_timesteps(grid_size, stn_pos, tools_pos, l_pos, a_pos, l_tp, all_l
 def create_graphs(grid_size, stn_pos_perm, stn_names, tools_pos, l_pos, a_pos, l_tp_perm, num_query=None):
     query_timesteps = []
     for stn_pos, l_tp in zip(stn_pos_perm, l_tp_perm):
-        all_leader_paths = opt_path_perm(stn_pos, l_pos, l_tp.station_order, 5)
+        all_leader_paths = opt_path_perm(stn_pos, l_pos, l_tp.station_order, 10)
         qt = get_query_timesteps(grid_size, stn_pos, tools_pos, l_pos, a_pos, l_tp, all_leader_paths, num_query)
         query_timesteps.append(qt)
 
@@ -204,7 +205,7 @@ stn_names = ['1', '2', '3']
 stn_pos_perm = [[Point2D(7,3), Point2D(7,8), Point2D(3,8)],
                 [Point2D(7,3), Point2D(3,8), Point2D(7,8)],
                 [Point2D(3,8), Point2D(7,8), Point2D(7,3)]]
-tools_pos = [Point2D(3,3)] # tools_pos needs to be an array but only one tool box is supported so far
+tools_pos = [Point2D(2,3)] # tools_pos needs to be an array but only one tool box is supported so far
 
 l_pos = Point2D(5, 0)
 # l_tp = agent.AgentType(len(stn_pos)) # Optional random order of stations to pass to agent_leader()
@@ -214,4 +215,5 @@ a_pos = Point2D(4, 0)
 
 create_graphs(grid_size, stn_pos_perm, stn_names, tools_pos, l_pos, a_pos, l_tp_perm)
 
-# experiment(grid_size, stn_pos_perm[0], tools_pos, l_pos, a_pos, l_tp_perm[0], [gd.Actions.LEFT], [3], debug=True)
+path = [gd.Actions.UP] * 3
+# experiment(grid_size, stn_pos_perm[2], tools_pos, l_pos, a_pos, l_tp_perm[0], path, [], debug=True)

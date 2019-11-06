@@ -23,6 +23,7 @@ class agent_adhoc(AbstractAgent):
             logging.warning("Init positions out of bounds")
         self.is_adhoc=True
         self.tool = None #Start off with no tool.
+        self.current_target = None        
         self.knowledge = Knowledge()
         self.certainty = False # Set True if only one station has max likelihood. Lets environment know not to allow query.
         self.p_obs = None
@@ -64,10 +65,12 @@ class agent_adhoc(AbstractAgent):
             curr_k_idx = self.knowledge.get_current_job_station_idx()
             #Checking what knowledge we have.
             if (self.knowledge.source[curr_k_idx]==Knowledge.origin.Answer):
-
                 #Then we simply work on the station because we have an answer telling us that that's the station to work on.
                 target_station = self.knowledge.station_order[curr_k_idx]
-
+                #new_prior = np.zeros(self.inference_engine.prior.shape)
+                #new_prior[curr_k_idx]
+                #self.inference_engine.prior = 
+                #self.certainty = True
             elif (self.knowledge.source[curr_k_idx] == None):
                 #which means we just finished a station in the last time-step. This calls for re-initalizing the inference_engine
                 self.tracking_stations = self.get_remaining_stations(obs)

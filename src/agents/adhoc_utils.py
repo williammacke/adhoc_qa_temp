@@ -29,6 +29,7 @@ class inference_engine():
         self.tracking_stations = copy.deepcopy(tracking_stations)
         self.prior = np.ones(len(self.tracking_stations))
         self.prior/=np.sum(self.prior)
+        self.current_target = None        
 
     def get_modified_obs(self,previous_obs,current_obs):
         """
@@ -98,17 +99,23 @@ class inference_engine():
         """
         mobs = self.get_modified_obs(pobs,cobs)
         ll = self.get_likelihood(mobs)
-        (map_idx,ps) = utils.get_MAP(self.prior,ll)
+        (rand_map_idx,ps) = utils.get_MAP(self.prior,ll)
         assert(np.all(ps.shape==ll.shape))
         self.prior = ps
         
-        maxes = np.where(ps == np.amax(ps))
+        maxes = np.where(ps == np.amax(ps))[0]
+
+        # This stops changing target when already chosen target is still possible (stops thrashing)
+        target_idx = self.current_target
+        if self.current_target not in maxes:
+            target_idx = rand_map_idx
+            self.current_target = rand_map_idx
         
         certainty = False
-        if len(maxes[0]) == 1:
+        if len(maxes) == 1:
             certainty = True
         
-        return self.tracking_stations[map_idx], certainty
+        return self.tracking_stations[target_idx], certainty
 
 
 

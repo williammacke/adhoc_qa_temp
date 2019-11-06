@@ -88,8 +88,8 @@ def get_MAP(prior,likelihood):
     # map_idx = np.argmax(ps)
 
     # If there are ties, return random max index
-    maxes = np.where(ps == np.amax(ps))
-    map_idx = np.random.choice(maxes[0])
+    maxes = np.where(ps == np.amax(ps))[0]
+    map_idx = np.random.choice(maxes)
 
     return (map_idx,ps)
 
