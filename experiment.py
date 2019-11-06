@@ -152,24 +152,44 @@ def create_graphs(grid_size, stn_pos_perm, stn_names, tools_pos, l_pos, a_pos, l
 
 
         avg = [sum(x) / len(x) for x in query_timesteps[i]]
-        sd = []
-        for d, mu in zip(query_timesteps[i], avg):
-            s = [(x - mu)**2 for x in d]
-            sd.append(math.sqrt(sum(s) / len(s)))
+        err_pos = []
+        err_neg = []
+        for qt, mu in zip(query_timesteps[i], avg):
+            err_p = []
+            err_n = []
+            for d in qt:
+                if d > mu:
+                    err_p.append(d - mu)
+                else:
+                    err_n.append(mu - d)
+            
+            if len(err_p):
+                err_pos.append(sum(err_p) / len(err_p))
+            else:
+                err_pos.append(0)            
+            if len(err_n):
+                err_neg.append(sum(err_n) / len(err_n))
+            else:
+                err_neg.append(0)
+
+        worst_case = [max(qt) for qt in query_timesteps[i]]
 
         if num_graphs > 1:
             axs2 = ax2[i]
         else:
             axs2 = ax2
 
-        axs2.errorbar(positions, avg, sd, fmt='o', capsize=10)
-        axs2.set_title('Timestep Average and Standard Deviation: Station %s' % (stn_names[i]))
+        labels = positions.copy()
+        labels[0] = 'X'
+
+        axs2.errorbar(positions, worst_case, fmt='ro')
+        axs2.errorbar(positions, avg, [err_neg, err_pos], fmt='o', capsize=10)
+        axs2.set_title('Timestep Average, Error, and Worst Case: Station %s' % (stn_names[i]))
         axs2.set_xlabel('Query Timestep')
         axs2.set_ylabel('Timesteps')
-
-        print('Graph', i, ': ')
-        print(avg)
-        print(sd)
+        axs2.set_xticks(positions)
+        axs2.set_xticklabels(labels)
+        axs2.legend(['Worst Case', 'Average Case'])
 
     fig.tight_layout()
     fig2.tight_layout()
