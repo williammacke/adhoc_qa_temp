@@ -190,7 +190,7 @@ def create_graphs(grid_size, stn_pos_perm, stn_names, tools_pos, l_pos, a_pos, l
         axs2.set_ylabel('Timesteps')
         axs2.set_xticks(positions)
         axs2.set_xticklabels(labels)
-        axs2.legend(['Worst Case', 'Average Case'])
+        # axs2.legend(['Worst Case', 'Average Case'])
 
     fig.tight_layout()
     fig2.tight_layout()
@@ -216,4 +216,4 @@ a_pos = Point2D(4, 0)
 create_graphs(grid_size, stn_pos_perm, stn_names, tools_pos, l_pos, a_pos, l_tp_perm)
 
 path = [gd.Actions.UP] * 3
-# experiment(grid_size, stn_pos_perm[2], tools_pos, l_pos, a_pos, l_tp_perm[0], path, [], debug=True)
+# experiment(grid_size, stn_pos_perm[2], tools_pos, l_pos, a_pos, l_tp_perm[0], path, [7], debug=True)

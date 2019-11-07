@@ -52,42 +52,30 @@ class agent_adhoc(AbstractAgent):
           - Else, go to get the tool first.
         """
         self.p_obs_temp = obs
-        if obs.timestep == 0:
-            #If it's the first timestep, we have no clue.
-            #self.tracking_stations = self.get_remaining_stations(obs)
-            #self.inference_engine = inference_engine(self.tracking_agent,self.tracking_stations)
 
-            target_station = np.random.choice(self.tracking_stations) #pick a station at random.
+        curr_k_idx = self.knowledge.get_current_job_station_idx()
+        #Checking what knowledge we have.
+        if (self.knowledge.source[curr_k_idx]==Knowledge.origin.Answer):
+            #Then we simply work on the station because we have an answer telling us that that's the station to work on.
+            target_station = self.knowledge.station_order[curr_k_idx]
+
+        elif (self.knowledge.source[curr_k_idx] == None):
+            #which means we just started or finished a station in the last time-step. This calls for re-initalizing the inference_engine
+            self.tracking_stations = self.get_remaining_stations(obs)
+            self.inference_engine = inference_engine(self.tracking_agent,self.tracking_stations)
+            target_station = np.random.choice(self.tracking_stations)
             self.knowledge.update_knowledge_from_inference(target_station)
 
+        elif (self.knowledge.source[curr_k_idx]==Knowledge.origin.Inference):
+            #Which means we have been working on a inference for a station.
+            target_station, certainty = self.inference_engine.inference_step(self.p_obs,obs)
+            self.knowledge.update_knowledge_from_inference(target_station)
+            if certainty:
+                self.certainty = certainty
+
         else:
-            curr_k_idx = self.knowledge.get_current_job_station_idx()
-            #Checking what knowledge we have.
-            if (self.knowledge.source[curr_k_idx]==Knowledge.origin.Answer):
-                #Then we simply work on the station because we have an answer telling us that that's the station to work on.
-                target_station = self.knowledge.station_order[curr_k_idx]
-                #new_prior = np.zeros(self.inference_engine.prior.shape)
-                #new_prior[curr_k_idx]
-                #self.inference_engine.prior = 
-                #self.certainty = True
-            elif (self.knowledge.source[curr_k_idx] == None):
-                #which means we just finished a station in the last time-step. This calls for re-initalizing the inference_engine
-                self.tracking_stations = self.get_remaining_stations(obs)
-                self.inference_engine = inference_engine(self.tracking_agent,self.tracking_stations)
-                target_station = np.random.choice(self.tracking_stations)
-                self.knowledge.update_knowledge_from_inference(target_station)
-
-            elif (self.knowledge.source[curr_k_idx]==Knowledge.origin.Inference):
-                #Which means we have been working on a inference for a station.
-                target_station, certainty = self.inference_engine.inference_step(self.p_obs,obs)
-                self.knowledge.update_knowledge_from_inference(target_station)
-                if certainty:
-                    self.certainty = certainty
-                # warnings.WarningMessage("Provision resetting inference_engine when a station is finished")
-
-            else:
-                #it should never come to this.
-                raise Exception("Some mistake around")
+            #it should never come to this.
+            raise Exception("Some mistake around")
 
         """
         Okay, now that we know which station we should be headed to, we need to ensure the nitty-gritty details.

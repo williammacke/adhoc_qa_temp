@@ -35,7 +35,7 @@ class environment():
         self.sttn_pos = sttn_positions
         self.tools_pos = tools_pos
         self.agents = [None, None] # Assumed only 2 agents, leader and adhoc respectively
-        self.allActions = [None, None]
+        self.allActions = [gd.Actions.NOOP, gd.Actions.NOOP]
 
         self.communication_time_steps = []
 
@@ -250,6 +250,11 @@ class environment():
         :return:
         """
         self.step_count+=1
+
+        if self.step_count > 1:
+            # Update inferencing engine and adhoc's certainty variable by calling adhoc agent's respond function before checking to query
+            observation = self.generate_observation()
+            proposal = self.agents[gd.ADHOC_IDX].respond(observation)
 
         certainty = self.agents[gd.ADHOC_IDX].certainty
 
