@@ -126,6 +126,7 @@ def get_query_timesteps(grid_size, stn_pos, tools_pos, l_pos, a_pos, l_tp, all_l
 
 def create_graphs(grid_size, stn_pos_perm, stn_names, tools_pos, l_pos, a_pos, l_tp_perm, num_query=None):
     query_timesteps = []
+
     for stn_pos, l_tp in zip(stn_pos_perm, l_tp_perm):
         all_leader_paths = opt_path_perm(stn_pos, l_pos, l_tp.station_order, 5)
         qt = get_query_timesteps(grid_size, stn_pos, tools_pos, l_pos, a_pos, l_tp, all_leader_paths, num_query)
@@ -151,7 +152,6 @@ def create_graphs(grid_size, stn_pos_perm, stn_names, tools_pos, l_pos, a_pos, l
             axs = ax[i]
         else:
             axs = ax
-        
         axs.boxplot(query_timesteps[i], positions=positions, whis='range', labels=labels)
         axs.set_title('Timestep Range Based on Query Times: Station %s' % (stn_names[i]))
         axs.set_xlabel('Query Timestep')
@@ -188,15 +188,20 @@ def create_graphs(grid_size, stn_pos_perm, stn_names, tools_pos, l_pos, a_pos, l
 
 grid_size = 10
 # target station needs to be last listed if you want worst case scenario with wrong inferencing
-stn_names = ['1', '2', '3']
-stn_pos_perm = [[Point2D(7,3), Point2D(7,8), Point2D(3,8)],
-                [Point2D(7,3), Point2D(3,8), Point2D(7,8)],
-                [Point2D(3,8), Point2D(7,8), Point2D(7,3)]]
+#stn_names = ['1', '2', '3']
+stn_names = [str(i) for i in range(1,11)]
+#stn_pos_perm = [[Point2D(7,3), Point2D(7,8), Point2D(3,8)],
+#                [Point2D(7,3), Point2D(3,8), Point2D(7,8)],
+#                [Point2D(3,8), Point2D(7,8), Point2D(7,3)]]
+nexp = 10
+pos = np.array([np.random.choice(100,size=10,replace=False) for _ in range(nexp)])
+stn_pos_perm = [[Point2D(pos[i][j]//10, pos[i][j]%10) for j in range(10)] for i in range(nexp)]
 tools_pos = [Point2D(2,3)] # tools_pos needs to be an array but only one tool box is supported so far
 
 l_pos = Point2D(5, 0)
 # l_tp = agent.AgentType(len(stn_pos)) # Optional random order of stations to pass to agent_leader()
-l_tp_perm = [agent.AgentType([2]), agent.AgentType([2]), agent.AgentType([2])] # Optional fixed order of stations to pass to agent_leader()
+#l_tp_perm = [agent.AgentType([2]), agent.AgentType([2]), agent.AgentType([2])] # Optional fixed order of stations to pass to agent_leader()
+l_tp_perm = [agent.AgentType([int(np.random.random()*10)]) for _ in range(nexp)] # Optional fixed order of stations to pass to agent_leader()
 
 a_pos = Point2D(4, 0)
 

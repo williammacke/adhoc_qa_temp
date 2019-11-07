@@ -40,6 +40,8 @@ class inference_engine():
         """
         pobs = previous_obs
         cobs = current_obs
+        if pobs is None:
+            return copy.deepcopy(cobs)
         newobs = copy.deepcopy(pobs) #copy previous observations.
         newobs.allActions = cobs.allActions #swap actions.
         return newobs
@@ -90,6 +92,8 @@ class inference_engine():
             elif curr_dist == prev_dist and agent_pos == sttn_pos:
                 likelihood_vector[idx] = 1
 
+        if np.sum(likelihood_vector) == 0:
+            return np.ones(len(self.tracking_stations))
         return likelihood_vector
 
     def inference_step(self,pobs,cobs):

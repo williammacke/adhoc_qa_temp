@@ -9,7 +9,8 @@ MAX_ITERS = 50
 
 # These parameters need to be consistent with init parameters of environment
 GRID_SIZE = 10
-N_STATIONS = 3
+#N_STATIONS = 3
+N_STATIONS = 10
 
 TOOLS_IDX = 2
 
