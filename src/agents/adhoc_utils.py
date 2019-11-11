@@ -47,7 +47,7 @@ class inference_engine():
         return newobs
 
 
-    def get_likelihood(self,mobs):
+    def get_likelihood(self,mobs, querying=False):
         """
         mobs: modified_obs
         possible_station_ids: The possible station_ids whose likelihood we want to measure.
@@ -96,18 +96,21 @@ class inference_engine():
             return np.ones(len(self.tracking_stations))
         return likelihood_vector
 
-    def inference_step(self,pobs,cobs):
+    def inference_step(self,pobs,cobs, querying=False):
         """
         Should take previous and current obs and return posterior estimate of the next station.
         returns: station to work on.
         """
         mobs = self.get_modified_obs(pobs,cobs)
-        ll = self.get_likelihood(mobs)
+        ll = self.get_likelihood(mobs, querying=querying)
+        #print("ll: {}".format(ll))
+        #print("prior: {}".format(self.prior))
         (rand_map_idx,ps) = utils.get_MAP(self.prior,ll)
         assert(np.all(ps.shape==ll.shape))
         self.prior = ps
         
         maxes = np.where(ps == np.amax(ps))[0]
+        #print(ps)
 
         # This stops changing target when already chosen target is still possible (stops thrashing)
         target_idx = self.current_target
@@ -118,6 +121,8 @@ class inference_engine():
         certainty = False
         if len(maxes) == 1:
             certainty = True
+        #print(certainty)
+        #print(maxes)
         
         return self.tracking_stations[target_idx], certainty
 

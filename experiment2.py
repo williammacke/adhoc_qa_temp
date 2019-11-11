@@ -99,7 +99,7 @@ def opt_path_perm(stn_pos, l_pos, l_station_order, repeat=1):
 def get_query_timesteps(grid_size, stn_pos, tools_pos, l_pos, a_pos, l_tp, all_leader_paths, num_query=None, debug=False):
     max_query = 1
 
-    queries = [0,1,5,-1] 
+    queries = [0,1,6,-1] 
 
     query_timesteps = []
     for query in queries:
@@ -120,13 +120,16 @@ def get_query_timesteps(grid_size, stn_pos, tools_pos, l_pos, a_pos, l_tp, all_l
 
 
 def create_graphs(grid_size, stn_pos_perm, stn_names, tools_pos, l_pos, a_pos, l_tp_perm, num_query=None):
-    query_timesteps = []
+    query_timesteps = [[] for _ in range(4)]
     for stn_pos, l_tp in zip(stn_pos_perm, l_tp_perm):
-        all_leader_paths = opt_path_perm(stn_pos, l_pos, l_tp.station_order, 5)
+        all_leader_paths = opt_path_perm(stn_pos, l_pos, l_tp.station_order, 1)
         qt = get_query_timesteps(grid_size, stn_pos, tools_pos, l_pos, a_pos, l_tp, all_leader_paths, num_query)
-        query_timesteps.append(qt)
+        for i in range(4):
+            query_timesteps[i] += qt[i]
 
-    num_graphs = len(stn_pos_perm)
+    num_graphs = 1
+    np.savetxt('figure3_results.dat', query_timesteps)
+    query_timesteps = [query_timesteps]
     fig_width = 10
     fig_height = 3 * num_graphs
 
@@ -184,9 +187,9 @@ def create_graphs(grid_size, stn_pos_perm, stn_names, tools_pos, l_pos, a_pos, l
 grid_size = 10
 # target station needs to be last listed if you want worst case scenario with wrong inferencing
 stn_names = ['1', '2', '3']
-stn_pos_perm = [[Point2D(7,3), Point2D(7,8), Point2D(3,8)],
-                [Point2D(7,3), Point2D(3,8), Point2D(7,8)],
-                [Point2D(3,8), Point2D(7,8), Point2D(7,3)]]
+stn_pos_perm = [[Point2D(7,2), Point2D(7,8), Point2D(3,8)],
+                [Point2D(7,2), Point2D(3,8), Point2D(7,8)],
+                [Point2D(3,8), Point2D(7,8), Point2D(7,2)]]
 tools_pos = [Point2D(2,3)] # tools_pos needs to be an array but only one tool box is supported so far
 
 l_pos = Point2D(5, 0)

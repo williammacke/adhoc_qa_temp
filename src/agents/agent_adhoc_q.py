@@ -27,6 +27,7 @@ class agent_adhoc(AbstractAgent):
         self.certainty = False # Set True if only one station has max likelihood. Lets environment know not to allow query.
         self.p_obs = None
         self.p_obs_temp = None # Holds previous observation temporarily in case action not approved by environment
+        self.certainty = False
         # warnings.WarningMessage("Make sure tracking agent is registered")
 
 
@@ -42,7 +43,7 @@ class agent_adhoc(AbstractAgent):
                 stations_left.append(sttnidx)
         return np.array(stations_left)
 
-    def respond(self,obs):
+    def respond(self,obs, querying=False):
         """
         #First retrieve which station is next.
           -Go to knowledge and ask which one we are working on right now and what's the source. If we have it from QA, then skip inference.
@@ -58,17 +59,18 @@ class agent_adhoc(AbstractAgent):
         if (self.knowledge.source[curr_k_idx]==Knowledge.origin.Answer):
             #Then we simply work on the station because we have an answer telling us that that's the station to work on.
             target_station = self.knowledge.station_order[curr_k_idx]
+            self.certainty = True
 
         elif (self.knowledge.source[curr_k_idx] == None):
             #which means we just started or finished a station in the last time-step. This calls for re-initalizing the inference_engine
             self.tracking_stations = self.get_remaining_stations(obs)
-            self.inference_engine = inference_engine(self.tracking_agent,self.tracking_stations)
+            #self.inference_engine = inference_engine(self.tracking_agent,self.tracking_stations)
             target_station = np.random.choice(self.tracking_stations)
             self.knowledge.update_knowledge_from_inference(target_station)
 
         elif (self.knowledge.source[curr_k_idx]==Knowledge.origin.Inference):
             #Which means we have been working on a inference for a station.
-            target_station, certainty = self.inference_engine.inference_step(self.p_obs,obs)
+            target_station, certainty = self.inference_engine.inference_step(self.p_obs,obs, querying=querying)
             self.knowledge.update_knowledge_from_inference(target_station)
             if certainty:
                 self.certainty = certainty
@@ -98,7 +100,9 @@ class agent_adhoc(AbstractAgent):
                 keep moving.
         """
         if self.tool is not None:
-            if self.tool == target_station:
+            if not self.certainty:
+                destination = obs.allPos[gd.TOOLS_IDX]
+            elif self.tool == target_station:
                 destination = obs.allPos[obs.stationInd[target_station]]
             else:
                 destination = obs.allPos[gd.TOOLS_IDX]

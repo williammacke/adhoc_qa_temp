@@ -5,12 +5,13 @@ from collections import namedtuple
 import math
 
 
-MAX_ITERS = 50
+MAX_ITERS = 2500
 
 # These parameters need to be consistent with init parameters of environment
+#GRID_SIZE = 50
 GRID_SIZE = 10
-#N_STATIONS = 3
-N_STATIONS = 10
+N_STATIONS = 3
+#N_STATIONS = 48
 
 TOOLS_IDX = 2
 

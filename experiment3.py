@@ -95,19 +95,25 @@ def opt_path_perm(stn_pos, l_pos, l_station_order, repeat=1):
     else:
         l_path += [gd.Actions.DOWN] * -offset.y
 
-    paths = list(set(permutations(l_path))) * repeat
+    #paths = list(set(permutations(l_path))) * repeat
+    np.random.shuffle(l_path)
+    paths = [l_path]*repeat
 
     return paths
 
 
 # Returns lists of timesteps to complete simulation for each query timestep
 def get_query_timesteps(grid_size, stn_pos, tools_pos, l_pos, a_pos, l_tp, all_leader_paths, num_query=None, debug=False):
-    max_query = 1
-
-    queries = [0,1,5,-1] 
+    max_query = 0
+    tx = tools_pos[0][0]
+    ty = tools_pos[0][1]
+    queries = [0,1,abs(tx-a_pos[0])+abs(ty-a_pos[1])+1, -1] 
 
     query_timesteps = []
+    path = all_leader_paths[int(np.random.random()*len(all_leader_paths))]
+    timesteps2 = None
     for query in queries:
+        print(query)
         timesteps = []
         for path in all_leader_paths:
             if query == -1:
@@ -116,30 +122,51 @@ def get_query_timesteps(grid_size, stn_pos, tools_pos, l_pos, a_pos, l_tp, all_l
                 qp = query
             steps = experiment(grid_size, stn_pos, tools_pos, l_pos, a_pos, l_tp, list(path), [qp], debug=debug)
             timesteps.append(steps)
+            if qp != 0:
+                if not timesteps2:
+                    timesteps2 = []
+                steps = experiment(grid_size, stn_pos, tools_pos, l_pos, a_pos, l_tp, list(path), list(range(qp,max_query+1)), debug=debug)
+                timesteps2.append(steps)
 
         if query == 0:
             max_query = max(timesteps)
         query_timesteps.append(timesteps)
+        if timesteps2:
+            query_timesteps.append(timesteps2)
+            timesteps2 = None
+
 
     return query_timesteps
 
 
 def create_graphs(grid_size, stn_pos_perm, stn_names, tools_pos, l_pos, a_pos, l_tp_perm, num_query=None):
-    query_timesteps = []
+    query_timesteps = [[] for _ in range(7)]
 
-    for stn_pos, l_tp in zip(stn_pos_perm, l_tp_perm):
-        all_leader_paths = opt_path_perm(stn_pos, l_pos, l_tp.station_order, 5)
-        qt = get_query_timesteps(grid_size, stn_pos, tools_pos, l_pos, a_pos, l_tp, all_leader_paths, num_query)
-        query_timesteps.append(qt)
+    for e,(stn_pos, l_tp) in enumerate(zip(stn_pos_perm, l_tp_perm)):
+        print("Experiment: {}".format(e))
+        tools_pos = [Point2D(int(np.random.random()*50), int(np.random.random()*50))]
+        l_pos = Point2D(int(np.random.random()*50), int(np.random.random()*50))
+        a_pos = Point2D(int(np.random.random()*50), int(np.random.random()*50))
+        all_leader_paths = opt_path_perm(stn_pos, l_pos, l_tp.station_order, 1)
+        qt = get_query_timesteps(grid_size, stn_pos, tools_pos, l_pos, a_pos, l_tp, all_leader_paths, num_query, debug=False)
+        print(qt)
+        for i in range(len(query_timesteps)):
+            query_timesteps[i] += qt[i]
 
-    num_graphs = len(stn_pos_perm)
+    print(query_timesteps)
+    np.savetxt("query_once.dat", query_timesteps)
+
+    query_timesteps = [query_timesteps]
+
+
+    num_graphs = len(query_timesteps)
     fig_width = 10
-    fig_height = 3 * num_graphs
+    fig_height = 3 
 
     fig, ax = plt.subplots(num_graphs, 1, figsize=(fig_width, fig_height))
     fig2, ax2 = plt.subplots(num_graphs, 1, figsize=(fig_width, fig_height))
 
-    for i in range(num_graphs):
+    for i in range(len(query_timesteps)):
         positions = list(range(len(query_timesteps[i])))
         if num_query:
             positions = list(range(num_query))
@@ -186,22 +213,27 @@ def create_graphs(grid_size, stn_pos_perm, stn_names, tools_pos, l_pos, a_pos, l
     # plt.savefig('testgraph')
 
 
-grid_size = 10
+grid_size = 50
+n_stations = 12
 # target station needs to be last listed if you want worst case scenario with wrong inferencing
 #stn_names = ['1', '2', '3']
-stn_names = [str(i) for i in range(1,11)]
+stn_names = [str(i) for i in range(1,n_stations*4+1)]
 #stn_pos_perm = [[Point2D(7,3), Point2D(7,8), Point2D(3,8)],
 #                [Point2D(7,3), Point2D(3,8), Point2D(7,8)],
 #                [Point2D(3,8), Point2D(7,8), Point2D(7,3)]]
-nexp = 10
-pos = np.array([np.random.choice(100,size=10,replace=False) for _ in range(nexp)])
-stn_pos_perm = [[Point2D(pos[i][j]//10, pos[i][j]%10) for j in range(10)] for i in range(nexp)]
+nexp = 100
+pos = np.array([np.random.choice(grid_size*grid_size//4,size=n_stations,replace=False) for _ in range(nexp)])
+stn_pos_perm = [[Point2D(pos[i][j]//(grid_size//2)*2+k, pos[i][j]%(grid_size//2)*2+l) for k in [0, 1] for l in [0,1]  for j in range(n_stations)] for i in range(nexp)]
+for perm in stn_pos_perm:
+    for p in perm:
+        if p[0] <0 or p[0] >= 50 or p[1] < 0 or p[1] >= 50:
+            print(p)
 tools_pos = [Point2D(2,3)] # tools_pos needs to be an array but only one tool box is supported so far
 
 l_pos = Point2D(5, 0)
 # l_tp = agent.AgentType(len(stn_pos)) # Optional random order of stations to pass to agent_leader()
 #l_tp_perm = [agent.AgentType([2]), agent.AgentType([2]), agent.AgentType([2])] # Optional fixed order of stations to pass to agent_leader()
-l_tp_perm = [agent.AgentType([int(np.random.random()*10)]) for _ in range(nexp)] # Optional fixed order of stations to pass to agent_leader()
+l_tp_perm = [agent.AgentType([int(np.random.random()*4*n_stations)]) for _ in range(nexp)] # Optional fixed order of stations to pass to agent_leader()
 
 a_pos = Point2D(4, 0)
 

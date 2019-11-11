@@ -274,19 +274,26 @@ class environment():
                 leader_target = self.agents[gd.LEADER_IDX].tp.get_current_job_station()
                 self.agents[gd.ADHOC_IDX].knowledge.update_knowledge_from_qa([leader_target])
             else:
-                if self.step_count == 1:
-                    possibleGoals = np.array(range(self.n_stations))
-                    prior = np.ones(self.n_stations)
-                else:
-                    possibleGoals = np.where(self.agents[gd.ADHOC_IDX].inference_engine.prior>0)[0]
-                    prior = self.agents[gd.ADHOC_IDX].inference_engine.prior
+                #if self.step_count == 1:
+                #    possibleGoals = np.array(range(self.n_stations))
+                #    prior = np.ones(self.n_stations)
+                #else:
+                possibleGoals = np.where(self.agents[gd.ADHOC_IDX].inference_engine.prior>0)[0]
+                prior = self.agents[gd.ADHOC_IDX].inference_engine.prior
                 query_set = set(self.query_type(possibleGoals))
                 leader_target = self.agents[gd.LEADER_IDX].tp.get_current_job_station()
-                if leader_target in query_set:
+                if len(query_set) == 0:
+                    agent_proposals,observation = self._step_dispatch()
+                    decisions = self._step_decide_and_apply(agent_proposals)
+                    self.history.append((observation,agent_proposals,decisions))
+                elif leader_target in query_set:
                     for g in range(len(prior)):
                         if g in query_set: continue
                         self.agents[gd.ADHOC_IDX].inference_engine.prior[g] = 0
                     self.agents[gd.ADHOC_IDX].inference_engine.prior /= np.sum(self.agents[gd.ADHOC_IDX].inference_engine.prior)
+                    #print(prior)
+                    #print(self.agents[gd.ADHOC_IDX].inference_engine.prior)
+                    #input()
                 else:
                     for g in query_set:
                         self.agents[gd.ADHOC_IDX].inference_engine.prior[g] = 0

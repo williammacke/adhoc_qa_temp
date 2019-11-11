@@ -83,6 +83,9 @@ def get_MAP(prior,likelihood):
     ll = np.array(likelihood)
 
     ps = pr * ll
+    if np.sum(ps) == 0:
+        ps = np.ones(len(ps))
+        ps *= ll
     ps /= np.sum(ps)
 
     # map_idx = np.argmax(ps)
