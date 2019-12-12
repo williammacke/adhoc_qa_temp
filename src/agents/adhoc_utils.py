@@ -1,5 +1,5 @@
 from src.agents.agent import AbstractAgent, AgentType
-from src import global_defs as gd
+from src import environment as env
 import numpy as np
 from collections import namedtuple
 from enum import Enum
@@ -29,7 +29,7 @@ class inference_engine():
         self.tracking_stations = copy.deepcopy(tracking_stations)
         self.prior = np.ones(len(self.tracking_stations))
         self.prior/=np.sum(self.prior)
-        self.current_target = None        
+        self.current_target = None
 
     def get_modified_obs(self,previous_obs,current_obs):
         """
@@ -57,10 +57,10 @@ class inference_engine():
         """
         #First set the tracking_agent's position to the observation reported position.
         obs = mobs
-        # self.tracking_agent.pos = obs.allPos[gd.LEADER_IDX]
+        # self.tracking_agent.pos = obs.allPos[env.LEADER_IDX]
 
         likelihood_vector = np.zeros(len(self.tracking_stations))
-        action_performed = obs.allActions[gd.LEADER_IDX]
+        action_performed = obs.allActions[env.LEADER_IDX]
 
         # def create_dummy_type(station_id):
         #     """Create a dummy type with only one station to work on"""
@@ -74,11 +74,11 @@ class inference_engine():
         #     action_probs, action = self.tracking_agent.respond(obs)
         #     likelihood_vector[idx] = action_probs[action_performed]
 
-        move = gd.ACTIONS_TO_MOVES[action_performed]
+        move = env.ACTIONS_TO_MOVES[action_performed]
 
         for idx, sttn in enumerate(self.tracking_stations):
             sttn_pos = obs.allPos[obs.stationInd[0] + sttn]
-            agent_pos = obs.allPos[gd.LEADER_IDX]
+            agent_pos = obs.allPos[env.LEADER_IDX]
 
             prev_dist = agent_pos.manhattan_dist(sttn_pos)
             curr_dist = (agent_pos + move).manhattan_dist(sttn_pos)
@@ -102,7 +102,7 @@ class inference_engine():
         (rand_map_idx,ps) = utils.get_MAP(self.prior,ll)
         assert(np.all(ps.shape==ll.shape))
         self.prior = ps
-        
+
         maxes = np.where(ps == np.amax(ps))[0]
 
         # This stops changing target when already chosen target is still possible (stops thrashing)
@@ -110,11 +110,11 @@ class inference_engine():
         if self.current_target not in maxes:
             target_idx = rand_map_idx
             self.current_target = rand_map_idx
-        
+
         certainty = False
         if len(maxes) == 1:
             certainty = True
-        
+
         return self.tracking_stations[target_idx], certainty
 
 
@@ -133,7 +133,7 @@ class Knowledge(AgentType):
     origin = Enum('KnowledgeSource',[('Inference',1),('Answer',2)])
 
     def __init__(self):
-        super().__init__(gd.N_STATIONS) #Initiaize the underlying type.
+        super().__init__(env.N_STATIONS) #Initiaize the underlying type.
         self.station_order = [None for sttn in self.station_order]
         self.knowledge = self.station_order #We call station_order as knowledge
         self.source = [None for sttn in self.knowledge] #We don't have knowledge yet, so it's no source.

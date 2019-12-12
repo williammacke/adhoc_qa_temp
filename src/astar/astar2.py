@@ -2,7 +2,7 @@ import numpy as np
 import time
 import matplotlib.pyplot as plt
 import copy
-from src.global_defs import *
+from src.environment import Point2D
 import heapq
 import math
 

@@ -3,9 +3,8 @@ import matplotlib
 import matplotlib.pyplot as plt
 import math
 
-from src import global_defs as gd
-from src.global_defs import Point2D
-from src.environment import environment
+from src.environment import Point2D
+from src.environment import environment as env
 from src.agents import agent
 from src.agents.agent_leader import agent_leader
 from src.agents.agent_adhoc_q import agent_adhoc
@@ -25,17 +24,17 @@ def experiment(grid_size, stn_pos, tools_pos, l_pos, a_pos, l_tp=None, l_path=[]
         print('Toolbox Position:     ', toolbox_positions)
         print('\nLeader Pos:           ', leader.pos)
         # print('Leader Target:        ', leader.tp.get_current_job_station()) # This throws index out of range error when all stations are complete
-        leader_action = env.allActions[gd.LEADER_IDX]
+        leader_action = env.allActions[env.LEADER_IDX]
         if leader_action is not None:
-            leader_action = gd.Actions_list[leader_action]
+            leader_action = env.Actions_list[leader_action]
         print('Leader Action:        ', leader_action)
         print('Leader Station Order: ', leader.tp.station_order)
         leader_station_status = [status.value for status in leader.tp.station_work_status]
         print('Leader Station Status:', leader_station_status)
         print('\nAdhoc Pos:            ', adhoc.pos)
-        adhoc_action = env.allActions[gd.ADHOC_IDX]
+        adhoc_action = env.allActions[env.ADHOC_IDX]
         if adhoc_action is not None:
-            adhoc_action = gd.Actions_list[adhoc_action]
+            adhoc_action = env.Actions_list[adhoc_action]
         print('Adhoc Action:         ', adhoc_action)
         print('Adhoc Tool:           ', adhoc.tool)
         print('Adhoc Station Order:  ', adhoc.knowledge.station_order)
@@ -47,7 +46,7 @@ def experiment(grid_size, stn_pos, tools_pos, l_pos, a_pos, l_tp=None, l_path=[]
         return
 
 
-    env = environment(grid_size, stn_pos, tools_pos)
+    env = env(grid_size, stn_pos, tools_pos)
 
     leader = agent_leader(l_pos, l_tp, l_path)
 
@@ -65,7 +64,7 @@ def experiment(grid_size, stn_pos, tools_pos, l_pos, a_pos, l_tp=None, l_path=[]
     if debug:
         debug_output(step_count)
 
-    while(not terminated and step_count < gd.MAX_ITERS):
+    while(not terminated):
         terminated, reward = env.step()
 
         step_count = env.step_count
@@ -82,13 +81,13 @@ def opt_path_perm(stn_pos, l_pos, l_station_order, repeat=1):
     offset = stn_pos[l_station_order[0]] - l_pos
 
     if offset.x >= 0:
-        l_path += [gd.Actions.RIGHT] * offset.x
+        l_path += [env.Actions.RIGHT] * offset.x
     else:
-        l_path += [gd.Actions.LEFT] * -offset.x
+        l_path += [env.Actions.LEFT] * -offset.x
     if offset.y >= 0:
-        l_path += [gd.Actions.UP] * offset.y
+        l_path += [env.Actions.UP] * offset.y
     else:
-        l_path += [gd.Actions.DOWN] * -offset.y
+        l_path += [env.Actions.DOWN] * -offset.y
 
     paths = list(set(permutations(l_path))) * repeat
 
@@ -144,7 +143,7 @@ def create_graphs(grid_size, stn_pos_perm, stn_names, tools_pos, l_pos, a_pos, l
             axs = ax[i]
         else:
             axs = ax
-        
+
         axs.boxplot(query_timesteps[i], positions=positions, whis='range', labels=labels)
         axs.set_title('Timestep Range Based on Query Times: Station %s' % (stn_names[i]))
         axs.set_xlabel('Query Timestep')
@@ -163,11 +162,11 @@ def create_graphs(grid_size, stn_pos_perm, stn_names, tools_pos, l_pos, a_pos, l
                     err_p.append(d - mu)
                 else:
                     err_n.append(mu - d)
-            
+
             if len(err_p):
                 err_pos.append(sum(err_p) / len(err_p))
             else:
-                err_pos.append(0)            
+                err_pos.append(0)
             if len(err_n):
                 err_neg.append(sum(err_n) / len(err_n))
             else:
@@ -215,5 +214,5 @@ a_pos = Point2D(4, 0)
 
 create_graphs(grid_size, stn_pos_perm, stn_names, tools_pos, l_pos, a_pos, l_tp_perm)
 
-path = [gd.Actions.UP] * 3
+path = [env.Actions.UP] * 3
 # experiment(grid_size, stn_pos_perm[2], tools_pos, l_pos, a_pos, l_tp_perm[0], path, [7], debug=True)

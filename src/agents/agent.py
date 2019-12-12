@@ -78,12 +78,12 @@ class AgentType():
             if stop_first_completion:
                 assert len(stations) >= 1
             else:
-                assert len(stations) == gd.N_STATIONS
+                assert len(stations) == env.N_STATIONS
 
             for stn in stations:
                 # Elements of list must be station indices
                 assert isinstance(stn, int)
-                assert stn in range(gd.N_STATIONS)
+                assert stn in range(env.N_STATIONS)
 
             self.n_stations = len(stations)
             self.station_order = np.array(stations)

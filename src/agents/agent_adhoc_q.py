@@ -1,6 +1,6 @@
 from src.agents.agent import AbstractAgent
 from src.agents import agent
-from src import global_defs as gd
+from src import environment as env
 import numpy as np
 from collections import namedtuple
 from enum import Enum
@@ -18,7 +18,7 @@ class agent_adhoc(AbstractAgent):
         self.pos = pos
         self.name = self.name+'_adhoc'+str(self.id)
 
-        if ((pos[0]<0 or pos[0]>gd.GRID_SIZE-1) or (pos[1]<0 or pos[1]>gd.GRID_SIZE-1)):
+        if ((pos[0]<0 or pos[0]>env.GRID_SIZE-1) or (pos[1]<0 or pos[1]>env.GRID_SIZE-1)):
             # warnings.warn("Init positions out of bounds",UserWarning)
             logging.warning("Init positions out of bounds")
         self.is_adhoc=True
@@ -32,11 +32,11 @@ class agent_adhoc(AbstractAgent):
 
     def register_tracking_agent(self,tagent):
         self.tracking_agent = tagent
-        self.inference_engine = inference_engine(self.tracking_agent,list(range(gd.N_STATIONS)))
+        self.inference_engine = inference_engine(self.tracking_agent,list(range(env.N_STATIONS)))
 
     def get_remaining_stations(self,cobs):
         stations_left = []
-        for sttnidx in range(gd.N_STATIONS):
+        for sttnidx in range(env.N_STATIONS):
             if cobs.stationStatus[sttnidx]  == agent.AgentType.status.pending:
                 #This means this station hasn't been closed yet.
                 stations_left.append(sttnidx)
@@ -101,23 +101,23 @@ class agent_adhoc(AbstractAgent):
             if self.tool == target_station:
                 destination = obs.allPos[obs.stationInd[target_station]]
             else:
-                destination = obs.allPos[gd.TOOLS_IDX]
+                destination = obs.allPos[env.TOOLS_IDX]
         else:
-            destination = obs.allPos[gd.TOOLS_IDX]
+            destination = obs.allPos[env.TOOLS_IDX]
 
         if utils.is_neighbor(self.pos,destination):
-            if destination == obs.allPos[gd.TOOLS_IDX]:
+            if destination == obs.allPos[env.TOOLS_IDX]:
                 #We are at the base to pick up a tool.
-                desired_action = gd.Actions.NOOP
+                desired_action = env.Actions.NOOP
                 self.tool = target_station
             else:
                 #we are the station to work.
-                if utils.is_neighbor(destination,obs.allPos[gd.LEADER_IDX]):
+                if utils.is_neighbor(destination,obs.allPos[env.LEADER_IDX]):
                     #Meaning, if the other agent is also neighoring the station, execute the work action
-                    desired_action = gd.Actions.WORK
+                    desired_action = env.Actions.WORK
                 else:
                     #Else, wait for other agent to get to station
-                    desired_action = gd.Actions.NOOP
+                    desired_action = env.Actions.NOOP
         else:
             #Navigate to destination.
             desired_action = None
@@ -132,8 +132,8 @@ class agent_adhoc(AbstractAgent):
         if decision is True:
             #If the decision was to work, then we have some bookkeeping to do.
             _,action = proposal
-            self.pos += gd.ACTIONS_TO_MOVES[action]
-            if action == gd.Actions.WORK:
+            self.pos += env.ACTIONS_TO_MOVES[action]
+            if action == env.Actions.WORK:
                 #We have been approved to work, station work is finished.
                 #Signal Knowledge that the work is finished.
                 curr_k_idx = self.knowledge.get_current_job_station_idx()

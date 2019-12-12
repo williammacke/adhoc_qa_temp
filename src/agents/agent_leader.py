@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from src.agents import agent
 from src.astar import pyastar
 from collections import namedtuple
-from src import global_defs as gd
+from src import environment as env
 from src import utils
 import copy
 
@@ -61,11 +61,11 @@ class agent_leader(agent.AbstractAgent):
             self.__target = self.tp.get_current_job_station()
         # If type is not provided, set agent to random type
         else:
-            self.tp = agent.AgentType(gd.N_STATIONS) #Initializing type from settings derived from global_defs.
+            self.tp = agent.AgentType(env.N_STATIONS) #Initializing type from settings derived from global_defs.
             target = self.tp.get_current_job_station()
             self.__target = target
 
-    def respond(self,observation: gd.obs)-> tuple:
+    def respond(self,observation: env.OBS)-> tuple:
         obs = observation
         target = self.tp.get_current_job_station()
         self.__target = target
@@ -80,14 +80,14 @@ class agent_leader(agent.AbstractAgent):
             desired_action = None
             if utils.is_neighbor(self.pos,target_pos):
                 #We are neighboring the station we want to work at.
-                if utils.is_neighbor(target_pos,obs.allPos[gd.ADHOC_IDX]):
+                if utils.is_neighbor(target_pos,obs.allPos[env.ADHOC_IDX]):
                     #Meaning, if the other agent is also neighoring the station, execute the work action
                     # Environment _proposal_check() checks if adhoc has the right tool
-                    desired_action = gd.Actions.WORK
+                    desired_action = env.Actions.WORK
                     #now, if the other agent also executed a WORK action, and happens to have the same tool, then we can safely move to the next station. This change will happen if the environment approves the work action, since, for the action to run, the agent needs a way to know if the other agent also has thetool to operate in this station. This tool checking will be done by the environment.
                 else:
                     #Else, just wait.
-                    desired_action = gd.Actions.NOOP
+                    desired_action = env.Actions.NOOP
             else:
                 #Meaning we yet have to reach our target station.
                 desired_action = None
@@ -100,8 +100,8 @@ class agent_leader(agent.AbstractAgent):
             _,action = proposal
             #Then we are allowed to execute the action.
             #First, apply the movement.
-            self.pos += gd.ACTIONS_TO_MOVES[action]
-            if action == gd.Actions.WORK:
+            self.pos += env.ACTIONS_TO_MOVES[action]
+            if action == env.Actions.WORK:
                 #Which means we were approved to go ahead and do the work action, because the other agent had the right tool with it. It's time to move onto the next station.
                 self.tp.set_status(self.tp.get_current_job_station_idx()) #mark the station's status as done.
         else:
