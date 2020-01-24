@@ -12,8 +12,11 @@ from src.agents.adhoc_utils import Knowledge, inference_engine
 
 adhoc_agent_state = namedtuple('AgentState','type pos target')
 
+def neverQuery(obs, knowledge):
+    return None
+
 class agent_adhoc(AbstractAgent):
-    def __init__(self,pos):
+    def __init__(self,pos, query_strat=neverQuery):
         super().__init__(pos,tp=-2)
         self.pos = pos
         self.name = self.name+'_adhoc'+str(self.id)
@@ -28,6 +31,7 @@ class agent_adhoc(AbstractAgent):
         self.p_obs = None
         self.p_obs_temp = None # Holds previous observation temporarily in case action not approved by environment
         # warnings.WarningMessage("Make sure tracking agent is registered")
+        self.query_strat=query_strat
 
 
     def register_tracking_agent(self,tagent):
@@ -52,6 +56,12 @@ class agent_adhoc(AbstractAgent):
           - Else, go to get the tool first.
         """
         self.p_obs_temp = obs
+
+        if self.query_strat(obs, self.knowledge):
+            action_probs = np.zeros(len(env.Actions))
+            action_probs[env.Actions.QUERY] = 1.0
+            return (actionprobs, env.Actions.QUERY)
+
 
         curr_k_idx = self.knowledge.get_current_job_station_idx()
         #Checking what knowledge we have.

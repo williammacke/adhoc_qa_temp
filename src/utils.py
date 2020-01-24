@@ -16,7 +16,8 @@ def is_neighbor(pos1, pos2):
     else:
         return False
 
-def check_within_boundaries(pos,dim=(env.GRID_SIZE,env.GRID_SIZE)):
+#def check_within_boundaries(pos,dim=(env.GRID_SIZE,env.GRID_SIZE)):
+def check_within_boundaries(pos,dim):
     dim_x,dim_y = dim
     pos_x,pos_y = pos
     if (pos_x<0 or pos_x>dim_x-1):
@@ -45,7 +46,7 @@ def get_valid_move_actions(pos,obstacles):
     """
 
     valid_actions = [False]*len(env.Actions)
-    for idx,action in enumerate(env.Actions_list[:-1]):
+    for idx,action in enumerate(env.Actions_list[:-2]):
         valid = check_valid(pos+env.ACTIONS_TO_MOVES[action], obstacles)
         if valid:
             valid_actions[idx] = True
