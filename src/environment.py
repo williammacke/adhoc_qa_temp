@@ -97,7 +97,9 @@ class ToolFetchingEnvironment(gym.Env):
 
 
     def answer_query(self, query):
-        raise NotImplementedError
+        if self.w_goal in query:
+            return True
+        return False
 
     def reset(self):
         self.curr_f_pos = self.f_pos
