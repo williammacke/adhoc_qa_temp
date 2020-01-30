@@ -7,7 +7,6 @@ class Policy:
 
 class RandomWorkerPolicy(Policy):
     def __init__(self):
-        self.plan = None
         self.last_w_pos = None
     def __call__(self, obs):
         w_pos, f_pos, s_pos, t_pos, f_tool, w_action, f_action, goal = obs
