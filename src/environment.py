@@ -23,6 +23,8 @@ class ToolFetchingEnvironment(gym.Env):
         self.f_tool = None
         self.w_goal = worker_goal
 
+        self.viewer = None
+
     def make_fetcher_obs(self, w_action, f_action, answer=None):
         return (self.curr_w_pos, self.curr_f_pos, self.s_pos, self.curr_t_pos, self.f_tool, w_action, f_action, answer)
 
@@ -93,6 +95,7 @@ class ToolFetchingEnvironment(gym.Env):
         reward_n = np.array([-1,-1])
         done_n = np.array([False, False])
         info_n = np.array([{}, {}])
+
         return obs_n, reward_n, done_n, info_n
 
 
@@ -108,3 +111,39 @@ class ToolFetchingEnvironment(gym.Env):
         self.f_tool = None
         obs_n = np.array([self.make_worker_obs(ToolFetchingEnvironment.WORKER_ACTIONS.NOOP, ToolFetchingEnvironment.FETCHER_ACTIONS.NOOP), self.make_fetcher_obs(ToolFetchingEnvironment.WORKER_ACTIONS.NOOP, ToolFetchingEnvironment.FETCHER_ACTIONS.NOOP)])
         return obs_n
+
+    def render(self):
+        screen_width = 600
+        screen_height = 600
+
+        horz_line_spacing = screen_width//self.width
+        vert_line_spacing = screen_height//self.height
+
+        if self.viewer is None:
+            from gym.envs.classic_control import rendering
+            self.viewer = rendering.Viewer(screen_width, screen_height)
+            for i in range(self.height):
+                line = rendering.Line(start=(0,vert_line_spacing*i), end=(screen_width, vert_line_spacing*i))
+                self.viewer.add_geom(line)
+            for i in range(self.width):
+                line = rendering.Line(start=(horz_line_spacing*i, 0), end=(horz_line_spacing*i, screen_height))
+                self.viewer.add_geom(line)
+            worker_x,worker_y = self.curr_w_pos
+            worker_shape = rendering.make_circle()
+            self.worker_transform = rendering.Transform(translation=(worker_x*horz_line_spacing, worker_y*vert_line_spacing))
+            worker_shape.add_attr(self.worker_transform)
+            self.viewer.add_geom(worker_shape)
+        worker_x,worker_y = self.curr_w_pos
+        self.worker_transform.set_translation(worker_x*horz_line_spacing, worker_y*vert_line_spacing)
+        
+
+
+        return self.viewer.render(False)
+
+
+    def close(self):
+        if self.viewer:
+            self.viewer.close()
+            self.viewer = None
+
+

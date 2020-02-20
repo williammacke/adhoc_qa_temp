@@ -19,5 +19,8 @@ while not done[0]:
     print(f"fetcher position {f_pos}")
     print(f"fetcher action {f_action}")
     print(f"fetcher tool {f_tool}")
+    myEnv.render()
     input()
     obs, reward, done, data = myEnv.step([worker(obs[0]),fetcher(obs[1])])
+
+myEnv.close()
