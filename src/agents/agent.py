@@ -32,7 +32,7 @@ class PlanPolicy(Policy):
         self._step = 0
 
     def __call__(self, obs):
-        action = self._plan[self._step]
+        action = self._plan[min(self._step, len(self._plan)-1)]
         self._step += 1
         return action
 

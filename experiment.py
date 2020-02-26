@@ -1,27 +1,67 @@
-from src import environment as env
+from src.environment import ToolFetchingEnvironment
 import numpy as np
 from src.agents.agent import RandomWorkerPolicy
+from src.agents.agent import PlanPolicy
 from src.agents.agent_adhoc_q import FetcherQueryPolicy
 from src.agents.agent_adhoc_q import FetcherAltPolicy
+from itertools import permutations
+import pandas as pd
 
 
-myEnv = env.ToolFetchingEnvironment(np.array([0,0]), np.array([1,1]), [np.array([2, 2]), 
-    np.array([3,3])], [np.array([5,5]), np.array([2,5])], 0)
-obs = myEnv.reset()
-fetcher = FetcherAltPolicy()
-worker = RandomWorkerPolicy()
-done = [False, False]
-while not done[0]:
-    w_pos, f_pos, s_pos, t_pos, f_tool, w_action, f_action, goal = obs[0]
-    print(f"worker position {w_pos}")
-    print(f"worker action {w_action}")
-    print(f"goal position {s_pos[goal]}")
-    print(f"goal {goal}")
-    print(f"fetcher position {f_pos}")
-    print(f"fetcher action {f_action}")
-    print(f"fetcher tool {f_tool}")
-    myEnv.render()
-    input()
-    obs, reward, done, data = myEnv.step([worker(obs[0]),fetcher(obs[1])])
+def experiment(args):
+    fetcher_pos = np.array([4, 0])
+    worker_pos = np.array([5, 0])
+    stn_pos = [np.array([7,2]), np.array([7,8]), np.array([3, 8])]
+    tool_pos = [np.array([2,3]) for _ in range(3)]
+    results = {}
+    for g in range(3):
+        results[f'goal {g}'] = {}
 
-myEnv.close()
+        def opt_path_perm(stn_pos, worker_pos):
+            worker_path = []
+            offset = stn_pos-worker_pos
+
+            if offset[0] >= 0:
+                worker_path += [ToolFetchingEnvironment.WORKER_ACTIONS.RIGHT] * offset[0]
+            else:
+                worker_path += [ToolFetchingEnvironment.WORKER_ACTIONS.LEFT] * -offset[0]
+
+            if offset[1] >= 0:
+                worker_path += [ToolFetchingEnvironment.WORKER_ACTIONS.UP] * offset[1]
+            else:
+                worker_path += [ToolFetchingEnvironment.WORKER_ACTIONS.DOWN] * -offset[1]
+
+            return list(set(permutations(worker_path)))
+
+        paths = opt_path_perm(stn_pos[g], worker_pos)
+        env = ToolFetchingEnvironment(fetcher_pos, worker_pos, stn_pos, tool_pos, g)
+        results[f'goal {g}']['X'] = []
+        for path in paths:
+            obs = env.reset()
+            done = [False, False]
+            fetcher = FetcherQueryPolicy()
+            worker = PlanPolicy(path + (ToolFetchingEnvironment.WORKER_ACTIONS.WORK,))
+            cost = 0
+            while not done[0]:
+                obs, reward, done, _ = env.step([worker(obs[0]), fetcher(obs[1])])
+                cost += reward[1]
+            results[f'goal {g}']['X'].append(cost)
+        for t in range(len(paths[0])):
+            results[f'goal {g}'][t] = []
+            for path in paths:
+                obs = env.reset()
+                done = [False, False]
+                fetcher = FetcherQueryPolicy()
+                worker = PlanPolicy(path + (ToolFetchingEnvironment.WORKER_ACTIONS.WORK,))
+                cost = 0
+                while not done[0]:
+                    obs, reward, done, _ = env.step([worker(obs[0]), fetcher(obs[1])])
+                    cost += reward[1]
+                results[f'goal {g}'][t].append(cost)
+    print(pd.DataFrame(results))
+
+
+
+experiment({})
+
+
