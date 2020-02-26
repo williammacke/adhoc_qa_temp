@@ -25,3 +25,24 @@ class RandomWorkerPolicy(Policy):
             actions.append(ToolFetchingEnvironment.WORKER_ACTIONS.UP)
 
         return np.random.choice(actions)
+
+class PlanPolicy(Policy):
+    def __init__(self, plan):
+        self._plan = plan
+        self._step = 0
+
+    def __call__(self, obs):
+        action = self._plan[self._step]
+        self._step += 1
+        return action
+
+    def reset(self):
+        self._step = 0
+
+    @property
+    def step(self):
+        return self._step
+
+    @property
+    def plan(self):
+        return self._plan
