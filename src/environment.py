@@ -113,11 +113,24 @@ class ToolFetchingEnvironment(gym.Env):
         return obs_n
 
     def render(self):
+
+        colors = {
+                'green':[0,1,0],
+                'blue':[0,0,1],
+                'violet':[1,0,1],
+                'yellow':[1,1,0]
+                }
+
+        color_keys = list(colors.keys())
+
         screen_width = 600
         screen_height = 600
 
         horz_line_spacing = screen_width//self.width
         vert_line_spacing = screen_height//self.height
+
+        worker_x,worker_y = self.curr_w_pos
+        fetcher_x,fetcher_y = self.curr_f_pos
 
         if self.viewer is None:
             from gym.envs.classic_control import rendering
@@ -128,13 +141,50 @@ class ToolFetchingEnvironment(gym.Env):
             for i in range(self.width):
                 line = rendering.Line(start=(horz_line_spacing*i, 0), end=(horz_line_spacing*i, screen_height))
                 self.viewer.add_geom(line)
-            worker_x,worker_y = self.curr_w_pos
+            self.tool_transforms = []
+            for i in range(len(self.curr_t_pos)):
+                color = color_keys[i%len(color_keys)]
+                station_x, station_y = self.s_pos[i]
+
+                station_shape = rendering.make_polygon([(-horz_line_spacing/2,-vert_line_spacing/2), 
+                    (-horz_line_spacing/2,vert_line_spacing/2), 
+                    (horz_line_spacing/2,vert_line_spacing/2), 
+                    (horz_line_spacing/2,-vert_line_spacing/2)])
+                station_transform = rendering.Transform(translation = (station_x*horz_line_spacing+horz_line_spacing/2, station_y*vert_line_spacing + vert_line_spacing/2) )
+                station_shape.add_attr(station_transform)
+                station_shape.set_color(*colors[color])
+                self.viewer.add_geom(station_shape)
+
+
+                tool_shape = rendering.make_polygon([(-horz_line_spacing/2,-vert_line_spacing/2), 
+                    (-horz_line_spacing/2,vert_line_spacing/2), 
+                    (horz_line_spacing/2,vert_line_spacing/2), 
+                    (horz_line_spacing/2,-vert_line_spacing/2)])
+                tool_transform = rendering.Transform(scale=(0.25,1))
+                tool_shape.add_attr(tool_transform)
+                tool_shape.set_color(*colors[color])
+                self.viewer.add_geom(tool_shape)
+                self.tool_transforms.append(tool_transform)
+
+
             worker_shape = rendering.make_circle()
-            self.worker_transform = rendering.Transform(translation=(worker_x*horz_line_spacing, worker_y*vert_line_spacing))
+            self.worker_transform = rendering.Transform()
             worker_shape.add_attr(self.worker_transform)
+            worker_shape.set_color(0,0,0)
             self.viewer.add_geom(worker_shape)
-        worker_x,worker_y = self.curr_w_pos
-        self.worker_transform.set_translation(worker_x*horz_line_spacing, worker_y*vert_line_spacing)
+            fetcher_shape = rendering.make_circle()
+            self.fetcher_transform = rendering.Transform()
+            fetcher_shape.add_attr(self.fetcher_transform)
+            fetcher_shape.set_color(1,0,0)
+            self.viewer.add_geom(fetcher_shape)
+
+                
+
+        self.worker_transform.set_translation(worker_x*horz_line_spacing + horz_line_spacing/2, worker_y*vert_line_spacing + vert_line_spacing/2)
+        self.fetcher_transform.set_translation(fetcher_x*horz_line_spacing + horz_line_spacing/2, fetcher_y*vert_line_spacing + vert_line_spacing/2)
+        for i,transform in enumerate(self.tool_transforms):
+            tool_x,tool_y = self.curr_t_pos[i]
+            transform.set_translation(tool_x*horz_line_spacing + horz_line_spacing/2, tool_y*vert_line_spacing + vert_line_spacing/2)
         
 
 
