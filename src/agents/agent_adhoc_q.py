@@ -2,7 +2,7 @@ from src.agents.agent import Policy
 from src.environment import ToolFetchingEnvironment
 import numpy as np
 
-def never_query(obs):
+def never_query(obs, agent):
     return None
 
 
@@ -82,7 +82,7 @@ class FetcherQueryPolicy(Policy):
 
         self.prev_w_pos = np.array(w_pos)
 
-        self.query = self.query_policy(obs)
+        self.query = self.query_policy(obs, self)
         if self.query:
             return ToolFetchingEnvironment.FETCHER_ACTIONS.QUERY, self.query
 
@@ -121,7 +121,7 @@ class FetcherAltPolicy(FetcherQueryPolicy):
 
         self.prev_w_pos = np.array(w_pos)
 
-        self.query = self.query_policy(obs)
+        self.query = self.query_policy(obs, self)
         if self.query:
             return ToolFetchingEnvironment.FETCHER_ACTIONS.QUERY, self.query
 
