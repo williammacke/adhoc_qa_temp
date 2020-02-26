@@ -38,7 +38,7 @@ class FetcherQueryPolicy(Policy):
                     self.probs[i] = 0
         elif w_action == ToolFetchingEnvironment.WORKER_ACTIONS.DOWN:
             for i,stn in enumerate(s_pos):
-                if stn[1] <= self.prev_w_pos[1]:
+                if stn[1] >= self.prev_w_pos[1]:
                     self.probs[i] = 0
         elif w_action == ToolFetchingEnvironment.WORKER_ACTIONS.UP:
             for i,stn in enumerate(s_pos):
@@ -54,9 +54,9 @@ class FetcherQueryPolicy(Policy):
             actions.append(ToolFetchingEnvironment.FETCHER_ACTIONS.RIGHT)
         elif pos[0] > goal[0]:
             actions.append(ToolFetchingEnvironment.FETCHER_ACTIONS.LEFT)
-        if pos[1] < goal[1]:
+        if pos[1] > goal[1]:
             actions.append(ToolFetchingEnvironment.FETCHER_ACTIONS.DOWN)
-        elif pos[1] > goal[1]:
+        elif pos[1] < goal[1]:
             actions.append(ToolFetchingEnvironment.FETCHER_ACTIONS.UP)
         if len(actions) == 0:
             return ToolFetchingEnvironment.FETCHER_ACTIONS.NOOP
@@ -144,13 +144,12 @@ class FetcherAltPolicy(FetcherQueryPolicy):
                 tool_valid_actions[1] = False # Left
             elif f_pos[0] >= t_pos[stn][0]:
                 tool_valid_actions[0] = False # Right
-            if f_pos[1] <= t_pos[stn][1]:
+            if f_pos[1] >= t_pos[stn][1]:
                 tool_valid_actions[2] = False # Down
-            elif f_pos[1] >= t_pos[stn][1]:
+            elif f_pos[1] <= t_pos[stn][1]:
                 tool_valid_actions[3] = False # Up
 
             valid_actions = np.logical_and(valid_actions, tool_valid_actions)
-        print(valid_actions)
 
         if np.any(valid_actions):
             p = valid_actions / np.sum(tool_valid_actions)

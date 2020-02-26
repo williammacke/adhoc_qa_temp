@@ -53,10 +53,10 @@ class ToolFetchingEnvironment(gym.Env):
             self.curr_w_pos -= np.array([1,0])
             self.w_pos[0] = max(self.curr_w_pos[0], 0)
         elif worker_action == ToolFetchingEnvironment.WORKER_ACTIONS.UP:
-            self.curr_w_pos -= np.array([0,1])
+            self.curr_w_pos += np.array([0,1])
             self.curr_w_pos[1] = max(self.curr_w_pos[1], 0)
         elif worker_action == ToolFetchingEnvironment.WORKER_ACTIONS.DOWN:
-            self.curr_w_pos += np.array([0,1])
+            self.curr_w_pos -= np.array([0,1])
             self.curr_w_pos[1] = min(self.curr_w_pos[1], self.height-1)
         elif worker_action == ToolFetchingEnvironment.WORKER_ACTIONS.WORK:
             goal_pos = self.s_pos[self.w_goal]
@@ -77,10 +77,10 @@ class ToolFetchingEnvironment(gym.Env):
             self.curr_f_pos -= np.array([1,0])
             self.curr_f_pos[0] = max(self.curr_f_pos[0], 0)
         elif fetcher_action == ToolFetchingEnvironment.FETCHER_ACTIONS.UP:
-            self.curr_f_pos -= np.array([0,1])
+            self.curr_f_pos += np.array([0,1])
             self.curr_f_pos[1] = max(self.curr_f_pos[1], 0)
         elif fetcher_action == ToolFetchingEnvironment.FETCHER_ACTIONS.DOWN:
-            self.curr_f_pos += np.array([0,1])
+            self.curr_f_pos -= np.array([0,1])
             self.curr_f_pos[1] = min(self.curr_f_pos[1], self.height-1)
         elif fetcher_action == ToolFetchingEnvironment.FETCHER_ACTIONS.PICKUP:
             assert fetcher_details >= 0 and fetcher_details < len(tool_pos)

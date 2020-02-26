@@ -19,9 +19,9 @@ class RandomWorkerPolicy(Policy):
         elif w_pos[0] > goal_pos[0]:
             actions.append(ToolFetchingEnvironment.WORKER_ACTIONS.LEFT)
 
-        if w_pos[1] < goal_pos[1]:
+        if w_pos[1] > goal_pos[1]:
             actions.append(ToolFetchingEnvironment.WORKER_ACTIONS.DOWN)
-        elif w_pos[1] > goal_pos[1]:
+        elif w_pos[1] < goal_pos[1]:
             actions.append(ToolFetchingEnvironment.WORKER_ACTIONS.UP)
 
         return np.random.choice(actions)
