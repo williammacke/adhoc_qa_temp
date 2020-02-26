@@ -2,12 +2,13 @@ from src import environment as env
 import numpy as np
 from src.agents.agent import RandomWorkerPolicy
 from src.agents.agent_adhoc_q import FetcherQueryPolicy
+from src.agents.agent_adhoc_q import FetcherAltPolicy
 
 
 myEnv = env.ToolFetchingEnvironment(np.array([0,0]), np.array([1,1]), [np.array([2, 2]), 
-    np.array([3,3])], [np.array([5,5]), np.array([5,5])], 0)
+    np.array([3,3])], [np.array([5,5]), np.array([2,5])], 0)
 obs = myEnv.reset()
-fetcher = FetcherQueryPolicy()
+fetcher = FetcherAltPolicy()
 worker = RandomWorkerPolicy()
 done = [False, False]
 while not done[0]:

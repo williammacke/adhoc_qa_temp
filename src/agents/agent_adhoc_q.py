@@ -140,19 +140,20 @@ class FetcherAltPolicy(FetcherQueryPolicy):
                 continue
 
             tool_valid_actions = np.array([True] * 4)
-            if f_pos[0] < t_pos[stn][0]:
+            if f_pos[0] <= t_pos[stn][0]:
                 tool_valid_actions[1] = False # Left
-            elif f_pos[0] > t_pos[stn][0]:
+            elif f_pos[0] >= t_pos[stn][0]:
                 tool_valid_actions[0] = False # Right
-            if f_pos[1] < t_pos[stn][1]:
-                tool_valid_actions[3] = False # Down
-            elif f_pos[1] > t_pos[stn][1]:
-                tool_valid_actions[2] = False # Up
+            if f_pos[1] <= t_pos[stn][1]:
+                tool_valid_actions[2] = False # Down
+            elif f_pos[1] >= t_pos[stn][1]:
+                tool_valid_actions[3] = False # Up
 
             valid_actions = np.logical_and(valid_actions, tool_valid_actions)
+        print(valid_actions)
 
         if np.any(valid_actions):
-            p = tool_valid_actions / np.sum(tool_valid_actions)
+            p = valid_actions / np.sum(tool_valid_actions)
             action_idx = np.random.choice(np.arange(4), p=p)
             return ToolFetchingEnvironment.FETCHER_ACTIONS(action_idx), None
         else:
