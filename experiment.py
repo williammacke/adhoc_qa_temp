@@ -48,15 +48,27 @@ def experiment(args):
             results[f'goal {g}']['X'].append(cost)
         for t in range(len(paths[0])):
             results[f'goal {g}'][t] = []
+            time = 0
+            def queryStrat(obs, agent):
+                print(agent.probs)
+                if np.max(agent.probs) == 1:
+                    return None
+                if time >= t:
+                    return [g]
+                return None
             for path in paths:
+                time = 0
                 obs = env.reset()
                 done = [False, False]
-                fetcher = FetcherQueryPolicy()
+                fetcher = FetcherQueryPolicy(queryStrat)
                 worker = PlanPolicy(path + (ToolFetchingEnvironment.WORKER_ACTIONS.WORK,))
                 cost = 0
                 while not done[0]:
                     obs, reward, done, _ = env.step([worker(obs[0]), fetcher(obs[1])])
                     cost += reward[1]
+                    time += 1
+                    #env.render()
+                    #input()
                 results[f'goal {g}'][t].append(cost)
     print(pd.DataFrame(results))
 

@@ -32,9 +32,12 @@ class PlanPolicy(Policy):
         self._step = 0
 
     def __call__(self, obs):
-        action = self._plan[min(self._step, len(self._plan)-1)]
-        self._step += 1
-        return action
+        w_pos, f_pos, s_pos, t_pos, f_tool, w_action, f_action, goal = obs
+        if f_action != ToolFetchingEnvironment.FETCHER_ACTIONS.QUERY:
+            action = self._plan[min(self._step, len(self._plan)-1)]
+            self._step += 1
+            return action
+        return self._plan[min(self._step-1, len(self._plan)-1)]
 
     def reset(self):
         self._step = 0
