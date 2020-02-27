@@ -6,6 +6,7 @@ from src.agents.agent_adhoc_q import FetcherQueryPolicy
 from src.agents.agent_adhoc_q import FetcherAltPolicy
 from itertools import permutations
 import pandas as pd
+import json
 
 
 def experiment(args):
@@ -45,12 +46,11 @@ def experiment(args):
             while not done[0]:
                 obs, reward, done, _ = env.step([worker(obs[0]), fetcher(obs[1])])
                 cost += reward[1]
-            results[f'goal {g}']['X'].append(cost)
+            results[f'goal {g}']['X'].append(int(cost))
         for t in range(len(paths[0])):
-            results[f'goal {g}'][t] = []
+            results[f'goal {g}'][str(t)] = []
             time = 0
             def queryStrat(obs, agent):
-                print(agent.probs)
                 if np.max(agent.probs) == 1:
                     return None
                 if time >= t:
@@ -69,11 +69,13 @@ def experiment(args):
                     time += 1
                     #env.render()
                     #input()
-                results[f'goal {g}'][t].append(cost)
-    print(pd.DataFrame(results))
+                results[f'goal {g}'][str(t)].append(int(cost))
+    return results
 
 
 
-experiment({})
+results = experiment({})
+with open('results.json', 'w') as f:
+    json.dump(results, f)
 
 
