@@ -5,8 +5,22 @@ from src.agents.agent import Policy
 from src.environment import ToolFetchingEnvironment
 import numpy as np
 
+
 def never_query(obs, agent):
     return None
+
+
+def random_query(obs, agent):
+    w_pos, f_pos, s_pos, t_pos, f_tool, w_action, f_action, answer = obs
+    s_probs = agent.probs
+
+    if f_action != ToolFetchingEnvironment.FETCHER_ACTIONS.NOOP:
+        return None
+
+    possible_stations = [s for s, s_p in enumerate(s_probs) if s_p > 0]
+    q = random.sample(possible_stations, len(possible_stations) // 2)
+
+    return q
 
 
 class FetcherQueryPolicy(Policy):
