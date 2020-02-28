@@ -4,6 +4,7 @@ This file contains relevant code for Fetcher's Policies
 from src.agents.agent import Policy
 from src.environment import ToolFetchingEnvironment
 import numpy as np
+import random
 
 
 def never_query(obs, agent):
