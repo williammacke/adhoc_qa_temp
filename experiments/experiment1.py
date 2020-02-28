@@ -8,6 +8,8 @@ from src.agents.agent_adhoc_q import FetcherAltPolicy
 from itertools import permutations
 import pandas as pd
 import json
+import argparse
+from time import sleep
 
 
 def experiment(args):
@@ -65,18 +67,27 @@ def experiment(args):
                 worker = PlanPolicy(path + (ToolFetchingEnvironment.WORKER_ACTIONS.WORK,))
                 cost = 0
                 while not done[0]:
+                    if args.render:
+                        env.render()
+                        sleep(0.05)
                     obs, reward, done, _ = env.step([worker(obs[0]), fetcher(obs[1])])
                     cost += reward[1]
                     time += 1
-                    #env.render()
                     #input()
                 results[f'goal {g}'][str(t)].append(int(cost))
+        env.close()
     return results
 
 
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-o', '--output', default='results.json', help='Output File')
+    parser.add_argument('--render', action='store_true', help='Flag should be present if rendering is desired')
 
-results = experiment({})
-with open('results.json', 'w') as f:
-    json.dump(results, f)
+    args = parser.parse_args()
+
+    results = experiment(args)
+    with open(args.output, 'w') as f:
+        json.dump(results, f)
 
 
