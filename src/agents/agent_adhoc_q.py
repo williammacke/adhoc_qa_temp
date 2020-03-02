@@ -83,7 +83,7 @@ class FetcherQueryPolicy(Policy):
         self.prev_w_pos = np.array(w_pos)
 
         self.query = self.query_policy(obs, self)
-        if self.query:
+        if self.query is not None:
             return ToolFetchingEnvironment.FETCHER_ACTIONS.QUERY, self.query
 
         if np.max(self.probs) < 1:

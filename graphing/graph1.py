@@ -1,10 +1,12 @@
+import context
 import json
 import matplotlib.pyplot as plt
 import numpy as np
+import argparse
 
 
 def graph(args):
-    with open('results.json', 'r') as f:
+    with open(args.data, 'r') as f:
         results = json.load(f)
 
     plt.rcParams.update({'font.size':18})
@@ -12,11 +14,21 @@ def graph(args):
 
     for i,graph in enumerate(results):
         data = results[graph]
-        axs = ax[i]
+        if args.use_baseline:
+            for k in data:
+                if k == 'baseline': continue
+                for i in range(len(data[k])):
+                    data[k][i] -= data['baseline'][i]
+        if len(results) > 1:
+            axs = ax[i]
+        else:
+            axs = ax
         avg = {k:sum(data[k])/len(data[k]) for k in data}
         err_pos = {}
         err_neg = {}
         for k in data:
+            if k == 'baseline':
+                continue
             err_p = []
             err_n = []
             mu = avg[k]
@@ -37,9 +49,9 @@ def graph(args):
 
         worst_case = {k:min(data[k]) for k in data}
         
-        labels = list(data.keys())
+        labels = list(k for k in data.keys() if k != 'baseline')
 
-        positions = list(range(len(data)))
+        positions = list(range(len(labels)))
 
         axs.errorbar(positions, [worst_case[labels[i]] for i in positions], fmt='ro')
         axs.errorbar(positions, [avg[labels[i]] for i in positions],
@@ -51,10 +63,12 @@ def graph(args):
 
 
 
-
-
-
-graph({})
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('data', default='results.json', help='datafile to graph')
+    parser.add_argument('--use_baseline', action='store_true', help='Flag should be present if baseline is subtracted from results')
+    args = parser.parse_args()
+    graph(args)
 
 
 
