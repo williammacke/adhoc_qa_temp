@@ -24,6 +24,34 @@ def random_query(obs, agent):
     return q
 
 
+def smart_query(obs, agent):
+    w_pos, f_pos, s_pos, t_pos, f_tool, w_action, f_action, answer = obs
+    s_probs = agent.probs
+
+    if f_action != ToolFetchingEnvironment.FETCHER_ACTIONS.NOOP:
+        return None
+
+    stn_per_action = {
+            ToolFetchingEnvironment.FETCHER_ACTIONS.RIGHT: [],
+            ToolFetchingEnvironment.FETCHER_ACTIONS.LEFT: [],
+            ToolFetchingEnvironment.FETCHER_ACTIONS.UP: [],
+            ToolFetchingEnvironment.FETCHER_ACTIONS.DOWN: []
+    }
+    for i, t in enumerate(t_pos):
+        if f_pos[0] < t[0]:
+            stn_per_action[ToolFetchingEnvironment.FETCHER_ACTIONS.RIGHT].append(i)
+        if f_pos[0] > t[0]:
+            stn_per_action[ToolFetchingEnvironment.FETCHER_ACTIONS.LEFT].append(i)
+        if f_pos[1] < t[1]:
+            stn_per_action[ToolFetchingEnvironment.FETCHER_ACTIONS.UP].append(i)
+        if f_pos[1] > t[1]:
+            stn_per_action[ToolFetchingEnvironment.FETCHER_ACTIONS.DOWN].append(i)
+
+    q = max(stn_per_action.values(), key=len)
+
+    return q
+
+
 class FetcherQueryPolicy(Policy):
     """
     Basic Fetcher Policy for querying, follows query_policy function argument (defaults to never query)
