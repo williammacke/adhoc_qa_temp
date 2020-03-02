@@ -19,9 +19,7 @@ def random_query(obs, agent):
         return None
 
     possible_stations = [s for s, s_p in enumerate(s_probs) if s_p > 0]
-    q = random.sample(possible_stations, len(possible_stations) // 2)
-
-    return q
+    return random.sample(possible_stations, len(possible_stations) // 2)
 
 
 def smart_query(obs, agent):
@@ -47,9 +45,7 @@ def smart_query(obs, agent):
         if f_pos[1] > t[1]:
             stn_per_action[ToolFetchingEnvironment.FETCHER_ACTIONS.DOWN].append(i)
 
-    q = max(stn_per_action.values(), key=len)
-
-    return q
+    return max(stn_per_action.values(), key=len)
 
 
 class FetcherQueryPolicy(Policy):
