@@ -1,3 +1,6 @@
+"""
+Plots output of experimental results file
+"""
 import context
 import json
 import matplotlib.pyplot as plt

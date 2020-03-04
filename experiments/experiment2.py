@@ -1,3 +1,6 @@
+"""
+Runs an experiment where fetcher asks about different goals
+"""
 import context
 from src.environment import ToolFetchingEnvironment
 import numpy as np

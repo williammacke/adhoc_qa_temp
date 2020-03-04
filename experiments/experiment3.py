@@ -1,3 +1,6 @@
+"""
+Runs experimental analaysis of query timing strategies in a complicated domain
+"""
 import context
 import random
 from src.environment import ToolFetchingEnvironment

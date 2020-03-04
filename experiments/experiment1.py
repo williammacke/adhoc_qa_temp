@@ -1,3 +1,6 @@
+"""
+Runs a basic experiment where fetcher queries at specific timestep
+"""
 import context
 from src.environment import ToolFetchingEnvironment
 import numpy as np
