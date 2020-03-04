@@ -46,7 +46,7 @@ python experiments/experiment_name.py --help
 ## Graphing Results
 * To plot results, simple run graph file
 ```bash
-python graphing/plot_results.py result_file
+python graphing/plot_results.py results_file_name
 ```
 * To get information on flags, run the graphing help flag
 ```bash
