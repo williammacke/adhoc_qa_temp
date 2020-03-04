@@ -1,5 +1,5 @@
 """
-Demo file working with multiple tool locations
+Shows how to write a custom query strategy with existing fetcher polices
 """
 import context
 from src.environment import ToolFetchingEnvironment
@@ -7,6 +7,14 @@ import numpy as np
 from src.agents.agent import RandomWorkerPolicy
 from src.agents.agent_adhoc_q import FetcherAltPolicy
 from time import sleep
+
+#query function takes the observation and the agent as arguments, can access agent's current belief state
+def query_at_begining(obs, agent):
+    if np.max(agent.probs < 1):
+        valid = [i for i,p in enumerate(agent.probs) if p > 0]
+        #return random sample of half valid stations
+        return np.random.choice(valid, size=len(valid)//2, replace=False)
+    return None
 
 if __name__ == '__main__':
     #Fetcher start position
@@ -21,8 +29,8 @@ if __name__ == '__main__':
     #grab observation
     obs = env.reset()
     done = [False, False]
-    #Need Policy to handle multiple tool positions
-    fetcher = FetcherAltPolicy()
+    #Set query policy flag to custom query function
+    fetcher = FetcherAltPolicy(query_policy=query_at_begining)
     worker = RandomWorkerPolicy()
     #run until done
     while not done[0]:
