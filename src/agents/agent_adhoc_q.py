@@ -127,12 +127,13 @@ class FetcherAltPolicy(FetcherQueryPolicy):
 
         # One station already guaranteed
         if np.max(self.probs) == 1:
-            if f_tool != np.argmax(self.probs):
-                if np.array_equal(f_pos, t_pos[0]):
-                    return ToolFetchingEnvironment.FETCHER_ACTIONS.PICKUP, np.argmax(self.probs)
+            target = np.argmax(self.probs)
+            if f_tool != target:
+                if np.array_equal(f_pos, t_pos[target]):
+                    return ToolFetchingEnvironment.FETCHER_ACTIONS.PICKUP, target
                 else:
-                    return self.action_to_goal(f_pos, t_pos[0]), None
-            return self.action_to_goal(f_pos, s_pos[np.argmax(self.probs)]), None
+                    return self.action_to_goal(f_pos, t_pos[target]), None
+            return self.action_to_goal(f_pos, s_pos[target]), None
 
         valid_actions = np.array([True] * 4) # NOOP is always valid
         for stn in range(len(s_pos)):
@@ -152,7 +153,7 @@ class FetcherAltPolicy(FetcherQueryPolicy):
             valid_actions = np.logical_and(valid_actions, tool_valid_actions)
 
         if np.any(valid_actions):
-            p = valid_actions / np.sum(tool_valid_actions)
+            p = valid_actions / np.sum(valid_actions)
             action_idx = np.random.choice(np.arange(4), p=p)
             return ToolFetchingEnvironment.FETCHER_ACTIONS(action_idx), None
         else:
