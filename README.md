@@ -9,11 +9,18 @@ cd adhoc_qa_temp
 ```
 * Create Virtual Environment
 ```bash
-python -m virutalenv env
+python -m virtualenv env
 ```
 * Activate Virtual Environment
+
+* Linux
 ```bash
 source env/bin/activate
+```
+
+* Windows
+```bat
+env/Scripts/activate
 ```
 * Install Prerequisites
 ```bash
