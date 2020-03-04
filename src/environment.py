@@ -1,9 +1,37 @@
+"""
+This file contains code relevant to the Tool Fetching Domain Environment
+"""
 import gym
 from enum import IntEnum
 import numpy as np
 
 
 class ToolFetchingEnvironment(gym.Env):
+    """
+    Tool Fetching Domain Environment
+    This is a multiagent environment consisting of a worker traveling to some station and a fetcher attempting to bring a tool to the worker
+
+    State Space
+    ---------------------------------------------------------------------------------------------------------
+    Worker: Tuple(Worker Position, Fetcher Position, Station Positions, Tool Positions, 
+        Fetcher's Tool, Worker's Last Action, Fetcher's Last Action, Worker's Goal)
+    Fetcher: Tuple(Worker Position, Fetcher Position, Station Positions, Tool Positions, 
+        Fetcher's Tool, Worker's Last Action, Fetcher's Last Action, Worker's answer to Query(if any))
+    ----------------------------------------------------------------------------------------------------------
+
+    Action Space
+    ----------------------------------------------------------------------------------------------------------
+    Worker: Left, Right, Up Down Noop Work
+    Fetcher: Left Right Up Down Noop Query Pickup
+    When Querying: Fetcher passes in list of stations (is your station in this list)
+    When Picking Up, Fetcher Passes in target tool
+    ----------------------------------------------------------------------------------------------------------
+
+    Reward
+    ----------------------------------------------------------------------------------------------------------
+    Both agents receive -1 every timestep the simulation continues and 0 on termination
+    ----------------------------------------------------------------------------------------------------------
+    """
     FETCHER_ACTIONS = IntEnum('FETCHER_Actions', 'RIGHT LEFT UP DOWN NOOP QUERY PICKUP', start=0)
     FETCHER_ACTION_VALUES = set(a.value for a in FETCHER_ACTIONS)
     WORKER_ACTIONS = IntEnum('WORKER_Actions', 'RIGHT LEFT UP DOWN NOOP WORK', start=0)

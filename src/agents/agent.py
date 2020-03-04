@@ -1,11 +1,20 @@
+"""
+This file contains relevant base code for agent Policies and Specific code for Worker's policy
+"""
 import numpy as np
 from src.environment import ToolFetchingEnvironment
 
 class Policy:
+    """
+    Base Polciy class, __call__ should map observation to action
+    """
     def __call__(self, obs):
         raise NotImplementedError
 
 class RandomWorkerPolicy(Policy):
+    """
+    Random Worker Policy, picks a optimal action randomly (effectively follows a random optimal route to goal)
+    """
     def __init__(self):
         self.last_w_pos = None
     def __call__(self, obs):
@@ -27,6 +36,9 @@ class RandomWorkerPolicy(Policy):
         return np.random.choice(actions)
 
 class PlanPolicy(Policy):
+    """
+    Plan Policy, taks a plan as initialization and follows it through simulation, useful for testing
+    """
     def __init__(self, plan):
         self._plan = plan
         self._step = 0

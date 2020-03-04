@@ -1,3 +1,6 @@
+"""
+This file contains relevant code for Fetcher's Policies
+"""
 from src.agents.agent import Policy
 from src.environment import ToolFetchingEnvironment
 import numpy as np
@@ -7,6 +10,10 @@ def never_query(obs, agent):
 
 
 class FetcherQueryPolicy(Policy):
+    """
+    Basic Fetcher Policy for querying, follows query_policy function argument (defaults to never query)
+    Assumes all tools are in same location
+    """
     def __init__(self, query_policy=never_query):
         self.query_policy = query_policy
         self.probs = None
@@ -102,6 +109,9 @@ class FetcherQueryPolicy(Policy):
 
 
 class FetcherAltPolicy(FetcherQueryPolicy):
+    """
+    More Complicated Fetcher Policy, allows for multiple tool locations
+    """
     def __call__(self, obs):
         w_pos, f_pos, s_pos, t_pos, f_tool, w_action, f_action, answer = obs
         if self.probs is None:
