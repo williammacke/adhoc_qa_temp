@@ -4,6 +4,30 @@ import numpy as np
 import random
 
 
+# Returns list of valid actions that brings fetcher closer to all tools
+def get_valid_actions(obs, agent):
+    w_pos, f_pos, s_pos, t_pos, f_tool, w_action, f_action, answer = obs
+
+    valid_actions = np.array([True] * 4) # NOOP is always valid
+    for stn in range(len(s_pos)):
+        if agent.probs[stn] == 0:
+            continue
+
+        tool_valid_actions = np.array([True] * 4)
+        if f_pos[0] <= t_pos[stn][0]:
+            tool_valid_actions[1] = False # Left
+        elif f_pos[0] >= t_pos[stn][0]:
+            tool_valid_actions[0] = False # Right
+        if f_pos[1] >= t_pos[stn][1]:
+            tool_valid_actions[2] = False # Down
+        elif f_pos[1] <= t_pos[stn][1]:
+            tool_valid_actions[3] = False # Up
+
+        valid_actions = np.logical_and(valid_actions, tool_valid_actions)
+
+    return valid_actions
+
+
 def never_query(obs, agent):
     return None
 
@@ -20,11 +44,11 @@ def random_query(obs, agent):
 
 
 def smart_query(obs, agent):
+    if np.any(get_valid_actions(obs, agent)):
+        return None
+
     w_pos, f_pos, s_pos, t_pos, f_tool, w_action, f_action, answer = obs
     s_probs = agent.probs
-
-    if f_action != ToolFetchingEnvironment.FETCHER_ACTIONS.NOOP:
-        return None
 
     stn_per_action = {
             ToolFetchingEnvironment.FETCHER_ACTIONS.RIGHT: [],
@@ -160,11 +184,7 @@ class FetcherAltPolicy(FetcherQueryPolicy):
 
         self.prev_w_pos = np.array(w_pos)
 
-        self.query = self.query_policy(obs, self)
-        if self.query:
-            return ToolFetchingEnvironment.FETCHER_ACTIONS.QUERY, self.query
-
-        # One station already guaranteed
+        # One station already guaranteed. No querying needed.
         if np.max(self.probs) == 1:
             if f_tool != np.argmax(self.probs):
                 if np.array_equal(f_pos, t_pos[0]):
@@ -173,25 +193,14 @@ class FetcherAltPolicy(FetcherQueryPolicy):
                     return self.action_to_goal(f_pos, t_pos[0]), None
             return self.action_to_goal(f_pos, s_pos[np.argmax(self.probs)]), None
 
-        valid_actions = np.array([True] * 4) # NOOP is always valid
-        for stn in range(len(s_pos)):
-            if self.probs[stn] == 0:
-                continue
+        self.query = self.query_policy(obs, self)
+        if self.query:
+            return ToolFetchingEnvironment.FETCHER_ACTIONS.QUERY, self.query
 
-            tool_valid_actions = np.array([True] * 4)
-            if f_pos[0] <= t_pos[stn][0]:
-                tool_valid_actions[1] = False # Left
-            elif f_pos[0] >= t_pos[stn][0]:
-                tool_valid_actions[0] = False # Right
-            if f_pos[1] >= t_pos[stn][1]:
-                tool_valid_actions[2] = False # Down
-            elif f_pos[1] <= t_pos[stn][1]:
-                tool_valid_actions[3] = False # Up
-
-            valid_actions = np.logical_and(valid_actions, tool_valid_actions)
+        valid_actions = get_valid_actions(obs, self)
 
         if np.any(valid_actions):
-            p = valid_actions / np.sum(tool_valid_actions)
+            p = valid_actions / np.sum(valid_actions)
             action_idx = np.random.choice(np.arange(4), p=p)
             return ToolFetchingEnvironment.FETCHER_ACTIONS(action_idx), None
         else:
