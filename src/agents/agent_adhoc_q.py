@@ -36,12 +36,8 @@ def never_query(obs, agent):
 
 
 def random_query(obs, agent):
-    w_pos, f_pos, s_pos, t_pos, f_tool, w_action, f_action, answer = obs
-    s_probs = agent.probs
-
-    if f_action != ToolFetchingEnvironment.FETCHER_ACTIONS.NOOP:
+    if np.any(get_valid_actions(obs, agent)):
         return None
-
     possible_stations = [s for s, s_p in enumerate(s_probs) if s_p > 0]
     return random.sample(possible_stations, len(possible_stations) // 2)
 
