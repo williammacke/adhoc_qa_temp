@@ -6,6 +6,7 @@ from src.environment import ToolFetchingEnvironment
 import numpy as np
 import random
 from scipy.optimize import fsolve
+from statistics import  median
 
 
 # Returns list of valid actions that brings fetcher closer to all tools
@@ -16,7 +17,6 @@ def get_valid_actions(obs, agent):
     for stn in range(len(s_pos)):
         if agent.probs[stn] == 0:
             continue
-
         tool_valid_actions = np.array([True] * 4)
         if f_pos[0] <= t_pos[stn][0]:
             tool_valid_actions[1] = False # Left
@@ -37,14 +37,14 @@ def never_query(obs, agent):
 
 
 def random_query(obs, agent):
-    if np.any(get_valid_actions(obs, agent)):
+    if np.any(get_valid_actions(obs, agent)) or np.max(agent.probs) >= 1:
         return None
-    possible_stations = [s for s, s_p in enumerate(s_probs) if s_p > 0]
+    possible_stations = [s for s, s_p in enumerate(agent.probs) if s_p > 0]
     return random.sample(possible_stations, len(possible_stations) // 2)
 
 
-def smart_query(obs, agent):
-    if np.any(get_valid_actions(obs, agent)):
+def max_action_query(obs, agent):
+    if np.any(get_valid_actions(obs, agent)) or np.max(agent.probs) >= 1:
         return None
 
     w_pos, f_pos, s_pos, t_pos, f_tool, w_action, f_action, answer = obs
@@ -57,6 +57,8 @@ def smart_query(obs, agent):
             ToolFetchingEnvironment.FETCHER_ACTIONS.DOWN: []
     }
     for i, t in enumerate(t_pos):
+        if s_probs[i] == 0:
+            continue
         if f_pos[0] < t[0]:
             stn_per_action[ToolFetchingEnvironment.FETCHER_ACTIONS.RIGHT].append(i)
         if f_pos[0] > t[0]:
@@ -67,6 +69,62 @@ def smart_query(obs, agent):
             stn_per_action[ToolFetchingEnvironment.FETCHER_ACTIONS.DOWN].append(i)
 
     return max(stn_per_action.values(), key=len)
+
+def min_action_query(obs, agent):
+    if np.any(get_valid_actions(obs, agent)) or np.max(agent.probs) >= 1:
+        return None
+
+    w_pos, f_pos, s_pos, t_pos, f_tool, w_action, f_action, answer = obs
+    s_probs = agent.probs
+
+    stn_per_action = {
+            ToolFetchingEnvironment.FETCHER_ACTIONS.RIGHT: [],
+            ToolFetchingEnvironment.FETCHER_ACTIONS.LEFT: [],
+            ToolFetchingEnvironment.FETCHER_ACTIONS.UP: [],
+            ToolFetchingEnvironment.FETCHER_ACTIONS.DOWN: []
+    }
+    for i, t in enumerate(t_pos):
+        if s_probs[i] == 0:
+            continue
+        if f_pos[0] < t[0]:
+            stn_per_action[ToolFetchingEnvironment.FETCHER_ACTIONS.RIGHT].append(i)
+        if f_pos[0] > t[0]:
+            stn_per_action[ToolFetchingEnvironment.FETCHER_ACTIONS.LEFT].append(i)
+        if f_pos[1] < t[1]:
+            stn_per_action[ToolFetchingEnvironment.FETCHER_ACTIONS.UP].append(i)
+        if f_pos[1] > t[1]:
+            stn_per_action[ToolFetchingEnvironment.FETCHER_ACTIONS.DOWN].append(i)
+
+    return min(stn_per_action.values(), key=len)
+
+def median_action_query(obs, agent):
+    if np.any(get_valid_actions(obs, agent)) or np.max(agent.probs) >= 1:
+        return None
+
+    w_pos, f_pos, s_pos, t_pos, f_tool, w_action, f_action, answer = obs
+    s_probs = agent.probs
+
+    stn_per_action = {
+            ToolFetchingEnvironment.FETCHER_ACTIONS.RIGHT: [],
+            ToolFetchingEnvironment.FETCHER_ACTIONS.LEFT: [],
+            ToolFetchingEnvironment.FETCHER_ACTIONS.UP: [],
+            ToolFetchingEnvironment.FETCHER_ACTIONS.DOWN: []
+    }
+    for i, t in enumerate(t_pos):
+        if s_probs[i] == 0:
+            continue
+        if f_pos[0] < t[0]:
+            stn_per_action[ToolFetchingEnvironment.FETCHER_ACTIONS.RIGHT].append(i)
+        if f_pos[0] > t[0]:
+            stn_per_action[ToolFetchingEnvironment.FETCHER_ACTIONS.LEFT].append(i)
+        if f_pos[1] < t[1]:
+            stn_per_action[ToolFetchingEnvironment.FETCHER_ACTIONS.UP].append(i)
+        if f_pos[1] > t[1]:
+            stn_per_action[ToolFetchingEnvironment.FETCHER_ACTIONS.DOWN].append(i)
+    stns_per_action_values = list(stn_per_action.values())
+    stns_per_action_values.sort(key=len)
+
+    return stns_per_action_values[len(stns_per_action_values)//2]
 
 
 class FetcherQueryPolicy(Policy):

@@ -9,14 +9,14 @@ from src.agents.agent import RandomWorkerPolicy
 from src.agents.agent import PlanPolicy
 from src.agents.agent_adhoc_q import FetcherQueryPolicy
 from src.agents.agent_adhoc_q import FetcherAltPolicy
-from src.agents.agent_adhoc_q import never_query, random_query, smart_query
+from src.agents.agent_adhoc_q import never_query, random_query, max_action_query, min_action_query, median_action_query
 from itertools import permutations
 import pandas as pd
 import json
 import argparse
 from time import sleep
 
-strats = {'Never Query':never_query, 'Random Query':random_query, "Smart Query":smart_query}
+strats = {'Never Query':never_query, 'Random Query':random_query, "Max Action Query":max_action_query, "Min Action Query":min_action_query, "Median Action Query":median_action_query}
 
 
 def experiment(args):
@@ -64,9 +64,10 @@ def experiment(args):
         path = rand_path_perm(stations_pos[goal], worker_pos)
         results['graph 1']['baseline'].append(-int(max(dist(worker_pos, stations_pos[goal]), dist(fetcher_pos, tools_pos[goal])+dist(tools_pos[goal], stations_pos[goal]))))
         for strat in strats:
+            print(f"Strat: {strat}")
             obs = env.reset()
             done = [False, False]
-            fetcher = FetcherQueryPolicy(query_policy=strats[strat])
+            fetcher = FetcherAltPolicy(query_policy=strats[strat])
             worker = PlanPolicy(path + [ToolFetchingEnvironment.WORKER_ACTIONS.WORK])
             cost = 0
             time = 0
