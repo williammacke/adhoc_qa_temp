@@ -9,6 +9,31 @@ from scipy.optimize import fsolve
 from statistics import  median
 
 
+def is_ZB(obs, g1, g2):
+    w_pos, f_pos, s_pos, t_pos, f_tool, w_action, f_action, answer = obs
+    valid_actions1 = np.array([True] * 4)
+    if f_pos[0] <= t_pos[g1][0]:
+        valid_actions1[1] = False # Left
+    elif f_pos[0] >= t_pos[g1][0]:
+        valid_actions1[0] = False # Right
+    if f_pos[1] >= t_pos[g1][1]:
+        valid_actions1[2] = False # Down
+    elif f_pos[1] <= t_pos[g1][1]:
+        valid_actions1[3] = False # Up
+
+    valid_actions2 = np.array([True] * 4)
+    if f_pos[0] <= t_pos[g2][0]:
+        valid_actions2[1] = False # Left
+    elif f_pos[0] >= t_pos[g2][0]:
+        valid_actions2[0] = False # Right
+    if f_pos[1] >= t_pos[g2][1]:
+        valid_actions2[2] = False # Down
+    elif f_pos[1] <= t_pos[g2][1]:
+        valid_actions2[3] = False # Up
+
+    return not np.any(np.logical_and(valid_actions1, valid_actions2))
+
+
 # Returns list of valid actions that brings fetcher closer to all tools
 def get_valid_actions(obs, agent):
     w_pos, f_pos, s_pos, t_pos, f_tool, w_action, f_action, answer = obs
@@ -40,7 +65,9 @@ def random_query(obs, agent):
     if np.any(get_valid_actions(obs, agent)) or np.max(agent.probs) >= 1:
         return None
     possible_stations = [s for s, s_p in enumerate(agent.probs) if s_p > 0]
-    return random.sample(possible_stations, len(possible_stations) // 2)
+    query =  random.sample(possible_stations, len(possible_stations) // 2)
+    #print(query)
+    return query
 
 
 def max_action_query(obs, agent):
@@ -125,6 +152,65 @@ def median_action_query(obs, agent):
     stns_per_action_values.sort(key=len)
 
     return stns_per_action_values[len(stns_per_action_values)//2]
+
+def smart_query(obs, agent):
+    if np.any(get_valid_actions(obs, agent)) or np.max(agent.probs) >= 1:
+        return None
+
+    w_pos, f_pos, s_pos, t_pos, f_tool, w_action, f_action, answer = obs
+
+    zbs = set()
+    goals = []
+    for g in range(len(s_pos)):
+        if agent.probs[g] == 0:
+            continue
+        goals.append(g)
+
+    for g1 in goals:
+        for g2 in goals:
+            if g1 == g2:
+                continue
+            if (g2, g1) in zbs:
+                continue
+            if is_ZB(obs, g1, g2):
+                zbs.add((g1, g2))
+
+    bin1 = set()
+    bin2 = set()
+    used = set()
+
+    for g1, g2 in zbs:
+        if g1 in used and g2 in used:
+            continue
+        if g1 in used:
+            if g1 in bin1:
+                bin2.add(g2)
+            else:
+                bin1.add(g2)
+        elif g2 in used:
+            if g2 in bin1:
+                bin2.add(g1)
+            else:
+                bin1.add(g1)
+        else:
+            bin1.add(g1)
+            bin2.add(g2)
+        used.add(g1)
+        used.add(g2)
+
+    valid = []
+    for g in goals:
+        if g in used: continue
+        valid.append(g)
+
+    #return list(bin1) + random.sample(valid, len(valid)//2)
+    return list(bin1)
+
+
+
+
+
+
 
 
 class FetcherQueryPolicy(Policy):

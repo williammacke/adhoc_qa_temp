@@ -9,14 +9,14 @@ from src.agents.agent import RandomWorkerPolicy
 from src.agents.agent import PlanPolicy
 from src.agents.agent_adhoc_q import FetcherQueryPolicy
 from src.agents.agent_adhoc_q import FetcherAltPolicy
-from src.agents.agent_adhoc_q import never_query, random_query, max_action_query, min_action_query, median_action_query
+from src.agents.agent_adhoc_q import never_query, random_query, max_action_query, min_action_query, median_action_query, smart_query
 from itertools import permutations
 import pandas as pd
 import json
 import argparse
 from time import sleep
 
-strats = {'Never Query':never_query, 'Random Query':random_query, "Max Action Query":max_action_query, "Min Action Query":min_action_query, "Median Action Query":median_action_query}
+strats = {'Never Query':never_query, 'Random Query':random_query, "Max Action Query":max_action_query, "Min Action Query":min_action_query, "Median Action Query":median_action_query, "Smart Query":smart_query}
 
 
 def experiment(args):
