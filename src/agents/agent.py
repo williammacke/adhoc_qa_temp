@@ -61,3 +61,20 @@ class PlanPolicy(Policy):
     @property
     def plan(self):
         return self._plan
+
+class SubOptimalWorker(RandomWorkerPolicy):
+    def __init__(self, epsilon):
+        super().__init__()
+        self._epsilon = epsilon
+        self._rand_actions = [
+                ToolFetchingEnvironment.WORKER_ACTIONS.RIGHT,
+                ToolFetchingEnvironment.WORKER_ACTIONS.LEFT,
+                ToolFetchingEnvironment.WORKER_ACTIONS.DOWN,
+                ToolFetchingEnvironment.WORKER_ACTIONS.UP,
+                ToolFetchingEnvironment.WORKER_ACTIONS.NOOP]
+
+    def __call__(self, obs):
+        normal_action = super().__call__(obs)
+        if np.random.random() < self._epsilon:
+            return np.random.choice(self._rand_actions)
+        return normal_action
