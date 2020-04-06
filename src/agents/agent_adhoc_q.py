@@ -5,6 +5,7 @@ from src.agents.agent import Policy
 from src.environment import ToolFetchingEnvironment
 import numpy as np
 import random
+from scipy.optimize import fsolve
 
 
 # Returns list of valid actions that brings fetcher closer to all tools
@@ -212,3 +213,70 @@ class FetcherAltPolicy(FetcherQueryPolicy):
             return ToolFetchingEnvironment.FETCHER_ACTIONS(action_idx), None
         else:
             return ToolFetchingEnvironment.FETCHER_ACTIONS.NOOP, None
+
+class FetcherAgentTypePolicy(Policy):
+    def __init__(self, agent_classifier, query_policy=never_query):
+        self._query_policy = query_policy
+        self._agent_classifier = agent_classifier
+        self._probs = None
+        self._full_probs = None
+
+    def reset(self):
+        self._agent_classifier.reset()
+        self._probs = None
+        self._full_probs = None
+
+    def make_inference(self, obs):
+        w_pos, f_pos, s_pos, t_pos, f_tool, w_action, f_action, answer = obs
+        num_g = len(s_pos)
+        if not self._agent_classifier.initialized:
+            self._agent_classifier.init(obs)
+        if self._full_probs is None:
+            self._full_probs = np.ones(self._agent_classifier.num_types)
+            self._full_probs /= np.sum(self._full_probs)
+        self._full_probs *= self._agent_classifier(obs)
+        self._full_probs /= np.sum(self._full_probs)
+
+        def solver(p):
+            F = np.empty(len(self._full_probs)+2)
+            for i in range(len(self._full_probs)):
+                F[i] = p[i//num_g]*p[num_g + (i%num_g)] - self._full_probs[i]
+            F[len(self._full_probs)] = -1
+            for j in range(num_g):
+                F[len(self._full_probs)] += p[j]
+            F[len(self._full_probs)+1] = -1
+            for j in range(num_g, len(self._full_probs)):
+                F[len(self._full_probs)+1] += p[j]
+            return F
+        x,_,_,_ = fsolve(solver, np.ones(len(self._full_probs)+2))
+        self._probs = x[:num_g]
+
+    def _action_to_goal(self, pos, goal):
+        actions = []
+        if pos[0] < goal[0]:
+            actions.append(ToolFetchingEnvironment.FETCHER_ACTIONS.RIGHT)
+        elif pos[0] > goal[0]:
+            actions.append(ToolFetchingEnvironment.FETCHER_ACTIONS.LEFT)
+        if pos[1] > goal[1]:
+            actions.append(ToolFetchingEnvironment.FETCHER_ACTIONS.DOWN)
+        elif pos[1] < goal[1]:
+            actions.append(ToolFetchingEnvironment.FETCHER_ACTIONS.UP)
+        if len(actions) == 0:
+            return ToolFetchingEnvironment.FETCHER_ACTIONS.NOOP
+        return np.random.choice(actions)
+
+
+    def __call__(self, obs):
+        w_pos, f_pos, s_pos, t_pos, f_tool, w_action, f_action, answer = obs
+        if answer is not None:
+            raise NotImplementedError
+        else:
+            self.make_inference(obs)
+        goal = np.argmax(self._probs)
+        if f_tool == goal:
+            return self._action_to_goal(f_pos, s_pos[goal]), None
+        else:
+            if np.array_equal(f_pos, t_pos[goal]):
+                return ToolFetchingEnvironment.FETCHER_ACTIONS.PICKUP, goal
+            else:
+                return self._action_to_goal(f_pos, t_pos[goal]), None
