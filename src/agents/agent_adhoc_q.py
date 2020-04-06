@@ -203,8 +203,16 @@ def smart_query(obs, agent):
         if g in used: continue
         valid.append(g)
 
-    #return list(bin1) + random.sample(valid, len(valid)//2)
-    return list(bin1)
+    if len(bin1) < len(bin2):
+        rbin = bin1
+        obin = bin2
+    else:
+        rbin = bin2
+        obin = bin1
+        
+
+    return list(rbin) + random.sample(valid, len(valid)//2) + random.sample(obin, (len(obin) - len(rbin))//2)
+    #return list(bin1)
 
 
 
