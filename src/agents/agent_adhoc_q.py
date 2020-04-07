@@ -229,27 +229,21 @@ class FetcherAgentTypePolicy(Policy):
     def make_inference(self, obs):
         w_pos, f_pos, s_pos, t_pos, f_tool, w_action, f_action, answer = obs
         num_g = len(s_pos)
+        num_a = self._agent_classifier.num_agent_types
         if not self._agent_classifier.initialized:
             self._agent_classifier.init(obs)
         if self._full_probs is None:
-            self._full_probs = np.ones(self._agent_classifier.num_types)
+            self._full_probs = np.ones((num_g, num_a))
             self._full_probs /= np.sum(self._full_probs)
+        if self._probs is None:
+            self._probs = np.empty(num_g)
         self._full_probs *= self._agent_classifier(obs)
         self._full_probs /= np.sum(self._full_probs)
 
-        def solver(p):
-            F = np.empty(len(self._full_probs)+2)
-            for i in range(len(self._full_probs)):
-                F[i] = p[i//num_g]*p[num_g + (i%num_g)] - self._full_probs[i]
-            F[len(self._full_probs)] = -1
-            for j in range(num_g):
-                F[len(self._full_probs)] += p[j]
-            F[len(self._full_probs)+1] = -1
-            for j in range(num_g, len(self._full_probs)):
-                F[len(self._full_probs)+1] += p[j]
-            return F
-        x,_,_,_ = fsolve(solver, np.ones(len(self._full_probs)+2))
-        self._probs = x[:num_g]
+        for i in range(num_g):
+            self._probs[i] = np.sum(self._full_probs[i, :])
+
+
 
     def _action_to_goal(self, pos, goal):
         actions = []

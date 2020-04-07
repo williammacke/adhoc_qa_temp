@@ -8,7 +8,7 @@ class Classifier:
         self._goals = None
         self._prev_w_pos = None
 
-    def reset():
+    def reset(self):
         self._initialized = False
 
     @property
@@ -66,16 +66,38 @@ class EpsilonGreedyClassifier(Classifier):
         w_pos, f_pos, s_pos, t_pos, f_tool, w_action, f_action, answer = obs
         if self._prev_w_pos is None:
             self._prev_w_pos = np.array(w_pos)
-            return np.ones(self.num_types)
-        probs = np.empty(self.num_types)
-        i = 0
-        for g in self._goals:
-            for e in self._epsilons:
-                valid_actions = self._actions_to_goal(self._prev_w_pos, g)
+            return np.ones((self.num_goal_types, self.num_agent_types))
+        probs = np.empty((self.num_goal_types, self.num_agent_types))
+        for i,g in enumerate(self._goals):
+            valid_actions = self._actions_to_goal(self._prev_w_pos, g)
+            for j,e in enumerate(self._epsilons):
                 if w_action in valid_actions:
-                    probs[i] = 1-e
+                    probs[i][j] = (1-e)/len(valid_actions) + e/5
                 else:
-                    probs[i] = e
-                i += 1
+                    probs[i][j] = e/5
         self._prev_w_pos = np.array(w_pos)
         return probs
+
+class GeneralClassifier(Classifier):
+    def __init__(self, models):
+        super().__init__()
+        self._models = models
+
+    def init(self, obs):
+        super().init(obs)
+        for m in self._models:
+            m.init(obs)
+
+    @property
+    def num_agent_types(self):
+        return len(self._models)
+
+    def __call__(self, obs):
+        assert self.initialized
+        w_pos, f_pos, s_pos, t_pos, f_tool, w_action, f_action, answer = obs
+        probs = np.empty((self.num_goal_types, self.num_agent_types))
+        for i,g in enumerate(self._goals):
+            for j,m in enumerate(self._models):
+                probs[i][j] = m(obs, g)
+        return probs
+

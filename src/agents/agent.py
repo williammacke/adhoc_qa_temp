@@ -71,10 +71,39 @@ class SubOptimalWorker(RandomWorkerPolicy):
                 ToolFetchingEnvironment.WORKER_ACTIONS.LEFT,
                 ToolFetchingEnvironment.WORKER_ACTIONS.DOWN,
                 ToolFetchingEnvironment.WORKER_ACTIONS.UP,
-                ToolFetchingEnvironment.WORKER_ACTIONS.NOOP]
+                ToolFetchingEnvironment.WORKER_ACTIONS.WORK]
 
     def __call__(self, obs):
         normal_action = super().__call__(obs)
         if np.random.random() < self._epsilon:
             return np.random.choice(self._rand_actions)
         return normal_action
+
+class IntermediatePointPolicy(RandomWorkerPolicy):
+    def __init__(self, intermediate_point):
+        super().__init__()
+        self._intermediate_point = intermediate_point
+        self._visited = False
+
+    def reset(self):
+        self._visited = False
+
+    def __call__(self, obs):
+        normal_action = super().__call__(obs)
+        w_pos, f_pos, s_pos, t_pos, f_tool, w_action, f_action, goal = obs
+        if np.array_equal(w_pos, self._intermediate_point):
+            self._visited = True
+        if self._visited:
+            return normal_action
+        actions = []
+        if w_pos[0] < self._intermediate_point[0]:
+            actions.append(ToolFetchingEnvironment.WORKER_ACTIONS.RIGHT)
+        elif w_pos[0] > self._intermediate_point[0]:
+            actions.append(ToolFetchingEnvironment.WORKER_ACTIONS.LEFT)
+
+        if w_pos[1] > self._intermediate_point[1]:
+            actions.append(ToolFetchingEnvironment.WORKER_ACTIONS.DOWN)
+        elif w_pos[1] < self._intermediate_point[1]:
+            actions.append(ToolFetchingEnvironment.WORKER_ACTIONS.UP)
+
+        return np.random.choice(actions)
