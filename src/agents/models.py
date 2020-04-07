@@ -1,4 +1,5 @@
 import numpy as np
+from src.environment import ToolFetchingEnvironment
 
 def actions_to_goal(pos, goal):
     actions = []
@@ -44,7 +45,7 @@ class EpsilonGreedyModel(Model):
 
 
 
-class IntermediateGOalModel(Model):
+class IntermediateGoalModel(Model):
     def __init__(self, intermediate_point):
         self._intermediate_point = intermediate_point
         self._visited = False
@@ -61,7 +62,7 @@ class IntermediateGOalModel(Model):
             return 1
         if np.array_equal(w_pos, self._intermediate_point):
             self._visited = True
-        if self._visisted:
+        if self._visited:
             valid_actions = actions_to_goal(self._prev_w_pos, goal)
         else:
             valid_actions = actions_to_goal(self._prev_w_pos, self._intermediate_point)

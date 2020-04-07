@@ -78,6 +78,7 @@ class EpsilonGreedyClassifier(Classifier):
         self._prev_w_pos = np.array(w_pos)
         return probs
 
+
 class GeneralClassifier(Classifier):
     def __init__(self, models):
         super().__init__()
@@ -96,8 +97,8 @@ class GeneralClassifier(Classifier):
         assert self.initialized
         w_pos, f_pos, s_pos, t_pos, f_tool, w_action, f_action, answer = obs
         probs = np.empty((self.num_goal_types, self.num_agent_types))
-        for i,g in enumerate(self._goals):
-            for j,m in enumerate(self._models):
+        for i, g in enumerate(self._goals):
+            for j, m in enumerate(self._models):
                 probs[i][j] = m(obs, g)
         return probs
 

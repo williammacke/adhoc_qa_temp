@@ -11,6 +11,9 @@ class Policy:
     def __call__(self, obs):
         raise NotImplementedError
 
+    def reset(self):
+        pass
+
 class RandomWorkerPolicy(Policy):
     """
     Random Worker Policy, picks a optimal action randomly (effectively follows a random optimal route to goal)
