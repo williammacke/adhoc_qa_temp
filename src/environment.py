@@ -4,6 +4,7 @@ This file contains code relevant to the Tool Fetching Domain Environment
 import gym
 from enum import IntEnum
 import numpy as np
+import copy
 
 
 class ToolFetchingEnvironment(gym.Env):
@@ -54,10 +55,10 @@ class ToolFetchingEnvironment(gym.Env):
         self.viewer = None
 
     def make_fetcher_obs(self, w_action, f_action, answer=None):
-        return (self.curr_w_pos, self.curr_f_pos, self.s_pos, self.curr_t_pos, self.f_tool, w_action, f_action, answer)
+        return copy.deepcopy((self.curr_w_pos, self.curr_f_pos, self.s_pos, self.curr_t_pos, self.f_tool, w_action, f_action, answer))
 
     def make_worker_obs(self, w_action, f_action):
-        return (self.curr_w_pos, self.curr_f_pos, self.s_pos, self.curr_t_pos, self.f_tool, w_action, f_action, self.w_goal)
+        return copy.deepcopy((self.curr_w_pos, self.curr_f_pos, self.s_pos, self.curr_t_pos, self.f_tool, w_action, f_action, self.w_goal))
 
 
     def step(self, action_n):
