@@ -393,6 +393,10 @@ class FetcherAgentTypePolicy(Policy):
         self._full_probs *= self._agent_classifier(obs)
         self._full_probs /= np.sum(self._full_probs)
 
+        if not any(p > 0 for p in self._full_probs.flatten()):
+            self._full_probs = np.ones((num_g, num_a))
+            self._full_probs /= np.sum(self._full_probs)
+
         for i in range(num_g):
             self._probs[i] = np.sum(self._full_probs[i, :])
 

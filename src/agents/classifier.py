@@ -72,7 +72,7 @@ class EpsilonGreedyClassifier(Classifier):
             valid_actions = self._actions_to_goal(self._prev_w_pos, g)
             for j,e in enumerate(self._epsilons):
                 if w_action in valid_actions:
-                    probs[i][j] = (1-e)/len(valid_actions) + e/5
+                    probs[i][j] = (1-e) + e/5
                 else:
                     probs[i][j] = e/5
         self._prev_w_pos = np.array(w_pos)

@@ -37,6 +37,7 @@ def experiment(args):
         results['graph 1'][strat] = []
     results['graph 1']['baseline'] = []
     for t in range(args.num_exp):
+        print(f"exp num: {t}")
         if args.cluster_stations:
             num_clusters = args.num_stations//4
             cluster_pos = [(i,j) for i in range(args.grid_size//2) for j in range(args.grid_size//2)]
@@ -54,6 +55,7 @@ def experiment(args):
         for e in epsilons:
             results['graph 1']['baseline'].append(-int(max(dist(worker_pos, stations_pos[goal]), dist(fetcher_pos, tools_pos[goal])+dist(tools_pos[goal], stations_pos[goal]))))
             for strat in strats:
+                print(f"strat: {strat}")
                 obs = env.reset()
                 done = [False, False]
                 strats[strat].reset()
