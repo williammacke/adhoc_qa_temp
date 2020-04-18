@@ -22,6 +22,10 @@ def graph(args):
                 if k == 'baseline': continue
                 for i in range(len(data[k])):
                     data[k][i] -= data['baseline'][i]
+        for k in data:
+            if k == 'baseline': continue
+            for i in range(len(data[k])):
+                data[k][i] *= -1
         if len(results) > 1:
             axs = ax[i]
         else:
@@ -50,7 +54,7 @@ def graph(args):
             else:
                 err_neg[k] = 0
 
-        worst_case = {k:min(data[k]) for k in data}
+        worst_case = {k:max(data[k]) for k in data}
         
         labels = list(k for k in data.keys() if k != 'baseline')
 
