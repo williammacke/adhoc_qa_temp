@@ -66,21 +66,9 @@ class ToolFetchingEnvironment(gym.Env):
         return copy.deepcopy((self.curr_w_pos, self.curr_f_pos, self.s_pos, self.curr_t_pos, self.f_tool, w_action, f_action, self.w_goal))
 
 
-    def step(self, action_n):
-        worker_action = action_n[0]
-        fetcher_action, fetcher_details = action_n[1]
-        assert worker_action in ToolFetchingEnvironment.WORKER_ACTION_VALUES
-        assert fetcher_action in ToolFetchingEnvironment.FETCHER_ACTION_VALUES
-        if fetcher_action == ToolFetchingEnvironment.FETCHER_ACTIONS.QUERY:
-            answer = self.answer_query(fetcher_details)
-            obs_n = np.array([self.make_worker_obs(ToolFetchingEnvironment.WORKER_ACTIONS.NOOP, ToolFetchingEnvironment.FETCHER_ACTIONS.QUERY), self.make_fetcher_obs(ToolFetchingEnvironment.WORKER_ACTIONS.NOOP, ToolFetchingEnvironment.FETCHER_ACTIONS.QUERY, answer)])
-            reward = -self._cost_fun(obs_n, fetcher_details)
-            reward_n = np.array([reward,reward])
-            done_n = np.array([False, False])
-            info_n = np.array([{}, {}])
-            return obs_n, reward_n, done_n, info_n
 
 
+    def _apply_worker_action(self, w_action):
         if worker_action == ToolFetchingEnvironment.WORKER_ACTIONS.RIGHT:
             self.curr_w_pos += np.array([1,0])
             self.curr_w_pos[0] = min(self.curr_w_pos[0], self.width-1)
@@ -93,18 +81,9 @@ class ToolFetchingEnvironment(gym.Env):
         elif worker_action == ToolFetchingEnvironment.WORKER_ACTIONS.DOWN:
             self.curr_w_pos -= np.array([0,1])
             self.curr_w_pos[1] = min(self.curr_w_pos[1], self.height-1)
-        elif worker_action == ToolFetchingEnvironment.WORKER_ACTIONS.WORK:
-            goal_pos = self.s_pos[self.w_goal]
-            tool_pos = self.curr_t_pos[self.w_goal]
-            if np.array_equal(self.curr_w_pos,  goal_pos) and np.array_equal(self.curr_w_pos, tool_pos):
-                obs_n = np.array([self.make_worker_obs(ToolFetchingEnvironment.WORKER_ACTIONS.WORK, fetcher_action), self.make_fetcher_obs(ToolFetchingEnvironment.WORKER_ACTIONS.WORK, fetcher_action)])
-                reward_n = np.array([0,0])
-                done_n = np.array([True, True])
-                info_n = np.array([{}, {}])
-                return obs_n, reward_n, done_n, info_n
 
-
-
+    def _apply_fetcher_action(self, f_action):
+        fetcher_action, fetcher_details = f_action
         if fetcher_action == ToolFetchingEnvironment.FETCHER_ACTIONS.RIGHT:
             self.curr_f_pos += np.array([1,0])
             self.curr_f_pos[0] = min(self.curr_f_pos[0], self.width-1)
@@ -122,8 +101,42 @@ class ToolFetchingEnvironment(gym.Env):
             if np.array_equal(self.curr_t_pos[fetcher_details], self.curr_f_pos):
                 self.f_tool = fetcher_details
 
+
+    def step(self, action_n):
+        worker_action = action_n[0]
+        fetcher_action, fetcher_details = action_n[1]
+        assert worker_action in ToolFetchingEnvironment.WORKER_ACTION_VALUES
+        assert fetcher_action in ToolFetchingEnvironment.FETCHER_ACTION_VALUES
+        if fetcher_action == ToolFetchingEnvironment.FETCHER_ACTIONS.QUERY:
+            answer = self.answer_query(fetcher_details)
+            obs_n = np.array([self.make_worker_obs(ToolFetchingEnvironment.WORKER_ACTIONS.NOOP, ToolFetchingEnvironment.FETCHER_ACTIONS.QUERY), self.make_fetcher_obs(ToolFetchingEnvironment.WORKER_ACTIONS.NOOP, ToolFetchingEnvironment.FETCHER_ACTIONS.QUERY, answer)])
+            reward = -self._cost_fun(obs_n, fetcher_details)
+            reward_n = np.array([reward,reward])
+            done_n = np.array([False, False])
+            info_n = np.array([{}, {}])
+            return obs_n, reward_n, done_n, info_n
+
+
+        self._apply_worker_action(worker_action)
+        self._apply_fetcher_action(action_n[1])
+
+
+
         if self.f_tool is not None:
             self.curr_t_pos[self.f_tool] = self.curr_f_pos
+
+
+
+        if worker_action == ToolFetchingEnvironment.WORKER_ACTIONS.WORK:
+            goal_pos = self.s_pos[self.w_goal]
+            tool_pos = self.curr_t_pos[self.w_goal]
+            if np.array_equal(self.curr_w_pos,  goal_pos) and np.array_equal(self.curr_w_pos, tool_pos):
+                obs_n = np.array([self.make_worker_obs(ToolFetchingEnvironment.WORKER_ACTIONS.WORK, fetcher_action), self.make_fetcher_obs(ToolFetchingEnvironment.WORKER_ACTIONS.WORK, fetcher_action)])
+                reward_n = np.array([0,0])
+                done_n = np.array([True, True])
+                info_n = np.array([{}, {}])
+                return obs_n, reward_n, done_n, info_n
+
 
 
         obs_n = np.array([self.make_worker_obs(worker_action, fetcher_action), self.make_fetcher_obs(worker_action, fetcher_action)])
@@ -230,5 +243,47 @@ class ToolFetchingEnvironment(gym.Env):
         if self.viewer:
             self.viewer.close()
             self.viewer = None
+
+
+class ToolFetchingEnvironmentWithObstacles(ToolFetchingEnvironment):
+    def __init__(self, fetcher_pos, worker_pos, stn_pos, tool_pos, worker_goal, obst_pos, width=10, height=10):
+        super().__init__(fetcher_pos, worker_pos, stn_pos, tool_pos, worker_goal, width, height)
+        self._obst_pos = obst_pos
+
+
+    def _apply_worker_action(self, w_action):
+        old_w_pos = np.array(self.curr_w_pos)
+        super()._apply_worker_action(w_action)
+        if self.curr_w_pos in self._obst_pos:
+            self.curr_w_pos = old_w_pos
+
+
+    def _apply_fetcher_action(self, f_action):
+        old_f_pos = np.array(self.curr_f_pos)
+        super()._apply_fetcher_action(f_action)
+        if self.curr_f_pos in self._obst_pos:
+            self.curr_f_pos = old_f_pos
+
+
+    def render(self):
+        super().render()
+        from gym.envs.classic_control import rendering
+        screen_width = 600
+        screen_height = 600
+
+        horz_line_spacing = screen_width//self.width
+        vert_line_spacing = screen_height//self.height
+        for o in self._obst_pos:
+            obst_x, obst_y = o
+            obst_shape = rendering.make_polygon([(-horz_line_spacing/2,-vert_line_spacing/2), 
+                (-horz_line_spacing/2,vert_line_spacing/2), 
+                (horz_line_spacing/2,vert_line_spacing/2), 
+                (horz_line_spacing/2,-vert_line_spacing/2)])
+            obst_transform = rendering.Transform(translation = (obst_x*horz_line_spacing+horz_line_spacing/2, obst_y*vert_line_spacing + vert_line_spacing/2) )
+            obst_shape.add_attr(obst_transform)
+            self.viewer.add_geom(obst_shape)
+        return self.viewer.render(False)
+
+
 
 
