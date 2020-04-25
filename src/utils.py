@@ -1,228 +1,145 @@
 import numpy as np
-from src import environment as env
-from profilehooks import profile
-import copy
-from src.astar.pyastar import astar
+from heapq import heappush, heappop
+from environment import ToolFetchingEnvironment
+from itertools import count
+from collections import Iterable
 
 
-def is_neighbor(pos1, pos2):
-    """
-    NOTE: NOT NEIGHBOR FUNCTION. REWRITTEN CODE TO CHECK IF TWO POSITIONS ARE ON TOP OF EACH OTHER.
-          I DID THIS SO I WOULDNT HAVE TO CHANGE NAME OF ALL LOCATIONS OF THIS FUNCTION.
-    """
-    found_match = False
-    if pos1 == pos2:
-        return True
-    else:
-        return False
+class Point2D:
+    def __init__(self, x, y):
+        self._x = x
+        self._y = y
 
-#def check_within_boundaries(pos,dim=(env.GRID_SIZE,env.GRID_SIZE)):
-def check_within_boundaries(pos,dim):
-    dim_x,dim_y = dim
-    pos_x,pos_y = pos
-    if (pos_x<0 or pos_x>dim_x-1):
-        return False
-    if (pos_y<0 or pos_y>dim_y-1):
-        return False
-    return True
 
-def check_intersection(pos,target_pos):
-    for tpos in target_pos:
-        if tpos==pos:
-            return False
-    else:
-        return True
+    def __iter__(self):
+        yield self._x
+        yield self._y
 
-def check_valid(pos,target_pos):
-    return check_within_boundaries(pos) and check_intersection(pos,target_pos)
 
-def get_valid_move_actions(pos,obstacles):
-    """
-    Helper functions to get valid movement actions (up,down,left,right,noop).
-    pos: Current position.
-    obstacles: List of position on the grid that the agent can't move. Could be placed anywhere in the grid.
+    def __getitem__(self, i):
+        assert i==0 or i==1
+        if i==0:
+            return self._x
+        return self._y
 
-    returns: A numpy array of True/False the size of global_defs.Action that indicates whether an action is valid or not.
-    """
+    def __hash__(self):
+        return hash((self._x, self._y))
 
-    valid_actions = [False]*len(env.Actions)
-    for idx,action in enumerate(env.Actions_list[:-2]):
-        valid = check_valid(pos+env.ACTIONS_TO_MOVES[action], obstacles)
-        if valid:
-            valid_actions[idx] = True
-    #The last action, i.e. WORK, is set to False, since we don't have any idea about deciding it.
-    return np.array(valid_actions)
+    def __eq__(self, other):
+        return self._x == other[0] and self._y == other[1]
 
-def generate_proposal(pos,destination,obstacles,desired_action=None):
-    "Given obstacles and a destination and an optional desired_action, return a proposal"
-    if desired_action is None:
-        (path_found,path_tuple) = get_path_astar(pos,destination,obstacles,env.GRID_SIZE)
-        if path_found:
-            desired_action,movement,path = path_tuple
+    __req__ = __eq__
+
+    def __add__(self, other):
+        return Point2D(self._x+other[0], self._y+other[1])
+
+    def __sub__(self, other):
+        return Point2D(self._x-other[0], self._y-other[1])
+
+    def __mul__(self, other):
+        if hasattr(other, '__getitem__'):
+            return Point2D(self._x*other[0], self._y*other[1])
+        return Point2D(self._x*other, self._y*other)
+
+    __rmul__ = __mul__
+
+    def __truediv__(self, other):
+        if hasattr(other, '__getitem__'):
+            return Point2D(self._x/other[0], self._y/other[1])
+        return Point2D(self._x/other, self._y/other)
+
+    def __floordiv__(self, other):
+        if hasattr(other, '__getitem__'):
+            return Point2D(self._x//other[0], self._y//other[1])
+        return Point2D(self._x//other, self._y//other)
+
+    def __isub__(self, other):
+            self._x -= other[0]
+            self._y -= other[1]
+
+    def __iadd__(self, other):
+        self._x += other[0]
+        self._y += other[1]
+
+    def __imul__(self, other):
+        if hasattr(other, '__getitem__'):
+            self._x *= other[0]
+            self._y *= other[1]
         else:
-            desired_action = np.random.choice(np.arange(5))
-    all_valid_move_actions = get_valid_move_actions(pos,obstacles)
-    action_probs = np.zeros(len(env.Actions),dtype='float')
-    action_probs[desired_action] = env.BIAS_PROB
-
-    #Now fill the rest of actions with minimal probability, called the base_probability. This is simply to add a non-zero possibilty to each valid action, just in case to make it non-deterministic.
-    base_probs = np.ones_like(action_probs)*all_valid_move_actions
-    base_probs /= np.sum(base_probs)
-    base_probs *= (1-env.BIAS_PROB) #now the base probs will sum up wit 0.05
-
-    action_probs+=base_probs
-    assert(np.sum(action_probs) == 1)
-    sampled_action = np.random.choice(env.Actions,p=action_probs)
-    proposal = (action_probs,sampled_action)
-    return proposal
-
-def get_MAP(prior,likelihood):
-    """
-    Given prior and likelihood, return the MAP index as well as the posterior distibution
-    """
-    pr = np.array(prior)
-    ll = np.array(likelihood)
-
-    ps = pr * ll
-    ps /= np.sum(ps)
-
-    # map_idx = np.argmax(ps)
-
-    # If there are ties, return random max index
-    maxes = np.where(ps == np.amax(ps))[0]
-    map_idx = np.random.choice(maxes)
-
-    return (map_idx,ps)
-
-def softmax(X, theta=1.0, axis=None):
-    """
-    Compute the softmax of each element along an axis of X.
-
-    Parameters
-    ----------
-    X: ND-Array. Probably should be floats.
-    theta (optional): float parameter, used as a multiplier
-        prior to exponentiation. Default = 1.0
-    axis (optional): axis to compute values along. Default is the
-        first non-singleton axis.
-
-    Returns an array the same size as X. The result will sum to 1
-    along the specified axis.
-    """
-
-    y = X
+            self._x *= other
+            self._y *= other
 
 
-    # multiply y against the theta parameter,
-    y = y * float(theta)
+    def __idiv__(self, other):
+        if hasattr(other, '__getitem__'):
+            self._x /= other[0]
+            self._y /= other[1]
+        else:
+            self._x /= other
+            self._y /= other
 
-    # subtract the max for numerical stability
-    y = y - np.max(y)
+    def __ifloordiv__(self, other):
+        if hasattr(other, '__getitem__'):
+            self._x //= other[0]
+            self._y //= other[1]
+        else:
+            self._x //= other
+            self._y //= other
 
-    # exponentiate y
-    y = np.exp(y)
 
-    # take the sum along the specified axis
-    ax_sum = np.sum(y)
+    def __str__(self):
+        return f'({self._x}, {self._y})'
 
-    # finally: divide elementwise
-    p = y / ax_sum
+    __repr__ = __str__
 
-    # flatten if X was 1D
-    if len(X.shape) == 1: p = p.flatten()
+    def __deepcopy__(self, memo):
+        return Point2D(self._x, self._y)
 
-    return p
+    def __copy__(self):
+        return Point2D(self._x, self._y)
 
-def compare_env_states(s1,s2):
-    #env_state_def = namedtuple('env_state_def','size n_objects obj_pos is_terminal step_count config agent_state_list')
-    are_same = True
-    are_same = are_same and (s1.size==s2.size)
-    are_same = are_same and (s1.n_objects==s2.n_objects)
-    are_same = are_same and (s1.is_terminal==s2.is_terminal)
-    are_same = are_same and (s1.step_count == s2.step_count)
-    are_same = are_same and (s1.config.S == s2.config.S)
-    are_same = are_same and (s1.config.k == s2.config.k)
-    are_same = are_same and np.all([compare_agent_states(a1_s,a2_s) for a1_s,a2_s in zip(s1.agent_state_list,s2.agent_state_list)])
-    return are_same
+    def __lt__(self, other):
+        return (self._x**2 + self._y**2) < (other._x**2 + other._y**2)
+        
 
-def compare_agent_states(s1,s2):
-    #agent_state_def = namedtuple('alifter_state','tp name pos ALPHA')
-    are_same = True
-    are_same = are_same and (s1.tp == s2.tp)
-    are_same = are_same and (s1.pos == s2.pos)
-    are_same = are_same and (s1.ALPHA == s2.ALPHA)
-    return are_same
+def dist(src, goal):
+    return abs(src[0]-goal[0]) + abs(src[1]-goal[1])
 
-def copy_lifter_to_random(a1,a2):
-    a2.pos = env.Point2D(a1.pos[0],a1.pos[1])
-    a2.name += ('_copy_'+a1.name)
+def horz_dist(src, goal):
+    return 0.9*abs(src[0]-goal[0]) + abs(src[1]-goal[1])
 
-def generate_initial_conditions(n_objects,n_agents):
-    #First generate objects.
-    grid_size = env.GRID_SIZE
+def vert_dist(src, goal):
+    return abs(src[1]-goal[1])
 
-    angfactor = 0.9
-    radius = int((grid_size//2)*angfactor)
-    phase = np.random.random()*(np.pi/2)
-    #Generate n_objects-1 offset angles.
-    #spread_factor = 1/8
-    spread_factor = 80
-    offset_angles_deviation = np.random.normal(0,1/spread_factor,(n_objects-1,1))
-    angular_positions = []
-    angular_positions.append(phase)
+def gen_graph(obs, width, height):
+    def graph(node):
+        deltas = np.array([[-1, 0], [1, 0], [0, -1], [0, 1]])
+        neighbors = []
+        for d in deltas:
+            new = node+d
+            if new not in obs and new[0] >= 0 and new[0] < width and new[1] >= 0 and new[1] < height:
+                neighbors.append((1,new))
+        return neighbors
+    return graph
 
-    curr_angular_position = copy.deepcopy(phase)
-    for i in range(n_objects-1):
-        curr_angular_position = curr_angular_position+(2*np.pi/(n_objects))+offset_angles_deviation[i]
-        angular_positions.append(copy.deepcopy(curr_angular_position[0]))
 
-    #Now convert from angular positions to integer positions.
-    object_positions = []
-    for idx in range(n_objects):
-        ang_pos = angular_positions[idx]
-        pos = env.Point2D(int(radius*np.cos(ang_pos)),int(radius*np.sin(ang_pos)))
-        pos += ((grid_size-1)//2,(grid_size-1)//2)
-        object_positions.append(pos)
+def astar(graph, start, finish, h=dist):
+    q = [(0,0,start,[])]
+    visited = set()
+    while len(q) > 0:
+        d, val, node, path = heappop(q)
+        path.append(node)
+        if np.array_equal(node, finish):
+            return path
+        if node in visited:
+            continue
+        visited.add(node)
+        for cost, n in graph(node):
+            heappush(q, (val+cost+h(n, finish), val+cost, n, list(path)))
 
-    #Now we need agent positions.
-    agent_positions = []
-    agent_ang_pos = np.array([phase+np.pi/2,phase+np.pi*(3/2)])
-    offset_angles_deviation = np.random.normal(0,spread_factor,2)
-    agent_ang_pos += offset_angles_deviation
-    rfactor = 0.2
-    rad = radius*rfactor
-    agent_pos = [env.Point2D(int(rad*np.cos(angpos)),int(rad*np.sin(angpos))) for angpos in agent_ang_pos]
-    agent_pos = [apos+((grid_size-1)//2,(grid_size-1)//2) for apos in agent_pos]
-    return (object_positions,agent_pos)
 
-#Get path from A-Star
-def get_path_astar(pos1,pos2,obstacles,grid_size):
-    """
-    pos1: From position in point2d object.
-    pos2: To position in point2d object.
-    obstacles: list of tuples of obstacles in the grid. Obtained by point2d.to_tuple() function.
-    grid_size: Assuming a square grid, the size of the grid.
-
-    returns a tuple of (path_found,(action,movement,path))
-    path_found: Boolean indicating whether a path is found or not.
-    if a path is found, the following have values. Else, they are None.
-    action: The action to take to execute the first movement
-    movement: The first movement in the path.
-    path: A list of movements to the final destination.
-
-    """
-    # Obstacles needs to be reformatted to pass to numpy.ravel_multi_index
-    #obs_multi_index = [[], []]
-    #for ob in obstacles:
-    #    obs_multi_index[0].append(ob[0])
-    #    obs_multi_index[1].append(ob[1])
-
-    astar_solver = astar(pos1.as_tuple(),pos2.as_tuple(),obstacles,grid_size,False)
-    path_found,path = astar_solver.find_minimumpath()
-
-    if not path_found:
-        return (False,(None,None,None))
-    else:
-        movement = path[1]-path[0]
-        action = env.MOVES_TO_ACTIONS[(movement[0],movement[1])]
-        return(True,(action,movement,path))
+def first_ind(l):
+    for i,e in enumerate(l):
+        if e:
+            return i
+    return None

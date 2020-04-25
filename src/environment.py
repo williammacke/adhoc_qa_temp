@@ -45,13 +45,13 @@ class ToolFetchingEnvironment(gym.Env):
         assert worker_goal >= 0 and worker_goal < len(stn_pos)
         self.width = width
         self.height = height
-        self.f_pos = np.array(fetcher_pos)
-        self.w_pos = np.array(worker_pos)
-        self.s_pos = np.array(stn_pos)
-        self.t_pos = np.array(tool_pos)
-        self.curr_f_pos = np.array(fetcher_pos)
-        self.curr_w_pos = np.array(worker_pos)
-        self.curr_t_pos = np.array(tool_pos)
+        self.f_pos = copy.deepcopy(fetcher_pos)
+        self.w_pos = copy.deepcopy(worker_pos)
+        self.s_pos = copy.deepcopy(stn_pos)
+        self.t_pos = copy.deepcopy(tool_pos)
+        self.curr_f_pos = copy.deepcopy(fetcher_pos)
+        self.curr_w_pos = copy.deepcopy(worker_pos)
+        self.curr_t_pos = copy.deepcopy(tool_pos)
         self.f_tool = None
         self.w_goal = worker_goal
 
@@ -65,10 +65,7 @@ class ToolFetchingEnvironment(gym.Env):
     def make_worker_obs(self, w_action, f_action):
         return copy.deepcopy((self.curr_w_pos, self.curr_f_pos, self.s_pos, self.curr_t_pos, self.f_tool, w_action, f_action, self.w_goal))
 
-
-
-
-    def _apply_worker_action(self, w_action):
+    def _apply_worker_action(self, worker_action):
         if worker_action == ToolFetchingEnvironment.WORKER_ACTIONS.RIGHT:
             self.curr_w_pos += np.array([1,0])
             self.curr_w_pos[0] = min(self.curr_w_pos[0], self.width-1)

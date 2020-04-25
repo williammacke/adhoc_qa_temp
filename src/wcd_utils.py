@@ -1,58 +1,38 @@
-from collections import deque
-from heapq import heappush, heappop
+import numpy as np
+from src.utils import astar, first_ind, Point2D
+import copy
 
-
-def adj(p):
-    x,y = p
-    return [(x+1,y), (x-1, y), (x,y+1), (x,y-1), (x,y)]
-
-def genGraph(state):
-    epsilon = 1/(len(state)*len(state[0])+1)
+def gen_graph(obs, width, height):
+    epsilon = 1/(width*height+1)
     def graph(node):
         p1,p2 = node
-        l = []
-        for pp1 in adj(p1):
-            x1,y1 = pp1
-            if x1 < 0  or x1 >= len(state) or y1 < 0 or y1 >= len(state[0]):
+        neighbors = []
+        deltas = np.array([[0, 0], [-1, 0], [1, 0], [0, -1], [0, 1]])
+        for d1 in deltas:
+            n1 = p1+d1
+            if n1[0] < 0 or n1[0] >= width or n1[1] < 0 or n1[1] >= height or n1 in obs:
                 continue
-            for pp2 in adj(p2):
-                if pp1 == p1 and pp2 == p2:
+            for d2 in deltas:
+                if (d1 == 0).all() and (d2 == 0).all():
                     continue
-                x2,y2 = pp2
-                if x2 < 0  or x2 >= len(state) or y2 < 0 or y2 >= len(state[0]):
+                n2 = p2+d2
+                if n2[0] < 0 or n2[0] >= width or n2[1] < 0 or n2[1] >= height or n2 in obs:
                     continue
-                if pp1 == pp2:
-                    if not state[x1][y1]:
-                        l.append((2-epsilon,(pp1,pp2)))
+                if n1 == n2:
+                    neighbors.append((2-epsilon, (n1,n2)))
                 else:
-                    if not state[x1][y1] and not state[x2][y2]:
-                        l.append((2,(pp1,pp2)))
-        return l
+                    neighbors.append((2, (n1,n2)))
+        return neighbors
     return graph
 
+def double_dist(a, b):
+    p1, p2 = a
+    d1, d2 = b
+    return abs(p1[0] - d1[0]) + abs(p1[1] - d1[1]) +\
+            abs(p2[0]-d2[0]) + abs(p2[1]-d2[1])
+    
 
-
-
-def wcd_astar(graph, start, finish, h):
-    q = [(0, 0, start, [start])]
-    visited = set()
-    while q:
-        e,val,state,plan = heappop(q)
-        if state == finish:
-            return plan
-        if state in visited: continue
-        visited.add(state)
-        for cost, sp in graph(state):
-            if sp in visited:
-                continue
-            heappush(q, (val+cost+h(sp,finish), val+cost, sp, plan+[sp]))
-
-#def pruned_reduce(state, loc):
-#    wcd = 0
-#    plan = []
-#    closed = set()
-#    Q = deque()
-#    Q.append(plan)
-#    while Q:
-#        A = Q.popleft()
+def wcd(start, finish1, finish2, obs=[], width=10, height=10):
+    return first_ind([a!=b for a,b in astar(gen_graph(obs, width, height),
+            (copy.deepcopy(start), copy.deepcopy(start)), (finish1, finish2), h=double_dist)])
 
