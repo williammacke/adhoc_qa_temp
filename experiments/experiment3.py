@@ -102,6 +102,7 @@ def experiment(args):
                 if args.render:
                     env.render()
                     sleep(0.05)
+                    input()
                 obs, reward, done, _ = env.step([worker(obs[0]), fetcher(obs[1])])
                 cost += reward[1]
                 time += 1

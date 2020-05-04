@@ -16,7 +16,8 @@ import json
 import argparse
 from time import sleep
 
-strats = {'Never Query':never_query, 'Random Query':random_query, "Max Action Query":max_action_query, "Min Action Query":min_action_query, "Median Action Query":median_action_query, "Smart Query":smart_query}
+#strats = {'Never Query':never_query, 'Random Query':random_query, "Max Action Query":max_action_query, "Min Action Query":min_action_query, "Median Action Query":median_action_query, "Smart Query":smart_query}
+strats = {'Never Query':never_query, 'Random Query':random_query, "Smart Query":smart_query}
 
 
 def experiment(args):
@@ -56,7 +57,8 @@ def experiment(args):
             stations_pos = [(i,j) for i in range(args.grid_size) for j in range(args.grid_size)]
             stations_pos = np.array(random.sample(stations_pos, args.num_stations))
         pos = [(i,j) for i in range(args.grid_size) for j in range(args.grid_size)]
-        tools_pos = np.array(random.sample(pos, args.num_stations))
+        tool_box_pos = random.sample(pos, args.num_tool_locations)
+        tools_pos = np.array([random.choice(tool_box_pos) for _ in range(args.num_stations)])
         fetcher_pos = np.array(random.choice(pos))
         worker_pos = np.array(random.choice(pos))
         goal = int(random.random()*len(stations_pos))
@@ -92,6 +94,7 @@ if __name__ == '__main__':
     parser.add_argument('--grid_size', default=100, type=int, help='Grid Size of environment')
     parser.add_argument('--num_stations', default=400, type=int, help='Number of stations in environment')
     parser.add_argument('--cluster_stations', action='store_true', help='Flag should be present if stations are clustered')
+    parser.add_argument('--num_tool_locations', type=int, default=5, help='Number of toolboxes')
 
     args = parser.parse_args()
 

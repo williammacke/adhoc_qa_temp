@@ -7,6 +7,7 @@ import numpy as np
 import random
 from scipy.optimize import fsolve
 from statistics import  median
+import pulp
 
 
 def is_ZB(obs, g1, g2):
@@ -121,8 +122,9 @@ def min_action_query(obs, agent):
             stn_per_action[ToolFetchingEnvironment.FETCHER_ACTIONS.UP].append(i)
         if f_pos[1] > t[1]:
             stn_per_action[ToolFetchingEnvironment.FETCHER_ACTIONS.DOWN].append(i)
+    valid_queries = {k:v for k,v in stn_per_action.items() if len(v) > 0}
 
-    return min(stn_per_action.values(), key=len)
+    return min(valid_queries.values(), key=len)
 
 def median_action_query(obs, agent):
     if np.any(get_valid_actions(obs, agent)) or np.max(agent.probs) >= 1:
@@ -161,6 +163,7 @@ def smart_query(obs, agent):
 
     zbs = set()
     goals = []
+    zb_goals = set()
     for g in range(len(s_pos)):
         if agent.probs[g] == 0:
             continue
@@ -174,10 +177,98 @@ def smart_query(obs, agent):
                 continue
             if is_ZB(obs, g1, g2):
                 zbs.add((g1, g2))
+                zb_goals.add(g1)
+                zb_goals.add(g2)
 
     bin1 = set()
     bin2 = set()
     used = set()
+
+    problem = pulp.LpProblem("Find max split", pulp.LpMaximize)
+
+    x = {i:pulp.LpVariable(f"x_{i}", lowBound=0, upBound=1, cat='Integer') for i in zb_goals}
+    alpha = {(i,j):pulp.LpVariable(f"alpha_{i},{j}", lowBound=0, upBound=2, cat='Integer') for i,j in zbs}
+    problem += pulp.lpSum(alpha[i,j] - x[i] - x[j] for i,j in zbs)
+    for i,j in zbs:
+        problem += alpha[i,j] <= 2*(x[i]+x[j])
+    problem.solve()
+
+    for i in x:
+        if x[i].varValue == 0:
+            bin1.add(i)
+        elif x[i].varValue == 1:
+            bin2.add(i)
+        else:
+            raise ValueError
+
+    remaining = []
+    for g in goals:
+        if g in zb_goals:
+            continue
+        remaining.append(g)
+    return list(bin1) + random.sample(remaining, len(remaining)//2)
+
+
+def smart_query(obs, agent):
+    if np.any(get_valid_actions(obs, agent)) or np.max(agent.probs) >= 1:
+        return None
+
+    w_pos, f_pos, s_pos, t_pos, f_tool, w_action, f_action, answer = obs
+
+    zbs = set()
+    goals = []
+    zb_goals = set()
+    for g in range(len(s_pos)):
+        if agent.probs[g] == 0:
+            continue
+        goals.append(g)
+
+    for g1 in goals:
+        for g2 in goals:
+            if g1 == g2:
+                continue
+            if (g2, g1) in zbs:
+                continue
+            if is_ZB(obs, g1, g2):
+                zbs.add((g1, g2))
+                zb_goals.add(g1)
+                zb_goals.add(g2)
+
+    bin1 = set()
+    bin2 = set()
+    used = set()
+
+    problem = pulp.LpProblem("Find max split", pulp.LpMinimize)
+
+    x = {i:pulp.LpVariable(f"x_{i}", lowBound=0, upBound=1, cat='Integer') for i in zb_goals}
+    alpha = {(i,j):pulp.LpVariable(f"alpha_{i},{j}", lowBound=0, upBound=2, cat='Integer') for i,j in zbs}
+    problem += pulp.lpSum((1 + x[i] + x[j] - alpha[i,j]) * (agent.probs[i] + agent.probs[j]) for i,j in zbs)
+    for i,j in zbs:
+        problem += alpha[i,j] <= 2*(x[i]+x[j])
+    problem.solve()
+
+    for i in x:
+        if x[i].varValue == 0:
+            bin1.add(i)
+        elif x[i].varValue == 1:
+            bin2.add(i)
+        else:
+            raise ValueError
+
+    remaining = []
+    for g in goals:
+        if g in zb_goals:
+            continue
+        remaining.append(g)
+    return list(bin1) + random.sample(remaining, len(remaining)//2)
+
+
+
+
+
+    
+
+    """
 
     for g1, g2 in zbs:
         if g1 in used and g2 in used:
@@ -213,6 +304,7 @@ def smart_query(obs, agent):
 
     return list(rbin) + random.sample(valid, len(valid)//2) + random.sample(obin, (len(obin) - len(rbin))//2)
     #return list(bin1)
+    """
 
 
 
@@ -226,15 +318,16 @@ class FetcherQueryPolicy(Policy):
     Basic Fetcher Policy for querying, follows query_policy function argument (defaults to never query)
     Assumes all tools are in same location
     """
-    def __init__(self, query_policy=never_query):
+    def __init__(self, query_policy=never_query, prior=None):
         self.query_policy = query_policy
-        self.probs = None
+        self._prior = prior
+        self.probs = copy.deepcopy(self._prior)
         self.query = None
         self.prev_w_pos = None
 
 
     def reset(self):
-        self.probs = None
+        self.probs = copy.deepcopy(self._prior)
         self.query = None
         self.prev_w_pos = None
 

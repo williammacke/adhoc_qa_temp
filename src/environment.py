@@ -197,12 +197,12 @@ class ToolFetchingEnvironment(gym.Env):
 
 
             worker_shape = rendering.make_circle()
-            self.worker_transform = rendering.Transform()
+            self.worker_transform = rendering.Transform(scale=(horz_line_spacing/20, vert_line_spacing/20))
             worker_shape.add_attr(self.worker_transform)
             worker_shape.set_color(0,0,0)
             self.viewer.add_geom(worker_shape)
             fetcher_shape = rendering.make_circle()
-            self.fetcher_transform = rendering.Transform()
+            self.fetcher_transform = rendering.Transform(scale=(horz_line_spacing/20, vert_line_spacing/20))
             fetcher_shape.add_attr(self.fetcher_transform)
             fetcher_shape.set_color(1,0,0)
             self.viewer.add_geom(fetcher_shape)
