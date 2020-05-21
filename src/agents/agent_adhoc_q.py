@@ -8,6 +8,7 @@ import random
 from scipy.optimize import fsolve
 from statistics import  median
 import pulp
+import copy
 
 
 def is_ZB(obs, g1, g2):
@@ -209,7 +210,7 @@ def smart_query(obs, agent):
     return list(bin1) + random.sample(remaining, len(remaining)//2)
 
 
-def smart_query(obs, agent):
+def smart_query2(obs, agent):
     if np.any(get_valid_actions(obs, agent)) or np.max(agent.probs) >= 1:
         return None
 
