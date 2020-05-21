@@ -13,7 +13,7 @@ def graph(args):
         results = json.load(f)
 
     plt.rcParams.update({'font.size':18})
-    fig, ax = plt.subplots(len(list(results.keys())), 1)
+    fig, ax = plt.subplots(len(list(results.keys())), 1, figsize=(15,10))
 
     for i,graph in enumerate(results):
         data = results[graph]
@@ -24,6 +24,7 @@ def graph(args):
                     data[k][i] -= data['baseline'][i]
         for k in data:
             if k == 'baseline': continue
+            if k in args.skip: continue
             for i in range(len(data[k])):
                 data[k][i] *= -1
         if len(results) > 1:
@@ -35,6 +36,8 @@ def graph(args):
         err_neg = {}
         for k in data:
             if k == 'baseline':
+                continue
+            if k in args.skip:
                 continue
             err_p = []
             err_n = []
@@ -56,7 +59,7 @@ def graph(args):
 
         worst_case = {k:max(data[k]) for k in data}
         
-        labels = list(k for k in data.keys() if k != 'baseline')
+        labels = list(k for k in data.keys() if k != 'baseline' and k not in args.skip)
 
         positions = list(range(len(labels)))
 
@@ -65,7 +68,10 @@ def graph(args):
                 [[err_neg[labels[i]] for i in positions], [err_pos[labels[i]] for i in positions]], fmt='o')
         axs.set_xticks(positions)
         axs.set_xticklabels(labels)
-    plt.show()
+    if args.output:
+        plt.savefig(args.output)
+    else:
+        plt.show()
 
 
 
@@ -74,6 +80,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('data', default='results.json', help='datafile to graph')
     parser.add_argument('--use_baseline', action='store_true', help='Flag should be present if baseline is subtracted from results')
+    parser.add_argument('--skip', default = [], nargs='+', help='labels to skip graphing')
+    parser.add_argument('-o', '--output', help='output file')
     args = parser.parse_args()
     graph(args)
 
