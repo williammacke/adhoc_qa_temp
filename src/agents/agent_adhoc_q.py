@@ -195,9 +195,9 @@ def smart_query(obs, agent):
     problem.solve()
 
     for i in x:
-        if x[i].varValue == 0:
+        if x[i].varValue == 1:
             bin1.add(i)
-        elif x[i].varValue == 1:
+        elif x[i].varValue == 0:
             bin2.add(i)
         else:
             raise ValueError
@@ -207,7 +207,10 @@ def smart_query(obs, agent):
         if g in zb_goals:
             continue
         remaining.append(g)
-    return list(bin1) + random.sample(remaining, len(remaining)//2)
+    query =  list(bin1) + random.sample(remaining, len(remaining)//2)
+    if len(query) == 0:
+        return None
+    return query
 
 
 def smart_query2(obs, agent):
@@ -249,9 +252,9 @@ def smart_query2(obs, agent):
     problem.solve()
 
     for i in x:
-        if x[i].varValue == 0:
+        if x[i].varValue == 1:
             bin1.add(i)
-        elif x[i].varValue == 1:
+        elif x[i].varValue == 0:
             bin2.add(i)
         else:
             raise ValueError
@@ -261,12 +264,241 @@ def smart_query2(obs, agent):
         if g in zb_goals:
             continue
         remaining.append(g)
-    return list(bin1) + random.sample(remaining, len(remaining)//2)
+    query = list(bin1) + random.sample(remaining, len(remaining)//2)
+    if len(query) == 0:
+        return None
+    return query
 
 
 
+def smart_query3(obs, agent):
+    if np.any(get_valid_actions(obs, agent)) or np.max(agent.probs) >= 1:
+        return None
+
+    w_pos, f_pos, s_pos, t_pos, f_tool, w_action, f_action, answer = obs
+
+    zbs = set()
+    goals = []
+    zb_goals = set()
+    for g in range(len(s_pos)):
+        if agent.probs[g] == 0:
+            continue
+        goals.append(g)
+
+    for g1 in goals:
+        for g2 in goals:
+            if g1 == g2:
+                continue
+            if (g2, g1) in zbs:
+                continue
+            if is_ZB(obs, g1, g2):
+                zbs.add((g1, g2))
+                zb_goals.add(g1)
+                zb_goals.add(g2)
+
+    bin1 = set()
+    bin2 = set()
+    used = set()
+
+    problem = pulp.LpProblem("Find max split with cost", pulp.LpMinimize)
+
+    x = {i:pulp.LpVariable(f"x_{i}", lowBound=0, upBound=1, cat='Integer') for i in zb_goals}
+    alpha = {(i,j):pulp.LpVariable(f"alpha_{i},{j}", lowBound=0, upBound=2, cat='Integer') for i,j in zbs}
+    problem += pulp.lpSum((1 + x[i] + x[j] - alpha[i,j]) * (agent.probs[i] + agent.probs[j]) for i,j in zbs) + pulp.lpSum(0.1 * x[i] for i in x)
+    for i,j in zbs:
+        problem += alpha[i,j] <= 2*(x[i]+x[j])
+    problem.solve()
+
+    for i in x:
+        if x[i].varValue == 1:
+            bin1.add(i)
+        elif x[i].varValue == 0:
+            bin2.add(i)
+        else:
+            raise ValueError
+
+    remaining = []
+    for g in goals:
+        if g in zb_goals:
+            continue
+        remaining.append(g)
+    query =  list(bin1) + random.sample(remaining, len(remaining)//2)
+    if len(query) == 0:
+        return None
+    return query
 
 
+def smart_query_noRandom(obs, agent):
+    if np.any(get_valid_actions(obs, agent)) or np.max(agent.probs) >= 1:
+        return None
+
+    w_pos, f_pos, s_pos, t_pos, f_tool, w_action, f_action, answer = obs
+
+    zbs = set()
+    goals = []
+    zb_goals = set()
+    for g in range(len(s_pos)):
+        if agent.probs[g] == 0:
+            continue
+        goals.append(g)
+
+    for g1 in goals:
+        for g2 in goals:
+            if g1 == g2:
+                continue
+            if (g2, g1) in zbs:
+                continue
+            if is_ZB(obs, g1, g2):
+                zbs.add((g1, g2))
+                zb_goals.add(g1)
+                zb_goals.add(g2)
+
+    bin1 = set()
+    bin2 = set()
+    used = set()
+
+    problem = pulp.LpProblem("Find max split", pulp.LpMaximize)
+
+    x = {i:pulp.LpVariable(f"x_{i}", lowBound=0, upBound=1, cat='Integer') for i in zb_goals}
+    alpha = {(i,j):pulp.LpVariable(f"alpha_{i},{j}", lowBound=0, upBound=2, cat='Integer') for i,j in zbs}
+    problem += pulp.lpSum(alpha[i,j] - x[i] - x[j] for i,j in zbs)
+    for i,j in zbs:
+        problem += alpha[i,j] <= 2*(x[i]+x[j])
+    problem.solve()
+
+    for i in x:
+        if x[i].varValue == 1:
+            bin1.add(i)
+        elif x[i].varValue == 0:
+            bin2.add(i)
+        else:
+            raise ValueError
+
+    remaining = []
+    for g in goals:
+        if g in zb_goals:
+            continue
+        remaining.append(g)
+    #return list(bin1) + random.sample(remaining, len(remaining)//2)
+    if len(bin1) == 0:
+        return None
+    return list(bin1)
+
+
+def smart_query2_noRandom(obs, agent):
+    if np.any(get_valid_actions(obs, agent)) or np.max(agent.probs) >= 1:
+        return None
+
+    w_pos, f_pos, s_pos, t_pos, f_tool, w_action, f_action, answer = obs
+
+    zbs = set()
+    goals = []
+    zb_goals = set()
+    for g in range(len(s_pos)):
+        if agent.probs[g] == 0:
+            continue
+        goals.append(g)
+
+    for g1 in goals:
+        for g2 in goals:
+            if g1 == g2:
+                continue
+            if (g2, g1) in zbs:
+                continue
+            if is_ZB(obs, g1, g2):
+                zbs.add((g1, g2))
+                zb_goals.add(g1)
+                zb_goals.add(g2)
+
+    bin1 = set()
+    bin2 = set()
+    used = set()
+
+    problem = pulp.LpProblem("Find max split", pulp.LpMinimize)
+
+    x = {i:pulp.LpVariable(f"x_{i}", lowBound=0, upBound=1, cat='Integer') for i in zb_goals}
+    alpha = {(i,j):pulp.LpVariable(f"alpha_{i},{j}", lowBound=0, upBound=2, cat='Integer') for i,j in zbs}
+    problem += pulp.lpSum((1 + x[i] + x[j] - alpha[i,j]) * (agent.probs[i] + agent.probs[j]) for i,j in zbs)
+    for i,j in zbs:
+        problem += alpha[i,j] <= 2*(x[i]+x[j])
+    problem.solve()
+
+    for i in x:
+        if x[i].varValue == 1:
+            bin1.add(i)
+        elif x[i].varValue == 0:
+            bin2.add(i)
+        else:
+            raise ValueError
+
+    remaining = []
+    for g in goals:
+        if g in zb_goals:
+            continue
+        remaining.append(g)
+    #return list(bin1) + random.sample(remaining, len(remaining)//2)
+    if len(bin1) == 0:
+        return None
+
+    return list(bin1)
+
+
+
+def smart_query3_noRandom(obs, agent):
+    if np.any(get_valid_actions(obs, agent)) or np.max(agent.probs) >= 1:
+        return None
+
+    w_pos, f_pos, s_pos, t_pos, f_tool, w_action, f_action, answer = obs
+
+    zbs = set()
+    goals = []
+    zb_goals = set()
+    for g in range(len(s_pos)):
+        if agent.probs[g] == 0:
+            continue
+        goals.append(g)
+
+    for g1 in goals:
+        for g2 in goals:
+            if g1 == g2:
+                continue
+            if (g2, g1) in zbs:
+                continue
+            if is_ZB(obs, g1, g2):
+                zbs.add((g1, g2))
+                zb_goals.add(g1)
+                zb_goals.add(g2)
+
+    bin1 = set()
+    bin2 = set()
+    used = set()
+
+    problem = pulp.LpProblem("Find max split with cost", pulp.LpMinimize)
+
+    x = {i:pulp.LpVariable(f"x_{i}", lowBound=0, upBound=1, cat='Integer') for i in zb_goals}
+    alpha = {(i,j):pulp.LpVariable(f"alpha_{i},{j}", lowBound=0, upBound=2, cat='Integer') for i,j in zbs}
+    problem += pulp.lpSum((1 + x[i] + x[j] - alpha[i,j]) * (agent.probs[i] + agent.probs[j]) for i,j in zbs) + pulp.lpSum(0.1 * x[i] for i in x)
+    for i,j in zbs:
+        problem += alpha[i,j] <= 2*(x[i]+x[j])
+    problem.solve()
+
+    for i in x:
+        if x[i].varValue == 1:
+            bin1.add(i)
+        elif x[i].varValue == 0:
+            bin2.add(i)
+        else:
+            raise ValueError
+
+    remaining = []
+    for g in goals:
+        if g in zb_goals:
+            continue
+        remaining.append(g)
+    #return list(bin1) + random.sample(remaining, len(remaining)//2)
+    if len(bin1) == 0:
+        return None
+    return list(bin1)
     
 
     """
@@ -454,7 +686,7 @@ class FetcherAltPolicy(FetcherQueryPolicy):
         valid_actions = get_valid_actions(obs, self)
 
         if np.any(valid_actions):
-            print(valid_actions)
+            #print(valid_actions)
             p = valid_actions / np.sum(valid_actions)
             action_idx = np.random.choice(np.arange(4), p=p)
             return ToolFetchingEnvironment.FETCHER_ACTIONS(action_idx), None

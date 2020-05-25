@@ -6,6 +6,9 @@ from enum import IntEnum
 import numpy as np
 import copy
 
+def uniform_cost(state, query):
+    return 1
+
 
 class ToolFetchingEnvironment(gym.Env):
     """
@@ -37,7 +40,7 @@ class ToolFetchingEnvironment(gym.Env):
     FETCHER_ACTION_VALUES = set(a.value for a in FETCHER_ACTIONS)
     WORKER_ACTIONS = IntEnum('WORKER_Actions', 'RIGHT LEFT UP DOWN NOOP WORK', start=0)
     WORKER_ACTION_VALUES = set(a.value for a in WORKER_ACTIONS)
-    def __init__(self, fetcher_pos, worker_pos, stn_pos, tool_pos, worker_goal, width=10, height=10):
+    def __init__(self, fetcher_pos, worker_pos, stn_pos, tool_pos, worker_goal, width=10, height=10, cost_fun=uniform_cost):
         assert len(stn_pos) == len(tool_pos)
         assert worker_goal >= 0 and worker_goal < len(stn_pos)
         self.width = width
@@ -53,6 +56,8 @@ class ToolFetchingEnvironment(gym.Env):
         self.w_goal = worker_goal
 
         self.viewer = None
+        
+        self._cost_fun = cost_fun
 
     def make_fetcher_obs(self, w_action, f_action, answer=None):
         return copy.deepcopy((self.curr_w_pos, self.curr_f_pos, self.s_pos, self.curr_t_pos, self.f_tool, w_action, f_action, answer))
@@ -69,7 +74,8 @@ class ToolFetchingEnvironment(gym.Env):
         if fetcher_action == ToolFetchingEnvironment.FETCHER_ACTIONS.QUERY:
             answer = self.answer_query(fetcher_details)
             obs_n = np.array([self.make_worker_obs(ToolFetchingEnvironment.WORKER_ACTIONS.NOOP, ToolFetchingEnvironment.FETCHER_ACTIONS.QUERY), self.make_fetcher_obs(ToolFetchingEnvironment.WORKER_ACTIONS.NOOP, ToolFetchingEnvironment.FETCHER_ACTIONS.QUERY, answer)])
-            reward_n = np.array([-1,-1])
+            reward = -self._cost_fun(obs_n, fetcher_details)
+            reward_n = np.array([reward,reward])
             done_n = np.array([False, False])
             info_n = np.array([{}, {}])
             return obs_n, reward_n, done_n, info_n

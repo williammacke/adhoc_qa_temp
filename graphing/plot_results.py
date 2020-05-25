@@ -12,7 +12,7 @@ def graph(args):
     with open(args.data, 'r') as f:
         results = json.load(f)
 
-    plt.rcParams.update({'font.size':18})
+    plt.rcParams.update({'font.size':8})
     fig, ax = plt.subplots(len(list(results.keys())), 1, figsize=(15,10))
 
     for i,graph in enumerate(results):
