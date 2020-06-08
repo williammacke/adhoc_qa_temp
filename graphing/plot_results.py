@@ -25,8 +25,8 @@ def graph(args):
         for k in data:
             if k == 'baseline': continue
             if k in args.skip: continue
-            for i in range(len(data[k])):
-                data[k][i] *= -1
+            for j in range(len(data[k])):
+                data[k][j] *= -1
         if len(results) > 1:
             axs = ax[i]
         else:
