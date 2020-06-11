@@ -48,27 +48,23 @@ class _GetchWindows:
         import msvcrt
         return bytes.decode(msvcrt.getch())
 
-
+class Input(enum.Enum):
+  W = 2
+  A = 1
+  S = 3
+  D = 0
 
 def get_worker_action():
     #fill in code for human input here
     while (True):
-      print("Press W - up, A - left, S - down, D - right: ")
+      print("Press W - up, A - left, S - down, D - right")
       getch = _Getch()
       val = getch().upper()
-      # val = input("Press W - up, A - left, S - down, D - right: ")
-      print(val)
-      if (val == "W"):
-        return 2
-      elif (val == "A"):
-        return 1
-      elif (val == "S"):
-        return 3
-      elif (val == "D"):
-        return 0
+
+      if (val in Input.__members__):
+        return Input[val].value
       else: 
-        quit()
-        print ("Could not determine your input, try again.")
+        print ("Not a valid input, please try again.")
 
 
 
