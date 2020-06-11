@@ -3,15 +3,29 @@ This is the working file for the Human Fetcher Collaboration
 """
 #gives file access to other src directory
 import context
-from src.environment import ToolFetchingEnvironment
 import numpy as np
+import enum
+
+from time import sleep
+
+from src.environment import ToolFetchingEnvironment
 from src.agents.agent import RandomWorkerPolicy
 from src.agents.agent_adhoc_q import FetcherQueryPolicy
-from time import sleep
 
 def get_worker_action():
     #fill in code for human input here
-    pass
+    while (True):
+      val = input("Press W - up, A - left, S - down, D - right: ")
+      if (val == "W" or val == "w"):
+        return 2
+      elif (val == "A"):
+        return 1
+      elif (val == "S"):
+        return 3
+      elif (val == "D"):
+        return 0
+      else: 
+        print ("Could not determine your input, try again.")
 
 
 
@@ -31,9 +45,16 @@ if __name__ == '__main__':
     done = [False, False]
     fetcher = FetcherQueryPolicy()
     worker = RandomWorkerPolicy()
+    #Print goal/positions for human to determine where to go
+    print("The worker may go to the stations at", stn_pos[0], stn_pos[1], stn_pos[2])
+    print("Your tool box is at", tool_pos[0])
+
     #run until done
     while not done[0]:
         #only needed for rendering
+        print("The fetcher is at", fetcher_pos)
+        print("You (the worker) is at", worker_pos)
+        print(fetcher(obs[1]))
         env.render()
         sleep(0.05)
         obs, reward, done, _ = env.step([get_worker_action(), fetcher(obs[1])])
