@@ -53,20 +53,27 @@ class Input(enum.Enum):
   A = 1
   S = 3
   D = 0
+  J = 5
 
+done = False
 
 def get_worker_action():
+    global done
     #fill in code for human input here
     while (True):
-      print("Press W - up, A - left, S - down, D - right")
-      getch = _Getch()
-      val = getch().upper()
-
-      if (val in Input.__members__):
-        return Input[val].value
-      else: 
-        exit()
-        print ("Not a valid input, please try again.")
+        # if (done):
+        #     return Input["J"].value
+        getch = _Getch()
+        val = getch().upper()
+  
+        if (val in Input.__members__):
+            if(val == "J"):
+                done = True
+            return Input[val].value
+        elif (val == "Z"):
+            exit()
+        else: 
+            print ("Not a valid input, please try again.")
 
 if __name__ == '__main__':
     #Fetcher start position
@@ -88,11 +95,12 @@ if __name__ == '__main__':
     print("You (the worker) is at", worker_pos)
     print("The worker may go to the stations at", stn_pos[0], stn_pos[1], stn_pos[2])
     print("Your tool box is at", tool_pos[0])
+    print("Press \nW - up\n A - left\n S - down\n D - right\n J - Done (press when arrived at station)\n Z - exit")
 
     #run until done
     while not done[0]:
         #only needed for rendering
-        print(fetcher(obs[1]))
+
         env.render()
         sleep(0.05)
         obs, reward, done, _ = env.step([get_worker_action(), fetcher(obs[1])])
