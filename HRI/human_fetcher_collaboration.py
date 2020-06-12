@@ -94,10 +94,10 @@ if __name__ == '__main__':
     #Print goal/positions for human to determine where to go
     print("The fetcher is at", fetcher_pos)
     print("You (the worker) is at", worker_pos)
-    print("You're goal position is at", stn_pos[goal_stn])
+    print("The fetcher's tool box is at", tool_pos[0])
+    print("Your goal position is at", stn_pos[goal_stn])
     # print("The worker may go to the stations at", stn_pos[0], stn_pos[1], stn_pos[2])
-    print("Your tool box is at", tool_pos[0])
-    print("Press\n W - up\n A - left\n S - down\n D - right\n J - Done (press when arrived at station)\n Z - exit")
+    print("Press\n W - up\n A - left\n S - down\n D - right\n J - done (press when arrived at station)\n Z - exit")
 
     #run until done
     while not done[0]:
