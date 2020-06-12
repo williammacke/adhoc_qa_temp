@@ -55,20 +55,20 @@ class Input(enum.Enum):
   D = 0
   J = 5
 
-done = False
+arrived = False
 
 def get_worker_action():
-    global done
+    global arrived
     #fill in code for human input here
     while (True):
-        # if (done):
-        #     return Input["J"].value
+        if (arrived):
+            return Input["J"].value
         getch = _Getch()
         val = getch().upper()
   
         if (val in Input.__members__):
             if(val == "J"):
-                done = True
+                arrived = True
             return Input[val].value
         elif (val == "Z"):
             exit()
@@ -84,7 +84,8 @@ if __name__ == '__main__':
     stn_pos = [np.array([7,2]), np.array([7,8]), np.array([3, 8])]
     #List of tool positions, in this example they are all located in the same spot
     tool_pos = [np.array([2,3]) for _ in range(3)]
-    env = ToolFetchingEnvironment(fetcher_pos, worker_pos, stn_pos, tool_pos, 2)
+    goal_stn = 2
+    env = ToolFetchingEnvironment(fetcher_pos, worker_pos, stn_pos, tool_pos, goal_stn)
     #grab observation
     obs = env.reset()
     done = [False, False]
@@ -93,14 +94,14 @@ if __name__ == '__main__':
     #Print goal/positions for human to determine where to go
     print("The fetcher is at", fetcher_pos)
     print("You (the worker) is at", worker_pos)
-    print("The worker may go to the stations at", stn_pos[0], stn_pos[1], stn_pos[2])
+    print("You're goal position is at", stn_pos[goal_stn])
+    # print("The worker may go to the stations at", stn_pos[0], stn_pos[1], stn_pos[2])
     print("Your tool box is at", tool_pos[0])
-    print("Press \nW - up\n A - left\n S - down\n D - right\n J - Done (press when arrived at station)\n Z - exit")
+    print("Press\n W - up\n A - left\n S - down\n D - right\n J - Done (press when arrived at station)\n Z - exit")
 
     #run until done
     while not done[0]:
         #only needed for rendering
-
         env.render()
         sleep(0.05)
         obs, reward, done, _ = env.step([get_worker_action(), fetcher(obs[1])])
