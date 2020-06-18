@@ -11,7 +11,7 @@ from time import sleep
 from src.environment import ToolFetchingEnvironment
 from src.agents.agent import RandomWorkerPolicy
 from src.agents.agent_adhoc_q import FetcherQueryPolicy
-from HRI.pygame_gui import PygameGUI
+from HRI.pygame_gui import GUI, Input
 
 class _Getch:
     """Gets a single character from standard input.  Does not echo to the
@@ -49,32 +49,32 @@ class _GetchWindows:
         import msvcrt
         return bytes.decode(msvcrt.getch())
 
-class Input(enum.Enum):
-  W = 2
-  A = 1
-  S = 3
-  D = 0
-  J = 5
+# class Input(enum.Enum):
+#   W = 2
+#   A = 1
+#   S = 3
+#   D = 0
+#   J = 5
 
 arrived = False
 
-def get_worker_action():
-    global arrived
-    #fill in code for human input here
-    while (True):
-        if (arrived):
-            return Input["J"].value
-        getch = _Getch()
-        val = getch().upper()
+# def get_worker_action():
+#     global arrived
+#     #fill in code for human input here
+#     while (True):
+#         if (arrived):
+#             return Input["J"].value
+#         getch = _Getch()
+#         val = getch().upper()
   
-        if (val in Input.__members__):
-            if(val == "J"):
-                arrived = True
-            return Input[val].value
-        elif (val == "Z"):
-            exit()
-        else: 
-            print ("Not a valid input, please try again.")
+#         if (val in Input.__members__):
+#             if(val == "J"):
+#                 arrived = True
+#             return Input[val].value
+#         elif (val == "Z"):
+#             exit()
+#         else: 
+#             print ("Not a valid input, please try again.")
 
 if __name__ == '__main__':
     #Fetcher start position
@@ -99,13 +99,18 @@ if __name__ == '__main__':
     print("Your goal position is at", stn_pos[goal_stn])
     print("Press\n W - up\n A - left\n S - down\n D - right\n J - done (press when arrived at station)\n Z - exit")
 
-    gui = PygameGUI()
-    # gui.on_execute()
+    gui = GUI(10, 6)
 
     #run until done
     while not done[0]:
-        #only needed for rendering
+        # only needed for rendering
         # env.render()
+
+        returnVal = gui.on_execute()
+        if(returnVal == Input.Exit):
+            break
+        
         sleep(0.05)
-        obs, reward, done, _ = env.step([get_worker_action(), fetcher(obs[1])])
-    env.close()
+        # obs, reward, done, _ = env.step([returnVal.value, fetcher(obs[1])])
+    # env.close()
+    gui.on_cleanup()
