@@ -20,14 +20,31 @@ class Input(enum.Enum):
   J = 5
   Exit = -1
 
+def render_station(screen, font, color, box_width, box_height, x_margin, y_margin, stn, textString):
+    rect = [box_width * stn[0] + x_margin, 
+                box_height * stn[1] + y_margin, 
+                box_width - (x_margin * 2), 
+                box_height - (y_margin * 2)]
+            
+    pygame.draw.rect(
+        screen, 
+        color, 
+        rect
+    )
+    
+    text = font.render(textString, True, WHITE)
+    screen.blit(text,
+    (box_width * stn[0] + x_margin * 3, box_height * stn[1] + y_margin * 3))
+
+
 class GUI:
     # Constructor
-    def __init__(self, num_cols, num_rows, stn_pos, tool_pos):
+    def __init__(self, num_cols, num_rows, stn_pos, tool_pos, worker_pos, fetcher_pos):
         self.running = True
         self.screen = None
         self.clock = None
         self.size = self.width, self.height = 640, 400
-        
+
         self.user_x = 40
         self.user_y = 40
         self.prev_user_x = 40
@@ -71,38 +88,11 @@ class GUI:
         num = 0
         
         for stn in stn_pos:
-            rect = [box_width * stn[0] + x_margin, 
-                box_height * stn[1] + y_margin, 
-                box_width - (x_margin * 2), 
-                box_height - (y_margin * 2)]
-            
-            pygame.draw.rect(
-                self.screen, 
-                RED, 
-                rect
-            )
-            
-            text = font.render(str(num), True, WHITE)
-            self.screen.blit(text,
-            (box_width * stn[0] + x_margin * 3, box_height * stn[1] + y_margin * 3))
-            
+            render_station(self.screen, font, RED, box_width, box_height, x_margin, y_margin, stn, str(num))
             num += 1
 
         for tool in tool_pos:
-            rect = [box_width * tool[0] + x_margin, 
-                box_height * tool[1] + y_margin, 
-                box_width - (x_margin * 2), 
-                box_height - (y_margin * 2)]
-            
-            pygame.draw.rect(
-                self.screen, 
-                BLUE, 
-                rect
-            )
-            
-            text = font.render("T", True, WHITE)
-            self.screen.blit(text,
-            (box_width * tool[0] + x_margin * 3, box_height * tool[1] + y_margin * 3))
+            render_station(self.screen, font, BLUE, box_width, box_height, x_margin, y_margin, tool, "T")
 
         # pygame.draw.rect(self.screen, RED, [self.user_x, self.user_y, 20, 20])
         # stn_rect = [0 + x_margin, 0 + y_margin, box_width - (x_margin * 2), box_height - (y_margin * 2)]

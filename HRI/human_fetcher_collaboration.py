@@ -101,7 +101,7 @@ if __name__ == '__main__':
     print("Your goal position is at", stn_pos[goal_stn])
     print("Press\n W - up\n A - left\n S - down\n D - right\n J - done (press when arrived at station)\n Z - exit")
 
-    gui = GUI(10, 6, stn_pos, tool_pos)
+    gui = GUI(10, 6, stn_pos, tool_pos, worker_pos, fetcher_pos)
 
     #run until done
     while not done[0]:
