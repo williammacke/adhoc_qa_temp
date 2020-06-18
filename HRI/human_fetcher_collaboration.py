@@ -89,7 +89,7 @@ if __name__ == '__main__':
     #List of tool positions, in this example they are all located in the same spot
     # tool_pos = [np.array([2,3]) for _ in range(3)]
     tool_pos = [np.array([3,5]) for _ in range(3)]
-    goal_stn = 0
+    goal_stn = 2
     env = ToolFetchingEnvironment(fetcher_pos, worker_pos, stn_pos, tool_pos, goal_stn)
     #grab observation
     obs = env.reset()
@@ -101,16 +101,14 @@ if __name__ == '__main__':
     # print("You (the worker) is at", worker_pos)
     # print("The fetcher's tool box is at", tool_pos[0])
     print("Your goal station is station", goal_stn)
-    print("Press\n W - up\n A - left\n S - down\n D - right\n J - done (press when arrived at station)\n Z - exit")
+    print("Press\n W - up\n A - left\n S - down\n D - right\n J - done (press when arrived at station)\n")
 
     gui = GUI(10, 6, stn_pos, tool_pos, worker_pos, fetcher_pos)
 
     #run until done
     while not done[0]:
         # only needed for rendering
-        env.render()
-        
-
+        # env.render()
         sleep(0.05)
 
         fetcher_move = fetcher(obs[1])
@@ -121,5 +119,5 @@ if __name__ == '__main__':
         obs, reward, done, _ = env.step([returnVal.value, fetcher_move])
         # obs, reward, done, _ = env.step([get_worker_action(), fetcher(obs[1])])
 
-    env.close()
+    # env.close()
     gui.on_cleanup()

@@ -33,6 +33,7 @@ class GUI:
         self.user_y = worker_pos[1]
         self.prev_user_x = worker_pos[0]
         self.prev_user_y = worker_pos[1]
+        self.arrived = False
 
         self.robot_x = fetcher_pos[0]
         self.robot_y = fetcher_pos[1]
@@ -147,10 +148,10 @@ class GUI:
             return Input.Exit
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_w:
-                self.user_y -= 1
+                self.user_y += 1
                 return Input.W
             elif event.key == pygame.K_s:
-                self.user_y += 1
+                self.user_y -= 1
                 return Input.S
             elif event.key == pygame.K_a:
                 self.user_x -= 1
@@ -158,6 +159,9 @@ class GUI:
             elif event.key == pygame.K_d:
                 self.user_x += 1
                 return Input.D
+            elif event.key == pygame.K_j:
+                self.arrived = True
+                return Input.J
         return None
                 
         
@@ -165,20 +169,19 @@ class GUI:
     def on_render(self):
         if(self.running):
             #User
-            # self.render_agent(self.user_x, self.user_y, GREEN)
-            # self.render_text("W", self.user_x, self.user_y)
-            # self.render_agent(self.prev_user_x, self.prev_user_y, WHITE) # Remove old user agent
+            if not self.arrived:
+                self.render_agent(self.user_x, self.user_y, BLACK)
+                self.render_text("W", self.user_x, self.user_y)
+                self.render_agent(self.prev_user_x, self.prev_user_y, WHITE) # Remove old user agent
 
-            # #Robot
-            # if self.robot_stay:
-            #     self.robot_stay = False
-            # else:
-            #     self.render_agent(self.robot_x, self.robot_y, GREEN)
-            #     self.render_text("F", self.robot_x, self.robot_y)
-            #     self.render_agent(self.prev_robot_x, self.prev_robot_y, WHITE) # Remove old robot agent
+            #Robot
+            if self.robot_stay:
+                self.robot_stay = False
+            else:
+                self.render_agent(self.robot_x, self.robot_y, GREEN)
+                self.render_text("F", self.robot_x, self.robot_y)
+                self.render_agent(self.prev_robot_x, self.prev_robot_y, WHITE) # Remove old robot agent
 
-            # pygame.draw.rect(self.screen, RED, [self.user_x, self.user_y, 20, 20])
-            # pygame.draw.rect(self.screen, WHITE, [self.prev_user_x, self.prev_user_y, 20, 20])
             pygame.display.flip()
 
     def on_cleanup(self):
@@ -193,9 +196,9 @@ class GUI:
         elif move == 1:
             self.robot_x -= 1
         elif move == 2:
-            self.robot_y -= 1
-        elif move == 3:
             self.robot_y += 1
+        elif move == 3:
+            self.robot_y -= 1
         else: #query or pickup
             self.robot_stay = True
             
@@ -204,8 +207,11 @@ class GUI:
         self._move_worker(other_agent_move)
         action = None
         while self.running:
-            for event in pygame.event.get():
-                action = self.on_event(event) 
+            if not self.arrived:
+                for event in pygame.event.get():
+                    action = self.on_event(event)
+            else:
+                action =  Input.J
             if action:
                 self.on_render()
                 return action
