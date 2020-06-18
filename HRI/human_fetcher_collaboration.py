@@ -78,9 +78,11 @@ arrived = False
 
 if __name__ == '__main__':
     #Fetcher start position
-    fetcher_pos = np.array([4, 0])
+    # fetcher_pos = np.array([4, 0])
+    fetcher_pos = np.array([0, 3])
     #Worker Start Position
-    worker_pos = np.array([5, 0])
+    # worker_pos = np.array([5, 0])
+    worker_pos = np.array([0, 2])
     #List of Station Positions
     # stn_pos = [np.array([7,2]), np.array([7,8]), np.array([3, 8])]
     stn_pos = [np.array([2,0]), np.array([9,0]), np.array([9,4])]

@@ -45,24 +45,24 @@ class GUI:
         self.clock = None
         self.size = self.width, self.height = 640, 400
 
-        self.user_x = 40
-        self.user_y = 40
+        self.user_x = worker_pos[0]
+        self.user_y = worker_pos[1]
         self.prev_user_x = 40
         self.prev_user_y = 40
 
         # Initiate screen
-        if (self.on_init(num_cols, num_rows, stn_pos, tool_pos) == False):
+        if (self.on_init(num_cols, num_rows, stn_pos, tool_pos, worker_pos, fetcher_pos) == False):
           self.running = False
 
     # Initiate pygame gui
-    def on_init(self, num_cols, num_rows, stn_pos, tool_pos):
+    def on_init(self, num_cols, num_rows, stn_pos, tool_pos, worker_pos, fetcher_pos):
         pygame.init()
 
         # Set screen to windowed size
         self.screen = pygame.display.set_mode(self.size, pygame.HWSURFACE | pygame.DOUBLEBUF)
         self.clock = pygame.time.Clock()
 
-        pygame.display.set_caption("Pygame Tutorial Caption")
+        pygame.display.set_caption("Caption")
 
         # Draw initial experiment screen
         self.screen.fill(WHITE)
@@ -94,8 +94,23 @@ class GUI:
         for tool in tool_pos:
             render_station(self.screen, font, BLUE, box_width, box_height, x_margin, y_margin, tool, "T")
 
-        # pygame.draw.rect(self.screen, RED, [self.user_x, self.user_y, 20, 20])
-        # stn_rect = [0 + x_margin, 0 + y_margin, box_width - (x_margin * 2), box_height - (y_margin * 2)]
+        worker_x = worker_pos[0] * box_width + (box_width / 2)
+        worker_y = worker_pos[1] * box_height + (box_height / 2)
+        pygame.draw.circle(self.screen, GREEN, (int(worker_x), int(worker_y)), int(box_width / 2 - 5))
+        
+        text = font.render("W", True, WHITE)
+        self.screen.blit(text,
+        (worker_x - (box_width / 2) + x_margin * 3, worker_y - (box_height / 2) + y_margin * 3))
+
+        
+        fetcher_x = fetcher_pos[0] * box_width + (box_width / 2)
+        fetcher_y = fetcher_pos[1] * box_height + (box_height / 2)
+        pygame.draw.circle(self.screen, GREEN, (int(fetcher_x), int(fetcher_y)), int(box_width / 2 - 5))
+        
+        text = font.render("F", True, WHITE)
+        self.screen.blit(text,
+        (fetcher_x - (box_width / 2) + x_margin * 3, fetcher_y - (box_height / 2) + y_margin * 3))
+
         pygame.display.flip()
         self.running = True
 
@@ -128,9 +143,9 @@ class GUI:
     # Render drawing
     def on_render(self):
         if(self.running):
-            pygame.draw.rect(self.screen, RED, [self.user_x, self.user_y, 20, 20])
-            pygame.draw.rect(self.screen, WHITE, [self.prev_user_x, self.prev_user_y, 20, 20])
-            pygame.display.flip()
+            # pygame.draw.rect(self.screen, RED, [self.user_x, self.user_y, 20, 20])
+            # pygame.draw.rect(self.screen, WHITE, [self.prev_user_x, self.prev_user_y, 20, 20])
+            # pygame.display.flip()
 
     def on_cleanup(self):
         pygame.quit()
