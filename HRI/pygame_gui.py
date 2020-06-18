@@ -22,23 +22,23 @@ class Input(enum.Enum):
 
 class GUI:
     # Constructor
-    #  width, height, num_cols, num_rows
-    def __init__(self, num_cols, num_rows, stn_pos):
+    def __init__(self, num_cols, num_rows, stn_pos, tool_pos):
         self.running = True
         self.screen = None
         self.clock = None
         self.size = self.width, self.height = 640, 400
+        
         self.user_x = 40
         self.user_y = 40
         self.prev_user_x = 40
         self.prev_user_y = 40
 
         # Initiate screen
-        if (self.on_init(num_cols, num_rows, stn_pos) == False):
+        if (self.on_init(num_cols, num_rows, stn_pos, tool_pos) == False):
           self.running = False
 
     # Initiate pygame gui
-    def on_init(self, num_cols, num_rows, stn_pos):
+    def on_init(self, num_cols, num_rows, stn_pos, tool_pos):
         pygame.init()
 
         # Set screen to windowed size
@@ -88,6 +88,21 @@ class GUI:
             
             num += 1
 
+        for tool in tool_pos:
+            rect = [box_width * tool[0] + x_margin, 
+                box_height * tool[1] + y_margin, 
+                box_width - (x_margin * 2), 
+                box_height - (y_margin * 2)]
+            
+            pygame.draw.rect(
+                self.screen, 
+                BLUE, 
+                rect
+            )
+            
+            text = font.render("T", True, WHITE)
+            self.screen.blit(text,
+            (box_width * tool[0] + x_margin * 3, box_height * tool[1] + y_margin * 3))
 
         # pygame.draw.rect(self.screen, RED, [self.user_x, self.user_y, 20, 20])
         # stn_rect = [0 + x_margin, 0 + y_margin, box_width - (x_margin * 2), box_height - (y_margin * 2)]
