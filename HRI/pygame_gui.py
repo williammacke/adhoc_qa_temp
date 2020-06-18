@@ -29,6 +29,9 @@ class GUI:
         self.size = self.width, self.height = 640, 400
         self.num_rows = num_rows
 
+        self.stn_pos = stn_pos
+        self.tool_pos = tool_pos
+
         self.user_x = worker_pos[0]
         self.user_y = worker_pos[1]
         self.prev_user_x = worker_pos[0]
@@ -170,17 +173,33 @@ class GUI:
         if(self.running):
             #User
             if not self.arrived:
+                self.render_agent(self.prev_user_x, self.prev_user_y, WHITE) # Remove old user agent
+
+                num = 0
+                # Overlay worker stations (in case agent gets on top)
+                for stn in self.stn_pos:
+                    self.render_station(RED, stn)
+                    self.render_text(str(num), stn[0], stn[1])
+
+                    num += 1
+                
                 self.render_agent(self.user_x, self.user_y, BLACK)
                 self.render_text("W", self.user_x, self.user_y)
-                self.render_agent(self.prev_user_x, self.prev_user_y, WHITE) # Remove old user agent
 
             #Robot
             if self.robot_stay:
                 self.robot_stay = False
             else:
+                self.render_agent(self.prev_robot_x, self.prev_robot_y, WHITE) # Remove old robot agent
+                
+                # Overlay fetcher stations (in case agent gets on top)
+                for tool in self.tool_pos:
+                    self.render_station(BLUE, tool)
+                    self.render_text("T", tool[0], tool[1])
+                    
                 self.render_agent(self.robot_x, self.robot_y, GREEN)
                 self.render_text("F", self.robot_x, self.robot_y)
-                self.render_agent(self.prev_robot_x, self.prev_robot_y, WHITE) # Remove old robot agent
+
 
             pygame.display.flip()
 

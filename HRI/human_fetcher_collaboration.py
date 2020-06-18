@@ -109,12 +109,13 @@ if __name__ == '__main__':
     while not done[0]:
         # only needed for rendering
         # env.render()
-        sleep(0.05)
 
         fetcher_move = fetcher(obs[1])
         returnVal = gui.on_execute(fetcher_move[0]) # returns with input value
         if(returnVal == Input.Exit):
             break
+        
+        sleep(0.05)
         
         obs, reward, done, _ = env.step([returnVal.value, fetcher_move])
         # obs, reward, done, _ = env.step([get_worker_action(), fetcher(obs[1])])
