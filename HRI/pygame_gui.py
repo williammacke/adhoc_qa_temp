@@ -20,32 +20,6 @@ class Input(enum.Enum):
   J = 5
   Exit = -1
 
-def render_station(screen, font, color, box_width, box_height, x_margin, y_margin, stn, textString):
-    rect = [box_width * stn[0] + x_margin, 
-                box_height * stn[1] + y_margin, 
-                box_width - (x_margin * 2), 
-                box_height - (y_margin * 2)]
-            
-    pygame.draw.rect(
-        screen, 
-        color, 
-        rect
-    )
-    
-    text = font.render(textString, True, WHITE)
-    screen.blit(text,
-    (box_width * stn[0] + x_margin * 3, box_height * stn[1] + y_margin * 3))
-
-def render_agent(screen, circle_x, circle_y, radius, textString, font, text_x, text_y):
-    pygame.draw.circle(screen, GREEN, (int(circle_x), int(circle_y)), int(radius))
-    
-    text = font.render(textString, True, WHITE)
-    screen.blit(text,
-        (text_x, text_y)
-    )
-
-
-
 class GUI:
     # Constructor
     def __init__(self, num_cols, num_rows, stn_pos, tool_pos, worker_pos, fetcher_pos):
@@ -56,76 +30,101 @@ class GUI:
 
         self.user_x = worker_pos[0]
         self.user_y = worker_pos[1]
-        self.prev_user_x = 40
-        self.prev_user_y = 40
+        self.prev_user_x = worker_pos[0]
+        self.prev_user_y = worker_pos[1]
+
+        self.box_width = self.width / num_cols
+        self.box_height = self.height / num_rows
+        self.x_margin = self.box_width / 10
+        self.y_margin = self.box_height / 10
+        self.radius = self.box_width / 2 - 5
+
+        self.font = ""
 
         # Initiate screen
         if (self.on_init(num_cols, num_rows, stn_pos, tool_pos, worker_pos, fetcher_pos) == False):
           self.running = False
 
+    
+    # Rectangular station
+    def render_station(self, color, stn):
+        rect = [self.box_width * stn[0] + self.x_margin, 
+                self.box_height * stn[1] + self.y_margin, 
+                self.box_width - (self.x_margin * 2), 
+                self.box_height - (self.y_margin * 2)]
+
+        pygame.draw.rect(
+            self.screen, 
+            color, 
+            rect
+        )
+
+    # Circular agent
+    def render_agent(self, circle_x, circle_y, color):
+        gui_x = circle_x * self.box_width + (self.box_width / 2)
+        gui_y = circle_y * self.box_height + (self.box_height / 2)
+        pygame.draw.circle(self.screen, color, (int(gui_x), int(gui_y)), int(self.radius))
+
+    # Text within station or agent
+    def render_text(self, textString, box_x, box_y):
+        text_x = box_x * self.box_width + self.x_margin * 3
+        text_y = box_y * self.box_height + self.y_margin * 3
+
+        text = self.font.render(textString, True, WHITE)
+        self.screen.blit(text,
+            (text_x, text_y)
+        )
+
     # Initiate pygame gui
     def on_init(self, num_cols, num_rows, stn_pos, tool_pos, worker_pos, fetcher_pos):
         pygame.init()
+        self.font = pygame.font.SysFont(None, 54)
 
         # Set screen to windowed size
         self.screen = pygame.display.set_mode(self.size, pygame.HWSURFACE | pygame.DOUBLEBUF)
         self.clock = pygame.time.Clock()
 
-        pygame.display.set_caption("Caption")
+        # Caption
+        pygame.display.set_caption("Communication Ad-Hoc Teamwork")
 
         # Draw initial experiment screen
         self.screen.fill(WHITE)
 
-        box_width = self.width / num_cols
-        box_height = self.height / num_rows
-
         # Grid lines
         for x in range(1, num_cols + 1):
-            point1 = pygame.math.Vector2(x * box_width, 0)
-            point2 = pygame.math.Vector2(x * box_width, self.height)
+            point1 = pygame.math.Vector2(x * self.box_width, 0)
+            point2 = pygame.math.Vector2(x * self.box_width, self.height)
             pygame.draw.line(self.screen, BLACK, point1, point2)
         
         for y in range(1, num_rows + 1):
-            point1 = pygame.math.Vector2(0, y * box_height)
-            point2 = pygame.math.Vector2(self.width, y * box_height)
+            point1 = pygame.math.Vector2(0, y * self.box_height)
+            point2 = pygame.math.Vector2(self.width, y * self.box_height)
             pygame.draw.line(self.screen, BLACK, point1, point2)
         
         # Stations
-        x_margin = box_width / 10
-        y_margin = box_width / 10
-        font = pygame.font.SysFont(None, 54)
         num = 0
         
+        # Worker Stations
         for stn in stn_pos:
-            render_station(self.screen, font, RED, box_width, box_height, x_margin, y_margin, stn, str(num))
+            self.render_station(RED, stn)
+            self.render_text(str(num), stn[0], stn[1])
+
             num += 1
-
-        for tool in tool_pos:
-            render_station(self.screen, font, BLUE, box_width, box_height, x_margin, y_margin, tool, "T")
-
-        worker_x = worker_pos[0] * box_width + (box_width / 2)
-        worker_y = worker_pos[1] * box_height + (box_height / 2)
-        render_agent(self.screen, 
-            worker_x, 
-            worker_y, 
-            box_width / 2 - 5, 
-            "W", 
-            font,
-            worker_x - (box_width / 2) + x_margin * 3, 
-            worker_y - (box_width / 2) + y_margin * 3   
-        )
         
-        fetcher_x = fetcher_pos[0] * box_width + (box_width / 2)
-        fetcher_y = fetcher_pos[1] * box_height + (box_height / 2)
-        render_agent(self.screen, 
-            fetcher_x, 
-            fetcher_y, 
-            box_width / 2 - 5, 
-            "F", 
-            font,
-            fetcher_x - (box_width / 2) + x_margin * 3, 
-            fetcher_y - (box_width / 2) + y_margin * 3   
-        )
+        # Toolbox Stations
+        for tool in tool_pos:
+            self.render_station(BLUE, tool)
+            self.render_text("T", tool[0], tool[1])
+
+        # Agents
+        # Worker
+        self.render_agent(worker_pos[0], worker_pos[1], GREEN)
+        self.render_text("W",  worker_pos[0], worker_pos[1])
+        
+        # Fetcher
+        self.render_agent(fetcher_pos[0], fetcher_pos[1], GREEN)
+        self.render_text("F",  fetcher_pos[0], fetcher_pos[1])
+
         pygame.display.flip()
         self.running = True
 
@@ -141,16 +140,16 @@ class GUI:
             return Input.Exit
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_w:
-                self.user_y -= 20
+                self.user_y -= 1
                 return Input.W
             elif event.key == pygame.K_s:
-                self.user_y += 20
+                self.user_y += 1
                 return Input.S
             elif event.key == pygame.K_a:
-                self.user_x -= 20
+                self.user_x -= 1
                 return Input.A
             elif event.key == pygame.K_d:
-                self.user_x += 20
+                self.user_x += 1
                 return Input.D
         return None
                 
@@ -158,8 +157,12 @@ class GUI:
     # Render drawing
     def on_render(self):
         if(self.running):
-            pygame.draw.rect(self.screen, RED, [self.user_x, self.user_y, 20, 20])
-            pygame.draw.rect(self.screen, WHITE, [self.prev_user_x, self.prev_user_y, 20, 20])
+            self.render_agent(self.user_x, self.user_y, GREEN)
+            self.render_text("W", self.user_x, self.user_y)
+            self.render_agent(self.prev_user_x, self.prev_user_y, WHITE) # Remove old agent
+
+            # pygame.draw.rect(self.screen, RED, [self.user_x, self.user_y, 20, 20])
+            # pygame.draw.rect(self.screen, WHITE, [self.prev_user_x, self.prev_user_y, 20, 20])
             pygame.display.flip()
 
     def on_cleanup(self):
@@ -173,7 +176,3 @@ class GUI:
             if action:
                 self.on_render()
                 return action
-
-# if __name__ == "__main__":
-#     gui = PygameGUI()
-#     gui.on_execute()
