@@ -23,7 +23,7 @@ class Input(enum.Enum):
 class GUI:
     # Constructor
     #  width, height, num_cols, num_rows
-    def __init__(self, num_cols, num_rows):
+    def __init__(self, num_cols, num_rows, stn_pos):
         self.running = True
         self.screen = None
         self.clock = None
@@ -34,11 +34,11 @@ class GUI:
         self.prev_user_y = 40
 
         # Initiate screen
-        if (self.on_init(num_cols, num_rows) == False):
+        if (self.on_init(num_cols, num_rows, stn_pos) == False):
           self.running = False
 
     # Initiate pygame gui
-    def on_init(self, num_cols, num_rows):
+    def on_init(self, num_cols, num_rows, stn_pos):
         pygame.init()
 
         # Set screen to windowed size
@@ -63,18 +63,34 @@ class GUI:
             point1 = pygame.math.Vector2(0, y * box_height)
             point2 = pygame.math.Vector2(self.width, y * box_height)
             pygame.draw.line(self.screen, BLACK, point1, point2)
-
-        # pygame.draw.line(self.screen, BLACK, pygame.math.Vector2(20, 0), pygame.math.Vector2(20, self.height))
-        # pygame.draw.rect(self.screen, RED, [self.user_x, self.user_y, 20, 20])
+        
+        # Stations
         x_margin = box_width / 10
         y_margin = box_width / 10
+        font = pygame.font.SysFont(None, 54)
+        num = 0
+        
+        for stn in stn_pos:
+            rect = [box_width * stn[0] + x_margin, 
+                box_height * stn[1] + y_margin, 
+                box_width - (x_margin * 2), 
+                box_height - (y_margin * 2)]
+            
+            pygame.draw.rect(
+                self.screen, 
+                RED, 
+                rect
+            )
+            
+            text = font.render(str(num), True, WHITE)
+            self.screen.blit(text,
+            (box_width * stn[0] + x_margin * 3, box_height * stn[1] + y_margin * 3))
+            
+            num += 1
 
+
+        # pygame.draw.rect(self.screen, RED, [self.user_x, self.user_y, 20, 20])
         # stn_rect = [0 + x_margin, 0 + y_margin, box_width - (x_margin * 2), box_height - (y_margin * 2)]
-        pygame.draw.rect(
-            self.screen, 
-            RED, 
-            [box_width * 6 + x_margin, 0 + y_margin, box_width - (x_margin * 2), box_height - (y_margin * 2)]
-        )
         pygame.display.flip()
         self.running = True
 
