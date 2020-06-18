@@ -11,6 +11,7 @@ from time import sleep
 from src.environment import ToolFetchingEnvironment
 from src.agents.agent import RandomWorkerPolicy
 from src.agents.agent_adhoc_q import FetcherQueryPolicy
+from HRI.pygame_gui import PygameGUI
 
 class _Getch:
     """Gets a single character from standard input.  Does not echo to the
@@ -96,13 +97,15 @@ if __name__ == '__main__':
     print("You (the worker) is at", worker_pos)
     print("The fetcher's tool box is at", tool_pos[0])
     print("Your goal position is at", stn_pos[goal_stn])
-    # print("The worker may go to the stations at", stn_pos[0], stn_pos[1], stn_pos[2])
     print("Press\n W - up\n A - left\n S - down\n D - right\n J - done (press when arrived at station)\n Z - exit")
+
+    gui = PygameGUI()
+    # gui.on_execute()
 
     #run until done
     while not done[0]:
         #only needed for rendering
-        env.render()
+        # env.render()
         sleep(0.05)
         obs, reward, done, _ = env.step([get_worker_action(), fetcher(obs[1])])
     env.close()
