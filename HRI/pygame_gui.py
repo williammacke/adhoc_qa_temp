@@ -3,12 +3,20 @@ from pygame.locals import *
 
 import enum
 import numpy as np
+import ctypes
 
 BLACK = (   0,   0,   0)
 WHITE = ( 255, 255, 255)
 GREEN = (   0, 255,   0)
 RED   = ( 255,   0,   0)
 BLUE  = (   0,   0, 255)
+
+LIGHT_STEEL_BLUE = (167, 190, 211)
+PRUSSIAN_BLUE = (13, 44, 84)
+EMERALD = (111, 208, 140)
+WINE = (115, 44, 44)
+APRICOT = (255, 202, 175)
+ORANGE_YELLOW = (245, 183, 0)
 
 PI = 3.141592653
 
@@ -22,38 +30,39 @@ class Input(enum.Enum):
 
 class GUI:
     # Constructor
-    def __init__(self, num_cols, num_rows, stn_pos, tool_pos, worker_pos, fetcher_pos):
+    def __init__(self, num_cols, num_rows, stn_pos, goal_stn, tool_pos, worker_pos, fetcher_pos):
         self.running = True
         self.screen = None
         self.clock = None
-        self.size = self.width, self.height = 640, 400
+        
+        pygame.init()
+        ctypes.windll.user32.SetProcessDPIAware()
+        infoObject = pygame.display.Info()
+        self.size = self.width, self.height = infoObject.current_w, infoObject.current_h # Fullscreen size
+        # self.size = self.width, self.height= 500, 300
         self.num_rows = num_rows
 
         self.stn_pos = stn_pos
         self.tool_pos = tool_pos
+        self.goal_stn = goal_stn
 
-        self.user_x = worker_pos[0]
-        self.user_y = worker_pos[1]
-        self.prev_user_x = worker_pos[0]
-        self.prev_user_y = worker_pos[1]
+        self.user = [worker_pos[0], worker_pos[1]] 
+        self.prev_user = [worker_pos[0], worker_pos[1]]
         self.arrived = False
 
-        self.robot_x = fetcher_pos[0]
-        self.robot_y = fetcher_pos[1]
-        self.prev_robot_x = fetcher_pos[0]
-        self.prev_robot_y = fetcher_pos[1]
+        self.robot = [fetcher_pos[0], fetcher_pos[1]]
+        self.prev_robot = [fetcher_pos[0], fetcher_pos[1]]
         self.robot_stay = False
 
         self.box_width = self.width / num_cols
         self.box_height = self.height / num_rows
         self.x_margin = self.box_width / 10
         self.y_margin = self.box_height / 10
-        self.radius = self.box_width / 2 - 5
-
-        self.font = ""
+        self.radius = self.box_width / 3
+        self.font = pygame.font.SysFont(None, int(120 * self.height / 1080))
 
         # Initiate screen
-        if (self.on_init(num_cols, num_rows, stn_pos, tool_pos, worker_pos, fetcher_pos) == False):
+        if (self.on_init(num_cols, num_rows, stn_pos, goal_stn, tool_pos, worker_pos, fetcher_pos) == False):
           self.running = False
 
     
@@ -70,6 +79,19 @@ class GUI:
             rect
         )
 
+    def render_all_stations(self):
+        num = 0
+        # Overlay worker stations (in case agent gets on top)
+        for stn in self.stn_pos:
+            if num == self.goal_stn:
+                self.render_station(EMERALD, stn)
+            else:
+                self.render_station(WINE, stn)
+
+            self.render_text(str(num), stn[0], stn[1])
+
+            num += 1
+        
     # Circular agent
     def render_agent(self, circle_x, circle_y, color):
         gui_x = circle_x * self.box_width + (self.box_width / 2)
@@ -81,18 +103,19 @@ class GUI:
         text_x = box_x * self.box_width + self.x_margin * 3
         text_y = (self.num_rows - 1 - box_y) * self.box_height + self.y_margin * 3
 
+
         text = self.font.render(textString, True, WHITE)
         self.screen.blit(text,
             (text_x, text_y)
         )
 
     # Initiate pygame gui
-    def on_init(self, num_cols, num_rows, stn_pos, tool_pos, worker_pos, fetcher_pos):
-        pygame.init()
-        self.font = pygame.font.SysFont(None, 54)
-
+    def on_init(self, num_cols, num_rows, stn_pos, goal_stn, tool_pos, worker_pos, fetcher_pos):
         # Set screen to windowed size
-        self.screen = pygame.display.set_mode(self.size, pygame.HWSURFACE | pygame.DOUBLEBUF)
+        # self.screen = pygame.display.set_mode(self.size, pygame.HWSURFACE | pygame.DOUBLEBUF)
+
+        #Set screen to fullscreen
+        self.screen = pygame.display.set_mode(self.size, pygame.FULLSCREEN)
         self.clock = pygame.time.Clock()
 
         # Caption
@@ -113,27 +136,20 @@ class GUI:
             pygame.draw.line(self.screen, BLACK, point1, point2)
         
         # Stations
-        num = 0
-        
-        # Worker Stations
-        for stn in stn_pos:
-            self.render_station(RED, stn)
-            self.render_text(str(num), stn[0], stn[1])
-
-            num += 1
+        self.render_all_stations()
         
         # Toolbox Stations
         for tool in tool_pos:
-            self.render_station(BLUE, tool)
+            self.render_station(LIGHT_STEEL_BLUE, tool)
             self.render_text("T", tool[0], tool[1])
 
         # Agents
         # Worker
-        self.render_agent(worker_pos[0], worker_pos[1], BLACK)
+        self.render_agent(worker_pos[0], worker_pos[1], ORANGE_YELLOW)
         self.render_text("W",  worker_pos[0], worker_pos[1])
         
         # Fetcher
-        self.render_agent(fetcher_pos[0], fetcher_pos[1], GREEN)
+        self.render_agent(fetcher_pos[0], fetcher_pos[1], PRUSSIAN_BLUE)
         self.render_text("F",  fetcher_pos[0], fetcher_pos[1])
 
         pygame.display.flip()
@@ -143,28 +159,33 @@ class GUI:
     # Returns what input was chosen
     def on_event(self, event):
         
-        self.prev_user_x = self.user_x
-        self.prev_user_y = self.user_y
-
+        self.prev_user[0] = self.user[0]
+        self.prev_user[1] = self.user[1]
         if event.type == pygame.QUIT:
             self.running = False
             return Input.Exit
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_w:
-                self.user_y += 1
+                self.user[1] += 1
                 return Input.W
             elif event.key == pygame.K_s:
-                self.user_y -= 1
+                self.user[1] -= 1
                 return Input.S
             elif event.key == pygame.K_a:
-                self.user_x -= 1
+                self.user[0] -= 1
                 return Input.A
             elif event.key == pygame.K_d:
-                self.user_x += 1
+                self.user[0] += 1
                 return Input.D
             elif event.key == pygame.K_j:
                 self.arrived = True
                 return Input.J
+            elif event.key == pygame.K_ESCAPE:
+                self.running = False
+                return Input.Exit
+
+                
+        # print(event.type)
         return None
                 
         
@@ -173,32 +194,25 @@ class GUI:
         if(self.running):
             #User
             if not self.arrived:
-                self.render_agent(self.prev_user_x, self.prev_user_y, WHITE) # Remove old user agent
-
-                num = 0
-                # Overlay worker stations (in case agent gets on top)
-                for stn in self.stn_pos:
-                    self.render_station(RED, stn)
-                    self.render_text(str(num), stn[0], stn[1])
-
-                    num += 1
+                self.render_agent(self.prev_user[0], self.prev_user[1], WHITE) # Remove old user agent
+                self.render_all_stations()
                 
-                self.render_agent(self.user_x, self.user_y, BLACK)
-                self.render_text("W", self.user_x, self.user_y)
+                self.render_agent(self.user[0], self.user[1], ORANGE_YELLOW)
+                self.render_text("W", self.user[0], self.user[1])
 
             #Robot
             if self.robot_stay:
                 self.robot_stay = False
             else:
-                self.render_agent(self.prev_robot_x, self.prev_robot_y, WHITE) # Remove old robot agent
+                self.render_agent(self.prev_robot[0], self.prev_robot[1], WHITE) # Remove old robot agent
                 
                 # Overlay fetcher stations (in case agent gets on top)
                 for tool in self.tool_pos:
-                    self.render_station(BLUE, tool)
+                    self.render_station(LIGHT_STEEL_BLUE, tool)
                     self.render_text("T", tool[0], tool[1])
-                    
-                self.render_agent(self.robot_x, self.robot_y, GREEN)
-                self.render_text("F", self.robot_x, self.robot_y)
+
+                self.render_agent(self.robot[0], self.robot[1], PRUSSIAN_BLUE)
+                self.render_text("F", self.robot[0], self.robot[1])
 
 
             pygame.display.flip()
@@ -207,20 +221,19 @@ class GUI:
         pygame.quit()
     
     def _move_worker(self, move):
-        self.prev_robot_x = self.robot_x
-        self.prev_robot_y = self.robot_y
+        self.prev_robot[0] = self.robot[0]
+        self.prev_robot[1] = self.robot[1]
 
         if move == 0:
-            self.robot_x += 1
+            self.robot[0] += 1
         elif move == 1:
-            self.robot_x -= 1
+            self.robot[0] -= 1
         elif move == 2:
-            self.robot_y += 1
+            self.robot[1] += 1
         elif move == 3:
-            self.robot_y -= 1
+            self.robot[1] -= 1
         else: #query or pickup
             self.robot_stay = True
-            
 
     def on_execute(self, other_agent_move):
         self._move_worker(other_agent_move)

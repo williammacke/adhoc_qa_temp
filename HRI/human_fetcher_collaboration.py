@@ -87,9 +87,9 @@ if __name__ == '__main__':
     # stn_pos = [np.array([7,2]), np.array([7,8]), np.array([3, 8])]
     stn_pos = [np.array([2,0]), np.array([9,0]), np.array([9,4])]
     #List of tool positions, in this example they are all located in the same spot
-    # tool_pos = [np.array([2,3]) for _ in range(3)]
+    # tool_pos = [np.array([2,3]), np.array([2,4]), np.array([2,5])]
     tool_pos = [np.array([3,5]) for _ in range(3)]
-    goal_stn = 2
+    goal_stn = 1
     env = ToolFetchingEnvironment(fetcher_pos, worker_pos, stn_pos, tool_pos, goal_stn)
     #grab observation
     obs = env.reset()
@@ -103,7 +103,7 @@ if __name__ == '__main__':
     print("Your goal station is station", goal_stn)
     print("Press\n W - up\n A - left\n S - down\n D - right\n J - done (press when arrived at station)\n")
 
-    gui = GUI(10, 6, stn_pos, tool_pos, worker_pos, fetcher_pos)
+    gui = GUI(10, 6, stn_pos, goal_stn, tool_pos, worker_pos, fetcher_pos)
 
     #run until done
     while not done[0]:
