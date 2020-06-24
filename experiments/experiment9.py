@@ -18,6 +18,7 @@ from time import sleep
 
 #strats = {'Never Query':never_query, 'Random Query':random_query, "Max Action Query":max_action_query, "Min Action Query":min_action_query, "Median Action Query":median_action_query, "Smart Query":smart_query}
 
+
 def uniform(goal_loc, tools,  worker_pos, fetcher_pos):
     return np.ones(len(goal_loc))/len(goal_loc)
 
@@ -61,7 +62,7 @@ def experiment(args):
     global rand_time
     results = {}
     results['graph 1'] = {}
-    strats = {'Never Query':never_query, "Random Query":random_query, "Smart Query":smart_query, 'Smart Query 2': smart_query2, 'Smart Query 3': create_smart_query3(args.cost), "Smart Query No Random":smart_query_noRandom, 'Smart Query 2 No Random': smart_query2_noRandom, 'Smart Query 3 No Random': create_smart_query3_noRandom(args.cost)}
+    strats = {'Never Query':never_query, "Random Query":random_query, "Smart Query":smart_query, 'Smart Query 2': smart_query2, 'Smart Query 3': create_smart_query3(args.cost), "Smart Query No Random":smart_query_noRandom, 'Smart Query 2 No Random': smart_query2_noRandom, 'Smart Query 3 No Random': create_smart_query3_noRandom(args.cost), "Tool Box Query":median_action_query, "Tool Box Query 2":max_action_query}
 
 
     def cost_fun(state, query):

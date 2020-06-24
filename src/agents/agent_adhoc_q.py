@@ -3,6 +3,8 @@ This file contains relevant code for Fetcher's Policies
 """
 from src.agents.agent import Policy
 from src.environment import ToolFetchingEnvironment
+from src.wcd_utils import fast_wcd
+from src.utils import Point2D
 import numpy as np
 import random
 from scipy.optimize import fsolve
@@ -24,8 +26,7 @@ def is_ZB(obs, g1, g2):
         valid_actions1[3] = False # Up
 
     valid_actions2 = np.array([True] * 4)
-    if f_pos[0] <= t_pos[g2][0]:
-        valid_actions2[1] = False # Left
+    if f_pos[0] <= t_pos[g2][0]: valid_actions2[1] = False # Left
     elif f_pos[0] >= t_pos[g2][0]:
         valid_actions2[0] = False # Right
     if f_pos[1] >= t_pos[g2][1]:
@@ -78,6 +79,8 @@ def max_action_query(obs, agent):
 
     w_pos, f_pos, s_pos, t_pos, f_tool, w_action, f_action, answer = obs
     s_probs = agent.probs
+    if np.all(t_pos[np.where(agent.probs > 0)] == f_pos):
+        return random_query(obs, agent)
 
     stn_per_action = {
             ToolFetchingEnvironment.FETCHER_ACTIONS.RIGHT: [],
@@ -97,7 +100,10 @@ def max_action_query(obs, agent):
         if f_pos[1] > t[1]:
             stn_per_action[ToolFetchingEnvironment.FETCHER_ACTIONS.DOWN].append(i)
 
-    return max(stn_per_action.values(), key=len)
+    query =  max(stn_per_action.values(), key=len)
+    if len(query) == 0:
+        return None
+    return query
 
 def min_action_query(obs, agent):
     if np.any(get_valid_actions(obs, agent)) or np.max(agent.probs) >= 1:
@@ -105,6 +111,9 @@ def min_action_query(obs, agent):
 
     w_pos, f_pos, s_pos, t_pos, f_tool, w_action, f_action, answer = obs
     s_probs = agent.probs
+
+    if np.all(t_pos[np.where(agent.probs > 0)] == f_pos):
+        return random_query(obs, agent)
 
     stn_per_action = {
             ToolFetchingEnvironment.FETCHER_ACTIONS.RIGHT: [],
@@ -133,6 +142,8 @@ def median_action_query(obs, agent):
 
     w_pos, f_pos, s_pos, t_pos, f_tool, w_action, f_action, answer = obs
     s_probs = agent.probs
+    if np.all(t_pos[np.where(agent.probs > 0)] == f_pos):
+        return random_query(obs, agent)
 
     stn_per_action = {
             ToolFetchingEnvironment.FETCHER_ACTIONS.RIGHT: [],
@@ -154,7 +165,10 @@ def median_action_query(obs, agent):
     stns_per_action_values = list(stn_per_action.values())
     stns_per_action_values.sort(key=len)
 
-    return stns_per_action_values[len(stns_per_action_values)//2]
+    query = stns_per_action_values[len(stns_per_action_values)//2]
+    if len(query) == 0:
+        return None
+    return query
 
 def smart_query(obs, agent):
     if np.any(get_valid_actions(obs, agent)) or np.max(agent.probs) >= 1:
@@ -672,12 +686,28 @@ class FetcherQueryPolicy(Policy):
         self.probs = copy.deepcopy(self._prior)
         self.query = None
         self.prev_w_pos = None
+        self.wcd = None
 
 
     def reset(self):
         self.probs = copy.deepcopy(self._prior)
         self.query = None
         self.prev_w_pos = None
+        self.wcd = None
+
+    def _init_wcd(self, obs):
+        w_pos, f_pos, s_pos, t_pos, f_tool, w_action, f_action, answer = obs
+        self.wcd = np.zeros((len(s_pos), len(s_pos)), dtype=np.int64)
+        for i,g1 in enumerate(s_pos):
+            for j,g2 in enumerate(s_pos):
+                print(i,j)
+                if i==j: 
+                    continue
+                if i > j:
+                    self.wcd[i][j] = self.wcd[j][i]
+                    continue
+                self.wcd[i][j] = fast_wcd(w_pos, [g1, g2])
+        print(self.wcd)
 
 
     def make_inference(self, obs):
@@ -724,6 +754,8 @@ class FetcherQueryPolicy(Policy):
 
 
     def __call__(self, obs):
+        #if self.wcd is None:
+        #    self._init_wcd(obs)
         w_pos, f_pos, s_pos, t_pos, f_tool, w_action, f_action, answer = obs
         if self.probs is None:
             self.probs = np.ones(len(s_pos))
@@ -766,6 +798,8 @@ class FetcherAltPolicy(FetcherQueryPolicy):
     More Complicated Fetcher Policy, allows for multiple tool locations
     """
     def __call__(self, obs):
+        #if self.wcd is None:
+        #    self._init_wcd(obs)
         w_pos, f_pos, s_pos, t_pos, f_tool, w_action, f_action, answer = obs
         if self.probs is None:
             self.probs = np.ones(len(s_pos))

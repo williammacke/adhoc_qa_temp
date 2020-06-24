@@ -1,15 +1,14 @@
 import numpy as np
 from heapq import heappush, heappop
-from environment import ToolFetchingEnvironment
+from src.environment import ToolFetchingEnvironment
 from itertools import count
 from collections import Iterable
 
 
 class Point2D:
-    def __init__(self, x, y):
-        self._x = x
-        self._y = y
-
+    def __init__(self, p):
+        self._x = p[0]
+        self._y = p[1]
 
     def __iter__(self):
         yield self._x
@@ -31,27 +30,27 @@ class Point2D:
     __req__ = __eq__
 
     def __add__(self, other):
-        return Point2D(self._x+other[0], self._y+other[1])
+        return Point2D([self._x+other[0], self._y+other[1]])
 
     def __sub__(self, other):
-        return Point2D(self._x-other[0], self._y-other[1])
+        return Point2D([self._x-other[0], self._y-other[1]])
 
     def __mul__(self, other):
         if hasattr(other, '__getitem__'):
-            return Point2D(self._x*other[0], self._y*other[1])
-        return Point2D(self._x*other, self._y*other)
+            return Point2D([self._x*other[0], self._y*other[1]])
+        return Point2D([self._x*other, self._y*other])
 
     __rmul__ = __mul__
 
     def __truediv__(self, other):
         if hasattr(other, '__getitem__'):
-            return Point2D(self._x/other[0], self._y/other[1])
-        return Point2D(self._x/other, self._y/other)
+            return Point2D([self._x/other[0], self._y/other[1]])
+        return Point2D([self._x/other, self._y/other])
 
     def __floordiv__(self, other):
         if hasattr(other, '__getitem__'):
-            return Point2D(self._x//other[0], self._y//other[1])
-        return Point2D(self._x//other, self._y//other)
+            return Point2D([self._x//other[0], self._y//other[1]])
+        return Point2D([self._x//other, self._y//other])
 
     def __isub__(self, other):
             self._x -= other[0]
@@ -93,10 +92,10 @@ class Point2D:
     __repr__ = __str__
 
     def __deepcopy__(self, memo):
-        return Point2D(self._x, self._y)
+        return Point2D([self._x, self._y])
 
     def __copy__(self):
-        return Point2D(self._x, self._y)
+        return Point2D([self._x, self._y])
 
     def __lt__(self, other):
         return (self._x**2 + self._y**2) < (other._x**2 + other._y**2)
