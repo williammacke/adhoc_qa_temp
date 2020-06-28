@@ -49,13 +49,6 @@ class _GetchWindows:
         import msvcrt
         return bytes.decode(msvcrt.getch())
 
-# class Input(enum.Enum):
-#   W = 2
-#   A = 1
-#   S = 3
-#   D = 0
-#   J = 5
-
 arrived = False
 
 def get_worker_action():
@@ -108,17 +101,15 @@ if __name__ == '__main__':
     #run until done
     while not done[0]:
         # only needed for rendering
-        # env.render()
 
         fetcher_move = fetcher(obs[1])
         returnVal = gui.on_execute(fetcher_move[0]) # returns with input value
+        # Exit experiment
         if(returnVal == Input.Exit):
             break
-        
+            
         sleep(0.05)
-        
         obs, reward, done, _ = env.step([returnVal.value, fetcher_move])
         # obs, reward, done, _ = env.step([get_worker_action(), fetcher(obs[1])])
 
-    # env.close()
     gui.on_cleanup()

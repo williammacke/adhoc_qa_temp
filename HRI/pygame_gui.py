@@ -6,17 +6,18 @@ import numpy as np
 import ctypes
 
 BLACK = (   0,   0,   0)
+GRAY  = ( 192, 192, 192)
 WHITE = ( 255, 255, 255)
 GREEN = (   0, 255,   0)
 RED   = ( 255,   0,   0)
 BLUE  = (   0,   0, 255)
 
-LIGHT_STEEL_BLUE = (167, 190, 211)
-PRUSSIAN_BLUE = (13, 44, 84)
-EMERALD = (111, 208, 140)
-WINE = (115, 44, 44)
-APRICOT = (255, 202, 175)
-ORANGE_YELLOW = (245, 183, 0)
+LIGHT_STEEL_BLUE = ( 167, 190, 211)
+PRUSSIAN_BLUE    = (  13,  44,  84)
+EMERALD          = ( 111, 208, 140)
+WINE             = ( 115,  44,  44)
+APRICOT          = ( 255, 202, 175)
+ORANGE_YELLOW    = ( 245, 183,   0)
 
 PI = 3.141592653
 
@@ -26,6 +27,7 @@ class Input(enum.Enum):
   S = 3
   D = 0
   J = 5
+  F = 4
   Exit = -1
 
 class GUI:
@@ -34,6 +36,7 @@ class GUI:
         self.running = True
         self.screen = None
         self.clock = None
+        self.pause_screen = True
         
         pygame.init()
         ctypes.windll.user32.SetProcessDPIAware()
@@ -41,6 +44,7 @@ class GUI:
         self.size = self.width, self.height = infoObject.current_w, infoObject.current_h # Fullscreen size
         # self.size = self.width, self.height= 500, 300
         self.num_rows = num_rows
+        self.num_cols = num_cols
 
         self.stn_pos = stn_pos
         self.tool_pos = tool_pos
@@ -62,9 +66,8 @@ class GUI:
         self.font = pygame.font.SysFont(None, int(120 * self.height / 1080))
 
         # Initiate screen
-        if (self.on_init(num_cols, num_rows, stn_pos, goal_stn, tool_pos, worker_pos, fetcher_pos) == False):
-          self.running = False
-
+        if (self.on_init() == False):
+            self.running = False
     
     # Rectangular station
     def render_station(self, color, stn):
@@ -103,34 +106,58 @@ class GUI:
         text_x = box_x * self.box_width + self.x_margin * 3
         text_y = (self.num_rows - 1 - box_y) * self.box_height + self.y_margin * 3
 
-
         text = self.font.render(textString, True, WHITE)
         self.screen.blit(text,
             (text_x, text_y)
         )
 
     # Initiate pygame gui
-    def on_init(self, num_cols, num_rows, stn_pos, goal_stn, tool_pos, worker_pos, fetcher_pos):
+    def on_init(self):
         # Set screen to windowed size
         # self.screen = pygame.display.set_mode(self.size, pygame.HWSURFACE | pygame.DOUBLEBUF)
 
-        #Set screen to fullscreen
+        # Set screen to fullscreen
         self.screen = pygame.display.set_mode(self.size, pygame.FULLSCREEN)
+
         self.clock = pygame.time.Clock()
 
         # Caption
         pygame.display.set_caption("Communication Ad-Hoc Teamwork")
+        self.draw_pause_screen()
+        self.running = True
 
-        # Draw initial experiment screen
+    def draw_pause_screen(self):
+        self.screen.fill(GRAY)
+
+        text = self.font.render("Your goal station is number " + str(self.goal_stn), True, WHITE)
+        self.screen.blit(text, (self.width / 2 - 600, 140))
+        text = self.font.render("P - Pause", True, WHITE)
+        self.screen.blit(text, (self.width / 2 - 200, 240))
+        text = self.font.render("W - Up", True, WHITE)
+        self.screen.blit(text, (self.width / 2 - 200, 340))
+        text = self.font.render("A - Left", True, WHITE)
+        self.screen.blit(text, (self.width / 2 - 200, 440))
+        text = self.font.render("S - Down", True, WHITE)
+        self.screen.blit(text, (self.width / 2 - 200, 540))
+        text = self.font.render("D - Right", True, WHITE)
+        self.screen.blit(text, (self.width / 2 - 200, 640))
+        text = self.font.render("F - Stop (don't move)", True, WHITE)
+        self.screen.blit(text, (self.width / 2 - 400, 740))
+        text = self.font.render("J - Done (press when arrived at station)", True, WHITE)
+        self.screen.blit(text, (self.width / 2 - 800, 840))
+        pygame.display.flip()
+
+
+    def draw_experiment_screen(self):
         self.screen.fill(WHITE)
 
         # Grid lines
-        for x in range(1, num_cols + 1):
+        for x in range(1, self.num_cols + 1):
             point1 = pygame.math.Vector2(x * self.box_width, 0)
             point2 = pygame.math.Vector2(x * self.box_width, self.height)
             pygame.draw.line(self.screen, BLACK, point1, point2)
         
-        for y in range(1, num_rows + 1):
+        for y in range(1, self.num_rows + 1):
             point1 = pygame.math.Vector2(0, y * self.box_height)
             point2 = pygame.math.Vector2(self.width, y * self.box_height)
             pygame.draw.line(self.screen, BLACK, point1, point2)
@@ -139,59 +166,65 @@ class GUI:
         self.render_all_stations()
         
         # Toolbox Stations
-        for tool in tool_pos:
+        for tool in self.tool_pos:
             self.render_station(LIGHT_STEEL_BLUE, tool)
             self.render_text("T", tool[0], tool[1])
 
         # Agents
         # Worker
-        self.render_agent(worker_pos[0], worker_pos[1], ORANGE_YELLOW)
-        self.render_text("W",  worker_pos[0], worker_pos[1])
+        self.render_agent(self.prev_user[0], self.prev_user[1], ORANGE_YELLOW)
+        self.render_text("W", self.prev_user[0], self.prev_user[1])
         
         # Fetcher
-        self.render_agent(fetcher_pos[0], fetcher_pos[1], PRUSSIAN_BLUE)
-        self.render_text("F",  fetcher_pos[0], fetcher_pos[1])
-
+        self.render_agent(self.prev_robot[0], self.prev_robot[1], PRUSSIAN_BLUE)
+        self.render_text("F", self.prev_robot[0], self.prev_robot[1])
         pygame.display.flip()
-        self.running = True
 
     # Events (keyboard / mouse)
     # Returns what input was chosen
     def on_event(self, event):
         
-        self.prev_user[0] = self.user[0]
-        self.prev_user[1] = self.user[1]
-        if event.type == pygame.QUIT:
-            self.running = False
-            return Input.Exit
-        elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_w:
-                self.user[1] += 1
-                return Input.W
-            elif event.key == pygame.K_s:
-                self.user[1] -= 1
-                return Input.S
-            elif event.key == pygame.K_a:
-                self.user[0] -= 1
-                return Input.A
-            elif event.key == pygame.K_d:
-                self.user[0] += 1
-                return Input.D
-            elif event.key == pygame.K_j:
-                self.arrived = True
-                return Input.J
-            elif event.key == pygame.K_ESCAPE:
+        if not self.pause_screen:
+            self.prev_user[0] = self.user[0]
+            self.prev_user[1] = self.user[1]
+            if event.type == pygame.QUIT:
                 self.running = False
                 return Input.Exit
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_w:
+                    self.user[1] += 1
+                    return Input.W
+                elif event.key == pygame.K_s:
+                    self.user[1] -= 1
+                    return Input.S
+                elif event.key == pygame.K_a:
+                    self.user[0] -= 1
+                    return Input.A
+                elif event.key == pygame.K_d:
+                    self.user[0] += 1
+                    return Input.D
+                elif event.key == pygame.K_j:
+                    self.arrived = True
+                    return Input.J
+                elif event.key == pygame.K_f:
+                    return Input.F
 
-                
-        # print(event.type)
-        return None
-                
+        # Valid input for both pause screen and experiment screen
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE: # Quit game
+                self.running = False
+                return Input.Exit
+            elif event.key == pygame.K_p:
+                self.pause_screen = not self.pause_screen # Switch pause screen/experiment screen
+                if self.pause_screen:
+                    self.draw_pause_screen()
+                else:
+                    self.draw_experiment_screen()
+        return None            
         
     # Render drawing
     def on_render(self):
-        if(self.running):
+        if self.running :
             #User
             if not self.arrived:
                 self.render_agent(self.prev_user[0], self.prev_user[1], WHITE) # Remove old user agent
@@ -213,7 +246,6 @@ class GUI:
 
                 self.render_agent(self.robot[0], self.robot[1], PRUSSIAN_BLUE)
                 self.render_text("F", self.robot[0], self.robot[1])
-
 
             pygame.display.flip()
 
@@ -243,7 +275,8 @@ class GUI:
                 for event in pygame.event.get():
                     action = self.on_event(event)
             else:
-                action =  Input.J
+                action = Input.J
             if action:
                 self.on_render()
                 return action
+        return action
