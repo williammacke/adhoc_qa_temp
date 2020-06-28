@@ -107,7 +107,7 @@ if __name__ == '__main__':
         # Exit experiment
         if(returnVal == Input.Exit):
             break
-            
+
         sleep(0.05)
         obs, reward, done, _ = env.step([returnVal.value, fetcher_move])
         # obs, reward, done, _ = env.step([get_worker_action(), fetcher(obs[1])])

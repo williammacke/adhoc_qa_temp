@@ -127,6 +127,7 @@ class GUI:
         self.running = True
 
     def draw_pause_screen(self):
+        self.font = pygame.font.SysFont(None, int(120 * self.height / 1080))
         self.screen.fill(GRAY)
 
         text = self.font.render("Your goal station is number " + str(self.goal_stn), True, WHITE)
@@ -149,6 +150,7 @@ class GUI:
 
 
     def draw_experiment_screen(self):
+        self.font = pygame.font.SysFont(None, int(self.height / self.num_cols))
         self.screen.fill(WHITE)
 
         # Grid lines
