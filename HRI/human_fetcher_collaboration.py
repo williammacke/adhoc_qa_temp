@@ -89,12 +89,6 @@ if __name__ == '__main__':
     done = [False, False]
     fetcher = FetcherQueryPolicy()
     worker = RandomWorkerPolicy()
-    #Print goal/positions for human to determine where to go
-    # print("The fetcher is at", fetcher_pos)
-    # print("You (the worker) is at", worker_pos)
-    # print("The fetcher's tool box is at", tool_pos[0])
-    print("Your goal station is station", goal_stn)
-    print("Press\n W - up\n A - left\n S - down\n D - right\n J - done (press when arrived at station)\n")
 
     gui = GUI(10, 6, stn_pos, goal_stn, tool_pos, worker_pos, fetcher_pos)
 

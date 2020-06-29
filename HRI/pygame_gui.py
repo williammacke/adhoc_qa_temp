@@ -21,6 +21,8 @@ ORANGE_YELLOW    = ( 245, 183,   0)
 
 PI = 3.141592653
 
+NOOP_ALLOWED = False
+
 class Input(enum.Enum):
   W = 2
   A = 1
@@ -148,10 +150,11 @@ class GUI:
         self.screen.blit(text, (self.width / 2 - 200, 540))
         text = self.font.render("D - Right", True, WHITE)
         self.screen.blit(text, (self.width / 2 - 200, 640))
-        text = self.font.render("K - Stop (don't move)", True, WHITE)
-        self.screen.blit(text, (self.width / 2 - 400, 740))
         text = self.font.render("J - Done (press when arrived at station)", True, WHITE)
-        self.screen.blit(text, (self.width / 2 - 800, 840))
+        self.screen.blit(text, (self.width / 2 - 800, 740))
+        if NOOP_ALLOWED:
+            text = self.font.render("K - Stop (don't move)", True, WHITE)
+            self.screen.blit(text, (self.width / 2 - 400, 840))
         pygame.display.flip()
 
     # Experiment Screen
@@ -210,7 +213,7 @@ class GUI:
                 elif event.key == pygame.K_j:
                     self.arrived = True
                     return Input.J
-                elif event.key == pygame.K_k:
+                elif event.key == pygame.K_k and NOOP_ALLOWED:
                     return Input.K
 
         # Valid input for both pause screen and experiment screen
