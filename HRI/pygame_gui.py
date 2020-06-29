@@ -27,7 +27,7 @@ class Input(enum.Enum):
   S = 3
   D = 0
   J = 5
-  F = 4
+  K = 4
   Exit = -1
 
 class GUI:
@@ -83,8 +83,8 @@ class GUI:
         )
 
     def render_all_stations(self):
+        # Worker stations
         num = 0
-        # Overlay worker stations (in case agent gets on top)
         for stn in self.stn_pos:
             if num == self.goal_stn:
                 self.render_station(EMERALD, stn)
@@ -95,6 +95,11 @@ class GUI:
 
             num += 1
         
+        # Toolbox Stations
+        for tool in self.tool_pos:
+            self.render_station(LIGHT_STEEL_BLUE, tool)
+            self.render_text("T", tool[0], tool[1])
+
     # Circular agent
     def render_agent(self, circle_x, circle_y, color):
         gui_x = circle_x * self.box_width + (self.box_width / 2)
@@ -126,6 +131,7 @@ class GUI:
         self.draw_pause_screen()
         self.running = True
 
+    # Pause screen
     def draw_pause_screen(self):
         self.font = pygame.font.SysFont(None, int(120 * self.height / 1080))
         self.screen.fill(GRAY)
@@ -142,13 +148,13 @@ class GUI:
         self.screen.blit(text, (self.width / 2 - 200, 540))
         text = self.font.render("D - Right", True, WHITE)
         self.screen.blit(text, (self.width / 2 - 200, 640))
-        text = self.font.render("F - Stop (don't move)", True, WHITE)
+        text = self.font.render("K - Stop (don't move)", True, WHITE)
         self.screen.blit(text, (self.width / 2 - 400, 740))
         text = self.font.render("J - Done (press when arrived at station)", True, WHITE)
         self.screen.blit(text, (self.width / 2 - 800, 840))
         pygame.display.flip()
 
-
+    # Experiment Screen
     def draw_experiment_screen(self):
         self.font = pygame.font.SysFont(None, int(self.height / self.num_cols))
         self.screen.fill(WHITE)
@@ -167,11 +173,6 @@ class GUI:
         # Stations
         self.render_all_stations()
         
-        # Toolbox Stations
-        for tool in self.tool_pos:
-            self.render_station(LIGHT_STEEL_BLUE, tool)
-            self.render_text("T", tool[0], tool[1])
-
         # Agents
         # Worker
         self.render_agent(self.prev_user[0], self.prev_user[1], ORANGE_YELLOW)
@@ -186,6 +187,7 @@ class GUI:
     # Returns what input was chosen
     def on_event(self, event):
         
+        # Experiment Screen
         if not self.pause_screen:
             self.prev_user[0] = self.user[0]
             self.prev_user[1] = self.user[1]
@@ -208,8 +210,8 @@ class GUI:
                 elif event.key == pygame.K_j:
                     self.arrived = True
                     return Input.J
-                elif event.key == pygame.K_f:
-                    return Input.F
+                elif event.key == pygame.K_k:
+                    return Input.K
 
         # Valid input for both pause screen and experiment screen
         if event.type == pygame.KEYDOWN:
@@ -227,27 +229,20 @@ class GUI:
     # Render drawing
     def on_render(self):
         if self.running :
+            
+            self.render_agent(self.prev_user[0], self.prev_user[1], WHITE) # Remove old user agent
+            self.render_agent(self.prev_robot[0], self.prev_robot[1], WHITE) # Remove old robot agent
+            self.render_all_stations()
+
             #User
-            if not self.arrived:
-                self.render_agent(self.prev_user[0], self.prev_user[1], WHITE) # Remove old user agent
-                self.render_all_stations()
-                
-                self.render_agent(self.user[0], self.user[1], ORANGE_YELLOW)
-                self.render_text("W", self.user[0], self.user[1])
+            self.render_agent(self.user[0], self.user[1], ORANGE_YELLOW)
+            self.render_text("W", self.user[0], self.user[1])
 
             #Robot
             if self.robot_stay:
                 self.robot_stay = False
-            else:
-                self.render_agent(self.prev_robot[0], self.prev_robot[1], WHITE) # Remove old robot agent
-                
-                # Overlay fetcher stations (in case agent gets on top)
-                for tool in self.tool_pos:
-                    self.render_station(LIGHT_STEEL_BLUE, tool)
-                    self.render_text("T", tool[0], tool[1])
-
-                self.render_agent(self.robot[0], self.robot[1], PRUSSIAN_BLUE)
-                self.render_text("F", self.robot[0], self.robot[1])
+            self.render_agent(self.robot[0], self.robot[1], PRUSSIAN_BLUE)
+            self.render_text("F", self.robot[0], self.robot[1])
 
             pygame.display.flip()
 
