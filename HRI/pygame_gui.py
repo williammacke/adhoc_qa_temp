@@ -21,7 +21,7 @@ ORANGE_YELLOW    = ( 245, 183,   0)
 
 PI = 3.141592653
 
-NOOP_ALLOWED = False
+NOOP_ALLOWED = True
 
 class Input(enum.Enum):
   W = 2
@@ -155,6 +155,11 @@ class GUI:
         if NOOP_ALLOWED:
             text = self.font.render("K - Stop (don't move)", True, WHITE)
             self.screen.blit(text, (self.width / 2 - 400, 840))
+            text = self.font.render("Press P to go to the experiment screen", True, BLACK)
+            self.screen.blit(text, (self.width / 2 - 800, 940))
+        else:
+            text = self.font.render("Press P to go to the experiment screen", True, BLACK)
+            self.screen.blit(text, (self.width / 2 - 800, 840))
         pygame.display.flip()
 
     # Experiment Screen

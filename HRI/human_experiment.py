@@ -1,10 +1,11 @@
 """
-This is the working file for the Human Fetcher Collaboration
+This is the file for running different human experiments
 """
 #gives file access to other src directory
 import context
 import numpy as np
 import enum
+import argparse
 
 from time import sleep
 
@@ -13,67 +14,28 @@ from src.agents.agent import RandomWorkerPolicy
 from src.agents.agent_adhoc_q import FetcherQueryPolicy
 from HRI.pygame_gui import GUI, Input
 
-class _Getch:
-    """Gets a single character from standard input.  Does not echo to the
-screen."""
-    def __init__(self):
-        try:
-            self.impl = _GetchWindows()
-        except ImportError:
-            self.impl = _GetchUnix()
-
-    def __call__(self): return self.impl()
-
-
-class _GetchUnix:
-    def __init__(self):
-        import tty, sys
-
-    def __call__(self):
-        import sys, tty, termios
-        fd = sys.stdin.fileno()
-        old_settings = termios.tcgetattr(fd)
-        try:
-            tty.setraw(sys.stdin.fileno())
-            ch = sys.stdin.read(1)
-        finally:
-            termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
-        return ch
-
-
-class _GetchWindows:
-    def __init__(self):
-        import msvcrt
-
-    def __call__(self):
-        import msvcrt
-        return bytes.decode(msvcrt.getch())
-
 arrived = False
 
-def get_worker_action():
-    global arrived
-    #fill in code for human input here
-    while (True):
-        if (arrived):
-            return Input["J"].value
-        getch = _Getch()
-        val = getch().upper()
-  
-        if (val in Input.__members__):
-            if(val == "J"):
-                arrived = True
-            return Input[val].value
-        elif (val == "Z"):
-            exit()
-        else: 
-            print ("Not a valid input, please try again.")
-
 if __name__ == '__main__':
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-fetcher', '-f', 
+                        type=int,
+                        nargs=2,
+                        help="type a comma separated value for the fetcher location", 
+                        required=True)
+    parser.add_argument('-worker', '-w',
+                        type=int,
+                        nargs=2, 
+                        help="type a comma separated value for the worker location", 
+                        required=True)
+
+    args = parser.parse_args()
+    
     #Fetcher start position
-    fetcher_pos = np.array([0, 3])
+    fetcher_pos = np.array(args.fetcher)
     #Worker Start Position
-    worker_pos = np.array([0, 2])
+    worker_pos = np.array(args.worker)
     #List of Station Positions
     stn_pos = [np.array([2,0]), np.array([9,0]), np.array([9,4])]
     #List of tool positions, in this example they are all located in the same spot
