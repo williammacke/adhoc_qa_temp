@@ -18,29 +18,53 @@ arrived = False
 
 if __name__ == '__main__':
 
+    #Command line arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument('-fetcher', '-f', 
-                        type=int,
-                        nargs=2,
-                        help="type a comma separated value for the fetcher location", 
-                        required=True)
-    parser.add_argument('-worker', '-w',
-                        type=int,
-                        nargs=2, 
-                        help="type a comma separated value for the worker location", 
+    #Experiment input file
+    parser.add_argument('-file', '-f', 
+                        help="path to experiment file", 
                         required=True)
 
+
     args = parser.parse_args()
-    
-    #Fetcher start position
-    fetcher_pos = np.array(args.fetcher)
-    #Worker Start Position
-    worker_pos = np.array(args.worker)
-    #List of Station Positions
-    stn_pos = [np.array([2,0]), np.array([9,0]), np.array([9,4])]
-    #List of tool positions, in this example they are all located in the same spot
-    tool_pos = [np.array([3,5]) for _ in range(3)]
-    goal_stn = 1
+
+    #Read file for parameters
+    file = open(args.file, "r")
+    lines = file.readlines()
+    for line in lines:
+        #Dimensions for screen
+        if line[0] == "d":
+            array = list(map(int, line[2:].split(" ")))
+            cols = array[0]
+            rows = array[1]
+        #Fetcher start position
+        elif line[0] == "f":
+            array = list(map(int, line[2:].split(" ")))   
+            fetcher_pos = np.array(array)  
+        #Worker start position
+        elif line[0] == "w":
+            array = list(map(int, line[2:].split(" ")))   
+            worker_pos = np.array(array)
+        #Number of stations
+        elif line[0] == "n":
+            num = 3
+        #List of Station Positions
+        elif line[0] == "s":
+            array = list(map(int, line[2:].split(" ")))
+            stn_pos = []
+            for i in range(num):
+                stn_pos.append(np.array([array[i * 2], array[i * 2 + 1]]))
+        #List of tool positions
+        elif line[0] == "t":
+            array = list(map(int, line[2:].split(" ")))
+            tool_pos = []
+            for i in range(num):
+                tool_pos.append(np.array([array[i * 2], array[i * 2 + 1]]))
+        #Goal station
+        elif line[0] == "g":
+            array = list(map(int, line[2:].split(" ")))
+            goal_stn = array[0]
+
     env = ToolFetchingEnvironment(fetcher_pos, worker_pos, stn_pos, tool_pos, goal_stn)
     #grab observation
     obs = env.reset()
@@ -48,7 +72,7 @@ if __name__ == '__main__':
     fetcher = FetcherQueryPolicy()
     worker = RandomWorkerPolicy()
 
-    gui = GUI(10, 6, stn_pos, goal_stn, tool_pos, worker_pos, fetcher_pos)
+    gui = GUI(cols, rows, stn_pos, goal_stn, tool_pos, worker_pos, fetcher_pos)
 
     #run until done
     while not done[0]:
