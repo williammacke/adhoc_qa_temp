@@ -666,12 +666,13 @@ class FetcherQueryPolicy(Policy):
     Basic Fetcher Policy for querying, follows query_policy function argument (defaults to never query)
     Assumes all tools are in same location
     """
-    def __init__(self, query_policy=never_query, prior=None):
+    def __init__(self, query_policy=never_query, prior=None, epsilon=0):
         self.query_policy = query_policy
         self._prior = prior
         self.probs = copy.deepcopy(self._prior)
         self.query = None
         self.prev_w_pos = None
+        self._epsilon = epsilon
 
 
     def reset(self):
@@ -746,7 +747,7 @@ class FetcherQueryPolicy(Policy):
         if self.query is not None:
             return ToolFetchingEnvironment.FETCHER_ACTIONS.QUERY, self.query
 
-        if np.max(self.probs) < 1:
+        if np.max(self.probs) < (1 - self._epsilon):
             #dealing with only one tool position currently
             if np.array_equal(f_pos, t_pos[0]):
                 return ToolFetchingEnvironment.FETCHER_ACTIONS.NOOP, None
@@ -785,7 +786,7 @@ class FetcherAltPolicy(FetcherQueryPolicy):
         self.prev_w_pos = np.array(w_pos)
 
         # One station already guaranteed. No querying needed.
-        if np.max(self.probs) == 1:
+        if np.max(self.probs) >= (1 - self._epsilon):
             target = np.argmax(self.probs)
             if f_tool != target:
                 if np.array_equal(f_pos, t_pos[target]):
