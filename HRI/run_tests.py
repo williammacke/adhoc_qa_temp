@@ -3,7 +3,7 @@ import random
 from zipfile import ZipFile
 
 # Enable environment
-os.system("env/Scripts/activate")
+# os.system("env/Scripts/activate")
 
 # Randomize experiments
 exp_num = [1, 2, 3, 4]

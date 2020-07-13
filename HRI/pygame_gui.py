@@ -121,10 +121,10 @@ class GUI:
     # Initiate pygame gui
     def on_init(self):
         # Set screen to windowed size
-        self.screen = pygame.display.set_mode(self.size, pygame.HWSURFACE | pygame.DOUBLEBUF)
+        # self.screen = pygame.display.set_mode(self.size, pygame.HWSURFACE | pygame.DOUBLEBUF)
 
         # Set screen to fullscreen
-        # self.screen = pygame.display.set_mode(self.size, pygame.FULLSCREEN)
+        self.screen = pygame.display.set_mode(self.size, pygame.FULLSCREEN)
 
         self.clock = pygame.time.Clock()
 
