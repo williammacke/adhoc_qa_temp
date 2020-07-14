@@ -216,7 +216,7 @@ class GUI:
                     self.user[0] += 1
                     return Input.D
                 elif event.key == pygame.K_j:
-                    self.arrived = True
+                    self.arrived = (self.stn_pos[self.goal_stn] == self.user).all()
                     return Input.J
                 elif event.key == pygame.K_k and NOOP_ALLOWED:
                     return Input.K
