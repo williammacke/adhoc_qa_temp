@@ -688,23 +688,23 @@ class FetcherQueryPolicy(Policy):
         if w_action == ToolFetchingEnvironment.WORKER_ACTIONS.WORK:
             for i,stn in enumerate(s_pos):
                 if not np.array_equal(stn, self.prev_w_pos):
-                    self.probs[i] = self._epsilon
+                    self.probs[i] *= self._epsilon
         elif w_action == ToolFetchingEnvironment.WORKER_ACTIONS.RIGHT:
             for i,stn in enumerate(s_pos):
                 if stn[0] <= self.prev_w_pos[0]:
-                    self.probs[i] = self._epsilon
+                    self.probs[i] *= self._epsilon
         elif w_action == ToolFetchingEnvironment.WORKER_ACTIONS.LEFT:
             for i,stn in enumerate(s_pos):
                 if stn[0] >= self.prev_w_pos[0]:
-                    self.probs[i] = self._epsilon
+                    self.probs[i] *= self._epsilon
         elif w_action == ToolFetchingEnvironment.WORKER_ACTIONS.DOWN:
             for i,stn in enumerate(s_pos):
                 if stn[1] >= self.prev_w_pos[1]:
-                    self.probs[i] = self._epsilon
+                    self.probs[i] *= self._epsilon
         elif w_action == ToolFetchingEnvironment.WORKER_ACTIONS.UP:
             for i,stn in enumerate(s_pos):
                 if stn[1] <= self.prev_w_pos[1]:
-                    self.probs[i] = self._epsilon
+                    self.probs[i] *= self._epsilon
 
         self.probs /= np.sum(self.probs)
 
