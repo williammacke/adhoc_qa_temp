@@ -93,7 +93,7 @@ class GUI:
             else:
                 self.render_station(WINE, stn)
 
-            self.render_text(str(num), stn[0], stn[1])
+            self.render_text(str(num + 1), stn[0], stn[1])
 
             num += 1
         
@@ -216,7 +216,7 @@ class GUI:
                     self.user[0] += 1
                     return Input.D
                 elif event.key == pygame.K_j:
-                    self.arrived = True
+                    self.arrived = (self.stn_pos[self.goal_stn] == self.user).all()
                     return Input.J
                 elif event.key == pygame.K_k and NOOP_ALLOWED:
                     return Input.K
