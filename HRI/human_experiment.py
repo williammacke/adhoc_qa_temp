@@ -101,7 +101,7 @@ if __name__ == '__main__':
     #grab observation
     obs = env.reset()
     done = [False, False]
-    fetcher = FetcherAltPolicy()
+    fetcher = FetcherAltPolicy(epsilon=0.05)
     worker = RandomWorkerPolicy()
 
     gui = GUI(cols, rows, stn_pos, goal_stn, tool_pos, worker_pos, fetcher_pos)
