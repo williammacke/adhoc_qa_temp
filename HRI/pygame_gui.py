@@ -1,5 +1,4 @@
 import pygame
-from pygame.locals import *
 
 import enum
 import numpy as np
@@ -138,7 +137,7 @@ class GUI:
         self.font = pygame.font.SysFont(None, int(120 * self.height / 1080))
         self.screen.fill(GRAY)
 
-        text = self.font.render("Your goal station is number " + str(self.goal_stn), True, WHITE)
+        text = self.font.render("Your goal station is number " + str(self.goal_stn + 1), True, WHITE)
         self.screen.blit(text, (self.width / 2 - 600, 140))
         text = self.font.render("P - Pause", True, WHITE)
         self.screen.blit(text, (self.width / 2 - 200, 240))
