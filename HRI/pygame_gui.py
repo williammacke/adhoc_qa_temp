@@ -139,16 +139,16 @@ class GUI:
 
         text = self.font.render("Your goal station is number " + str(self.goal_stn + 1), True, WHITE)
         self.screen.blit(text, (self.width / 2 - 600, 140))
-        text = self.font.render("P - Pause", True, WHITE)
-        self.screen.blit(text, (self.width / 2 - 200, 240))
-        text = self.font.render("W - Up", True, WHITE)
-        self.screen.blit(text, (self.width / 2 - 200, 340))
-        text = self.font.render("A - Left", True, WHITE)
-        self.screen.blit(text, (self.width / 2 - 200, 440))
-        text = self.font.render("S - Down", True, WHITE)
-        self.screen.blit(text, (self.width / 2 - 200, 540))
-        text = self.font.render("D - Right", True, WHITE)
-        self.screen.blit(text, (self.width / 2 - 200, 640))
+        text = self.font.render("P - Pause/Unpause", True, WHITE)
+        self.screen.blit(text, (self.width / 2 - 400, 240))
+        text = self.font.render("Up/W - Move up", True, WHITE)
+        self.screen.blit(text, (self.width / 2 - 325, 340))
+        text = self.font.render("Left/A - Move left", True, WHITE)
+        self.screen.blit(text, (self.width / 2 - 355, 440))
+        text = self.font.render("Down/S - Move down", True, WHITE)
+        self.screen.blit(text, (self.width / 2 - 425, 540))
+        text = self.font.render("Right/D - Move right", True, WHITE)
+        self.screen.blit(text, (self.width / 2 - 410, 640))
         text = self.font.render("J - Done (press when arrived at station)", True, WHITE)
         self.screen.blit(text, (self.width / 2 - 800, 740))
         if NOOP_ALLOWED:
@@ -202,16 +202,16 @@ class GUI:
                 self.running = False
                 return Input.Exit
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_w:
+                if event.key == pygame.K_w or event.key == pygame.K_UP:
                     self.user[1] += 1
                     return Input.W
-                elif event.key == pygame.K_s:
+                elif event.key == pygame.K_s or event.key == pygame.K_DOWN:
                     self.user[1] -= 1
                     return Input.S
-                elif event.key == pygame.K_a:
+                elif event.key == pygame.K_a or event.key == pygame.K_LEFT:
                     self.user[0] -= 1
                     return Input.A
-                elif event.key == pygame.K_d:
+                elif event.key == pygame.K_d or event.key == pygame.K_RIGHT:
                     self.user[0] += 1
                     return Input.D
                 elif event.key == pygame.K_j:
