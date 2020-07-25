@@ -11,6 +11,9 @@ from scipy.optimize import fsolve
 from statistics import  median
 import pulp
 import copy
+from skopt import gp_minimize
+from skopt.space import Integer
+from pyeasyga import pyeasyga
 
 
 def is_ZB(obs, g1, g2):
@@ -341,6 +344,95 @@ def create_smart_query3(cost):
             return None
         return query
     return smart_query3
+
+
+def create_optimal_query(cost, basecost, edp, wcd_f):
+    class interval:
+        def __init__(self, a, b):
+            self.a = a
+            self.b = b
+
+        def card(self):
+            return self.b-self.a
+
+    def get_voi(g, G, s1, s2):
+        intervals = [interval(wcd_f[gp,g][s2[0]][s2[1]], edp[g,gp][s1[0]][s1[1]]) for gp in G if g != gp and wcd_f[gp,g][s2[0]][s2[1]] <= edp[g,gp][s1[0]][s1[1]]]
+        intervals.sort(key = lambda x:x.a)
+        if len(intervals) == 0:
+            return 0
+        y = [ intervals[0] ]
+        for i in intervals[1:]:
+            if y[-1].b < i.a:
+                y.append(i)
+            elif y[-1].b >= i.a and i.b > y[-1].b:
+                y[-1].b = i.b
+        return np.sum([i.card() for i in y])
+
+
+
+    def sq(obs, agent):
+        if np.any(get_valid_actions(obs, agent)) or np.max(agent.probs) >= 1:
+            return None
+    
+        w_pos, f_pos, s_pos, t_pos, f_tool, w_action, f_action, answer = obs
+        G = np.where(agent.probs > 0)[0]
+        VOI = np.array([get_voi(g, G, w_pos, f_pos) for g in G])
+        def obj(x, data):
+            x = np.array(x)
+            G = np.where(agent.probs > 0)[0]
+            probs = agent.probs[G]
+
+            G1 = G[np.where(x == 0)[0]]
+            G2 = G[np.where(x == 1)[0]]
+
+            query = list(G1)
+
+
+
+            w1 = agent.probs[G1]
+            w2 = agent.probs[G2]
+
+            VOI1 = np.array([get_voi(g, G1, w_pos, f_pos) for g in G1])
+            VOI2 = np.array([get_voi(g, G2, w_pos, f_pos) for g in G2])
+
+            value =  -1*(np.dot(w1, VOI1) + np.dot(w2, VOI2) + cost*len(G1))
+            #if len(G1) == 0:
+            #    print("Empty Query")
+            #    print(x)
+            #    print(G, G2)
+            #    print(value, np.dot(VOI, agent.probs[G]) + value - basecost)
+            #print(query, np.dot(VOI, agent.probs[G]) + value - basecost)
+            return value
+
+
+
+        ga  = pyeasyga.GeneticAlgorithm(G)
+        ga.population_size = 200
+        ga.fitness_function = obj
+        ga.run()
+
+        space = [Integer(0, 1) for _ in G]
+        #answer = gp_minimize(obj, space)
+        answer = ga.best_individual()
+        print("answer",answer)
+        objective = obj(answer[1], None)
+        objective += (np.dot(VOI, agent.probs[G]) - basecost)
+        query = list(G[np.where(np.array(answer[1]) == 0)[0]])
+        print(query, objective)
+        if objective > 0:
+            if len(query) == 0 or len(query) == len(G):
+                print("ERROR: Not finding optimal")
+                return None
+            print("Asking Query: ", query)
+            return query
+        return None
+
+    return sq
+
+
+
+
+
 
 def smart_query3(obs, agent):
     if np.any(get_valid_actions(obs, agent)) or np.max(agent.probs) >= 1:
