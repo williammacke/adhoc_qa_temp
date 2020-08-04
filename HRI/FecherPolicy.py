@@ -32,19 +32,19 @@ class FetcherQueryPolicy:
             for i,stn in enumerate(s_pos):
                 if not np.array_equal(stn, self.prev_w_pos):
                     self.probs[i] *= self._epsilon
-        elif w_action == ToolFetchingEnvironment.WORKER_ACTIONS.RIGHT:
+        elif w_action == 0:
             for i,stn in enumerate(s_pos):
                 if stn[0] <= self.prev_w_pos[0]:
                     self.probs[i] *= self._epsilon
-        elif w_action == ToolFetchingEnvironment.WORKER_ACTIONS.LEFT:
+        elif w_action == 1:
             for i,stn in enumerate(s_pos):
                 if stn[0] >= self.prev_w_pos[0]:
                     self.probs[i] *= self._epsilon
-        elif w_action == ToolFetchingEnvironment.WORKER_ACTIONS.DOWN:
+        elif w_action == 3:
             for i,stn in enumerate(s_pos):
                 if stn[1] >= self.prev_w_pos[1]:
                     self.probs[i] *= self._epsilon
-        elif w_action == ToolFetchingEnvironment.WORKER_ACTIONS.UP:
+        elif w_action == 2:
             for i,stn in enumerate(s_pos):
                 if stn[1] <= self.prev_w_pos[1]:
                     self.probs[i] *= self._epsilon
@@ -55,15 +55,15 @@ class FetcherQueryPolicy:
     def action_to_goal(self, pos, goal):
         actions = []
         if pos[0] < goal[0]:
-            actions.append(ToolFetchingEnvironment.FETCHER_ACTIONS.RIGHT)
+            actions.append(0)
         elif pos[0] > goal[0]:
-            actions.append(ToolFetchingEnvironment.FETCHER_ACTIONS.LEFT)
+            actions.append(1)
         if pos[1] > goal[1]:
-            actions.append(ToolFetchingEnvironment.FETCHER_ACTIONS.DOWN)
+            actions.append(3)
         elif pos[1] < goal[1]:
-            actions.append(ToolFetchingEnvironment.FETCHER_ACTIONS.UP)
+            actions.append(2)
         if len(actions) == 0:
-            return ToolFetchingEnvironment.FETCHER_ACTIONS.NOOP
+            return 4
         return np.random.choice(actions)
 
 
@@ -88,18 +88,18 @@ class FetcherQueryPolicy:
 
         self.query = self.query_policy(obs, self)
         if self.query is not None:
-            return ToolFetchingEnvironment.FETCHER_ACTIONS.QUERY, self.query
+            return 5, self.query
 
         if np.max(self.probs) < (1 - self._epsilon):
             #dealing with only one tool position currently
             if np.array_equal(f_pos, t_pos[0]):
-                return ToolFetchingEnvironment.FETCHER_ACTIONS.NOOP, None
+                return 4, None
             else:
                 return self.action_to_goal(f_pos, t_pos[0]), None
         else:
             if f_tool != np.argmax(self.probs):
                 if np.array_equal(f_pos, t_pos[0]):
-                    return ToolFetchingEnvironment.FETCHER_ACTIONS.PICKUP, np.argmax(self.probs)
+                    return 6, np.argmax(self.probs)
                 else:
                     return self.action_to_goal(f_pos, t_pos[0]), None
             return self.action_to_goal(f_pos, s_pos[np.argmax(self.probs)]), None
@@ -132,14 +132,14 @@ class FetcherAltPolicy(FetcherQueryPolicy):
             target = np.argmax(self.probs)
             if f_tool != target:
                 if np.array_equal(f_pos, t_pos[target]):
-                    return ToolFetchingEnvironment.FETCHER_ACTIONS.PICKUP, target
+                    return 6, target
                 else:
                     return self.action_to_goal(f_pos, t_pos[target]), None
             return self.action_to_goal(f_pos, s_pos[target]), None
 
         self.query = self.query_policy(obs, self)
         if self.query is not None:
-            return ToolFetchingEnvironment.FETCHER_ACTIONS.QUERY, self.query
+            return 5, self.query
 
         valid_actions = get_valid_actions(obs, self)
 
@@ -147,6 +147,6 @@ class FetcherAltPolicy(FetcherQueryPolicy):
             #print(valid_actions)
             p = valid_actions / np.sum(valid_actions)
             action_idx = np.random.choice(np.arange(4), p=p)
-            return ToolFetchingEnvironment.FETCHER_ACTIONS(action_idx), None
+            return action_idx, None
         else:
-            return ToolFetchingEnvironment.FETCHER_ACTIONS.NOOP, None
+            return 4, None
