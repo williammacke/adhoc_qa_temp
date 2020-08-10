@@ -111,7 +111,6 @@ if __name__ == '__main__':
     #run until done
     while not done[0]:
         # only needed for rendering
-
         fetcher_move = fetcher(obs[1])
         t0 = time.clock()
         returnVal = gui.on_execute(fetcher_move[0]) # returns with input value

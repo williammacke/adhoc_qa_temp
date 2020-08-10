@@ -33,4 +33,10 @@ Sk.externalLibraries = {
     'pygame.version': {
         path: basePath + 'version.js',
     },
+    'numpy': {
+        path: "https://raw.githubusercontent.com/ebertmi/skulpt_numpy/master/numpy/__init__.js",
+    },
+    'numpy.random': {
+        path: "https://raw.githubusercontent.com/ebertmi/skulpt_numpy/master/numpy/random/__init__.js",
+    },
 };

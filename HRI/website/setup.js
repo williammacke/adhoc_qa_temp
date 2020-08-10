@@ -28,10 +28,10 @@ function printString(text) {
 
 function addModal() {
     $("#mycanvas").css("height", window.innerHeight * 0.95);
-    $("#mycanvas").css("width", window.innerWidth * 0.95);
+    $("#mycanvas").css("width", window.innerWidth * 0.75);
     $("#mycanvas").css("margin", "auto");
     $(Sk.main_canvas).css("height", window.innerHeight * 0.95);
-    $(Sk.main_canvas).css("width", window.innerWidth * 0.95);
+    $(Sk.main_canvas).css("width", window.innerWidth * 0.75);
     $(Sk.main_canvas).css("margin", "auto");
     $(Sk.main_canvas).css("border", "1px solid blue");
 

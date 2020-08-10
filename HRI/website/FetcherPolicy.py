@@ -1,8 +1,31 @@
 import numpy as np
 import random
+import copy
 
 def never_query(obs, agent):
     return None
+
+# Returns list of valid actions that brings fetcher closer to all tools
+def get_valid_actions(obs, agent):
+    w_pos, f_pos, s_pos, t_pos, f_tool, w_action, f_action, answer = obs
+
+    valid_actions = np.array([True] * 4) # NOOP is always valid
+    for stn in range(len(s_pos)):
+        if agent.probs[stn] == 0:
+            continue
+        tool_valid_actions = np.array([True] * 4)
+        if f_pos[0] <= t_pos[stn][0]:
+            tool_valid_actions[1] = False # Left
+        if f_pos[0] >= t_pos[stn][0]:
+            tool_valid_actions[0] = False # Right
+        if f_pos[1] >= t_pos[stn][1]:
+            tool_valid_actions[2] = False # Down
+        if f_pos[1] <= t_pos[stn][1]:
+            tool_valid_actions[3] = False # Up
+
+        valid_actions = np.logical_and(valid_actions, tool_valid_actions)
+
+    return valid_actions
 
 class FetcherQueryPolicy:
     """
@@ -28,7 +51,7 @@ class FetcherQueryPolicy:
         w_pos, f_pos, s_pos, t_pos, f_tool, w_action, f_action, answer = obs
         if self.prev_w_pos is None:
             return
-        if w_action == ToolFetchingEnvironment.WORKER_ACTIONS.WORK:
+        if w_action == 5:
             for i,stn in enumerate(s_pos):
                 if not np.array_equal(stn, self.prev_w_pos):
                     self.probs[i] *= self._epsilon

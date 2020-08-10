@@ -25,17 +25,16 @@
                 // PygameGUI
                 var sourcePath = "gui.py";
                 $.get(sourcePath, function (data) {
-                    $("#code").val(data);
+                    $("#code").val(data); // put python script in html (plaintext)
                 
                     // Set up canvas
                     Sk.main_canvas = document.createElement("canvas");
-                    // Sk.main_canvas = document.getElementById("myCanvas");
                     Sk.quitHandler = function () {
                         $(".modal").modal("hide");
                     };
                     addModal();
 
-                    // Run PygameGUI
+                    // Run gui.py
                     var prog = document.getElementById("code").value;
 
                     Sk.misceval.asyncToPromise(function () {
