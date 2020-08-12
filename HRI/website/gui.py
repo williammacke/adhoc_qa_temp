@@ -2,34 +2,6 @@ import numpy as np
 import random
 import copy
 
-def never_query(obs, agent):
-    return None
-
-# Returns list of valid actions that brings fetcher closer to all tools
-def get_valid_actions(obs, agent):
-    w_pos, f_pos, s_pos, t_pos, f_tool, w_action, f_action, answer = obs
-
-    valid_actions = np.array([True] * 4) # NOOP is always valid
-    print(valid_actions)
-    for stn in range(len(s_pos)):
-        if agent.probs[stn] == 0:
-            continue
-        tool_valid_actions = np.array([True] * 4)
-        if f_pos[0] <= t_pos[stn][0]:
-            tool_valid_actions[1] = False # Left
-        if f_pos[0] >= t_pos[stn][0]:
-            tool_valid_actions[0] = False # Right
-        if f_pos[1] >= t_pos[stn][1]:
-            tool_valid_actions[2] = False # Down
-        if f_pos[1] <= t_pos[stn][1]:
-            tool_valid_actions[3] = False # Up
-        print(valid_actions)
-        print(tool_valid_actions)
-        valid_actions = np.logical_and(valid_actions, tool_valid_actions)
-        print("hi3")
-    print("hi2")
-    return valid_actions
-
 # Replaces np.max
 def maxElement(array):
     maxElem = 0
@@ -38,6 +10,19 @@ def maxElement(array):
             maxElem = elem
 
     return maxElem
+
+# Replaces np.argmax
+def maxIndex(array):
+    maxElem = 0
+    maxIndex = -1
+    curIndex = 0
+    for elem in array:
+        if elem > maxElem:
+            maxElem = elem
+            maxIndex = curIndex
+        curIndex += 1
+
+    return maxIndex
 
 #Replaces np.array_equal
 def checkEqual(a1, a2):
@@ -48,6 +33,37 @@ def checkEqual(a1, a2):
         if a1[i] != a2[i]:
             return False
     return True
+
+#Replaces np.logical_and
+#input is two arrays with values 0 and 1
+def logicalAnd(a1, a2):
+    result = np.array([0] * 4)
+    for i in range(len(a1)):
+        result[i] = a1[i] * a2[i]
+    return result
+
+def never_query(obs, agent):
+    return None
+
+# Returns list of valid actions that brings fetcher closer to all tools
+def get_valid_actions(obs, agent):
+    w_pos, f_pos, s_pos, t_pos, f_tool, w_action, f_action, answer = obs
+
+    valid_actions = np.array([1] * 4) # NOOP is always valid
+    for stn in range(len(s_pos)):
+        if agent.probs[stn] == 0:
+            continue
+        tool_valid_actions = np.array([1] * 4)
+        if f_pos[0] <= t_pos[stn][0]:
+            tool_valid_actions[1] = 0 # Left
+        if f_pos[0] >= t_pos[stn][0]:
+            tool_valid_actions[0] = 0 # Right
+        if f_pos[1] >= t_pos[stn][1]:
+            tool_valid_actions[2] = 0 # Down
+        if f_pos[1] <= t_pos[stn][1]:
+            tool_valid_actions[3] = 0 # Up
+        valid_actions = logicalAnd(valid_actions, tool_valid_actions)
+    return valid_actions
 
 class FetcherQueryPolicy:
     """
@@ -75,7 +91,7 @@ class FetcherQueryPolicy:
             return
         if w_action == 5:
             for i,stn in enumerate(s_pos):
-                if not np.array_equal(stn, self.prev_w_pos):
+                if not checkEqual(stn, self.prev_w_pos):
                     self.probs[i] *= self._epsilon
         elif w_action == 0:
             for i,stn in enumerate(s_pos):
@@ -128,13 +144,12 @@ class FetcherQueryPolicy:
             self.probs /= np.sum(self.probs)
         else:
             self.make_inference(obs)
-
         self.prev_w_pos = np.array(w_pos)
 
         self.query = self.query_policy(obs, self)
         if self.query is not None:
             return 5, self.query
-
+        
         if maxElement(self.probs) < (1 - self._epsilon):
             #dealing with only one tool position currently
             if checkEqual(f_pos, t_pos[0]):
@@ -142,12 +157,12 @@ class FetcherQueryPolicy:
             else:
                 return self.action_to_goal(f_pos, t_pos[0]), None
         else:
-            if f_tool != np.argmax(self.probs):
-                if np.array_equal(f_pos, t_pos[0]):
-                    return 6, np.argmax(self.probs)
+            if f_tool != maxIndex(self.probs):
+                if checkEqual(f_pos, t_pos[0]):
+                    return 6, maxIndex(self.probs)
                 else:
                     return self.action_to_goal(f_pos, t_pos[0]), None
-            return self.action_to_goal(f_pos, s_pos[np.argmax(self.probs)]), None
+            return self.action_to_goal(f_pos, s_pos[maxIndex(self.probs)]), None
 
 class FetcherAltPolicy(FetcherQueryPolicy):
     """
@@ -174,7 +189,7 @@ class FetcherAltPolicy(FetcherQueryPolicy):
 
         # One station already guaranteed. No querying needed.
         if maxElement(self.probs) >= (1 - self._epsilon):
-            target = np.argmax(self.probs)
+            target = maxIndex(self.probs)
             if f_tool != target:
                 if checkEqual(f_pos, t_pos[target]):
                     return 6, target
@@ -190,7 +205,6 @@ class FetcherAltPolicy(FetcherQueryPolicy):
         valid_actions = get_valid_actions(obs, self)
 
         if np.any(valid_actions):
-            print(valid_actions)
             p = valid_actions / np.sum(valid_actions)
             action_idx = np.random.choice(np.arange(4), p=p)
             return action_idx, None
@@ -249,6 +263,7 @@ class GUI:
         # Fetcher
         self.robot = [fetcher_pos[0], fetcher_pos[1]]
         self.prev_robot = [fetcher_pos[0], fetcher_pos[1]]
+        self.pickup_tool = -1
         self.robot_stay = False
 
         # Font
@@ -359,10 +374,9 @@ class GUI:
             point2 = (self.width, y * self.box_height)
             pygame.draw.line(self.screen, BLACK, point1, point2)
         
-        # # Stations
+        # Stations
         self.render_all_stations()
-        
-        # Agents
+
         # Worker
         self.render_agent(self.prev_user[0], self.prev_user[1], ORANGE_YELLOW)
         self.render_text("W", self.prev_user[0], self.prev_user[1])
@@ -378,9 +392,7 @@ class GUI:
             
             self.render_station(WHITE, self.prev_user) # Remove old user agent
             self.render_station(WHITE, self.prev_robot) # Remove old robot agent
-            # self.render_agent(self.prev_user[0], self.prev_user[1], WHITE) # Remove old user agent
-            # self.render_agent(self.prev_robot[0], self.prev_robot[1], WHITE) # Remove old robot agent
-            self.render_all_stations()
+            self.render_all_stations() # If agent overlay
 
             #User
             self.render_agent(self.user[0], self.user[1], ORANGE_YELLOW)
@@ -389,6 +401,7 @@ class GUI:
             #Robot
             if self.robot_stay:
                 self.robot_stay = False
+            
             self.render_agent(self.robot[0], self.robot[1], PRUSSIAN_BLUE)
             self.render_text("F", self.robot[0], self.robot[1])
 
@@ -400,20 +413,26 @@ class GUI:
         pygame.quit()
     
     # Move fetcher agent (robot)
-    def _move_agent(self, move):
+    def _move_agent(self, other_agent_move):
         self.prev_robot[0] = self.robot[0]
         self.prev_robot[1] = self.robot[1]
+        move = other_agent_move[0]
 
-        if move == 0:
-            self.robot[0] += 1
-        elif move == 1:
+        if move == 0: # Right
+            self.robot[0] += 1 
+        elif move == 1: # Left
             self.robot[0] -= 1
-        elif move == 2:
+        elif move == 2: # Up
             self.robot[1] += 1
-        elif move == 3:
+        elif move == 3: # Down
             self.robot[1] -= 1
-        else: #query or pickup
+        elif move == 4: # NOOP
             self.robot_stay = True
+        elif move == 6: # pickup
+            self.pickup_tool = other_agent_move[1]
+        else:
+            print("move agent 5")
+            
 
     # Pygame event (key down)
     def on_event(self, e):
@@ -422,8 +441,7 @@ class GUI:
         if not self.pause_screen:
             self.prev_user[0] = self.user[0]
             self.prev_user[1] = self.user[1]
-            print(pygame.key.name(e.key))
-            # All directions
+
             if e.key == pygame.K_LEFT:
                 self.user[0] -= 1
                 return 1
@@ -436,11 +454,9 @@ class GUI:
             elif e.key == pygame.K_UP:
                 self.user[1] += 1
                 return 2
-            # Work
-            elif e.key == pygame.K_SPACE:
+            elif e.key == pygame.K_SPACE: # Work
                 return 5
-            # NOOP 
-            elif e.key == pygame.K_RETURN and NOOP_ALLOWED:
+            elif e.key == pygame.K_RETURN and NOOP_ALLOWED: # NOOP
                 return 4
         
         # Valid input for both pause screen and experiment screen
@@ -457,17 +473,19 @@ class GUI:
     def on_execute(self, other_agent_move):
         self._move_agent(other_agent_move)
         action = None
+
         while self.running:
             self.clock.tick(8)
             #User input
             for e in pygame.event.get():
                 if e.type == pygame.KEYDOWN:
                     action = self.on_event(e)
+            # Got input, return action, worker_pos, and fetcher_pos
             if action != None:
                 self.on_render()
-                return action
+                return action, self.user, self.robot
         
-        return action
+        return -1, self.user, self.robot
 
 
 if __name__ == '__main__':
@@ -476,7 +494,7 @@ if __name__ == '__main__':
     rows = 6
     stn_pos = [[3,0], [7,0], [3,5],[7,4]]
     goal_stn = 3
-    tool_pos = [[9,4], [9,4], [9,4],[9,4]]
+    tool_pos = [[9,4], [9,4], [9,4], [9,4]]
     worker_pos = [0,2]
     fetcher_pos = [9,2]
 
@@ -486,27 +504,39 @@ if __name__ == '__main__':
     # Set up fetcher robot
     fetcher = FetcherQueryPolicy()
     # fetcher = FetcherAltPolicy(epsilon=0.05)
+
     # Observation state 
     f_obs = [worker_pos, fetcher_pos, stn_pos, tool_pos, None, None, None, None]
-    print(f_obs)
     done = False
 
     #Loop actions until expreiment is complete
     while not done:
         gui.clock.tick(8)
+
         #Get fetcher move
         fetcher_move = fetcher(f_obs)
-        print(fetcher_move[0])
+
         #Get user action
-        action = gui.on_execute(fetcher_move[0])
-        print(action)
-        if action == -1:
+        action, worker_pos, fetcher_pos = gui.on_execute(fetcher_move)
+
+        # Escape (backspace button) or working and finished
+        if action == -1 or (action == 5 and fetcher_pos == worker_pos and gui.pickup_tool == goal_stn):
             done = True
 
+        #Move pickup tool
+        if gui.pickup_tool != -1:
+            modified_tool_pos = copy.deepcopy(tool_pos)
+            modified_tool_pos[gui.pickup_tool] = fetcher_pos
+            f_obs[3] = modified_tool_pos
+            f_obs[4] = gui.pickup_tool
+
+        #Modify observation state
+        f_obs[0] = worker_pos
+        f_obs[1] = fetcher_pos
         f_obs[5] = action
         f_obs[6] = fetcher_move[0]
-        print(f_obs)
 
+    #TODO record like previous experiment
     gui.clock.tick(8)
     gui.screen.fill(pygame.Color("white"))
     pygame.display.update()
