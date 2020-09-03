@@ -206,7 +206,13 @@ class FetcherAltPolicy(FetcherQueryPolicy):
 
         if np.any(valid_actions):
             p = valid_actions / np.sum(valid_actions)
-            action_idx = np.random.choice(np.arange(4), p=p)
+            i = 0
+            num_valid_actions = []
+            for x in valid_actions:
+                if x:
+                    num_valid_actions.append(i)
+                i += 1
+            action_idx = random.choice(num_valid_actions)
             return action_idx, None
         else:
             return 4, None
@@ -430,8 +436,8 @@ class GUI:
             self.robot_stay = True
         elif move == 6: # pickup
             self.pickup_tool = other_agent_move[1]
-        else:
-            print("move agent 5")
+        # else:
+        #     print("move agent 5")
             
 
     # Pygame event (key down)
@@ -488,6 +494,17 @@ class GUI:
         return -1, self.user, self.robot
 
 
+def write_file(worker_action, fetcher_action, time):
+    worker_actions = {0: "RIGHT", 1: "LEFT", 2: "UP", 3: "DOWN", 4: "NOOP", 5: "WORK"}
+    fetcher_actions = {0: "RIGHT", 1: "LEFT", 2: "UP", 3: "DOWN", 4: "NOOP", 6: "PICKUP"}
+
+    print("{0:15} {1:15} {2:15f}".format(
+        worker_actions[worker_action], 
+        fetcher_actions[fetcher_action],
+        time
+        )
+    )
+
 if __name__ == '__main__':
     # Dimensions, stations, and worker/fetcher values
     cols = 10
@@ -501,9 +518,11 @@ if __name__ == '__main__':
     # Set up pygame gui
     gui = GUI(cols, rows, stn_pos, goal_stn, tool_pos, worker_pos, fetcher_pos)
 
+    print("date") #Prints date to output file
+
     # Set up fetcher robot
-    fetcher = FetcherQueryPolicy()
-    # fetcher = FetcherAltPolicy(epsilon=0.05)
+    # fetcher = FetcherQueryPolicy()
+    fetcher = FetcherAltPolicy(epsilon=0.05)
 
     # Observation state 
     f_obs = [worker_pos, fetcher_pos, stn_pos, tool_pos, None, None, None, None]
@@ -517,7 +536,12 @@ if __name__ == '__main__':
         fetcher_move = fetcher(f_obs)
 
         #Get user action
+        t0 = time.clock()
         action, worker_pos, fetcher_pos = gui.on_execute(fetcher_move)
+        t1 = time.clock()
+
+        #Write actions to file
+        write_file(action, fetcher_move[0], t1-t0)
 
         # Escape (backspace button) or working and finished
         if action == -1 or (action == 5 and fetcher_pos == worker_pos and gui.pickup_tool == goal_stn):

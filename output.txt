@@ -1,0 +1,29 @@
+06/07/2020 14:24:49
+WORKER ACTION   FETCHER ACTION  TIME ELAPSED   
+RIGHT           UP              11.67911
+RIGHT           RIGHT           0.25948
+DOWN            UP              0.27129
+RIGHT           RIGHT           0.24613
+RIGHT           UP              0.18827
+DOWN            UP              0.21459
+RIGHT           RIGHT           0.18730
+RIGHT           RIGHT           0.18226
+RIGHT           UP              0.20205
+RIGHT           UP              0.26620
+RIGHT           PICKUP          0.27176
+RIGHT           RIGHT           0.22998
+NOOP            RIGHT           0.24981
+NOOP            RIGHT           0.18096
+NOOP            DOWN            0.09612
+NOOP            DOWN            0.10406
+NOOP            RIGHT           0.12114
+NOOP            DOWN            0.10831
+NOOP            DOWN            0.13091
+NOOP            RIGHT           0.15687
+NOOP            DOWN            0.16491
+NOOP            RIGHT           0.19211
+NOOP            DOWN            0.17282
+NOOP            DOWN            0.18303
+NOOP            DOWN            0.11047
+WORK            DOWN            0.47910
+WORK            NOOP            0.00164

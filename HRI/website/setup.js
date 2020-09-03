@@ -21,9 +21,20 @@ function builtinRead(x) {
 }
 
 function printString(text) {
-    var output = document.getElementById("output");
-    text = text.replace(/</g, "&lt;");
-    output.innerHTML = output.innerHTML + text;
+    var filename = "output1.txt";
+    
+    $.ajax({
+        url : 'cgi-bin/writeFile.py',
+        type : 'post',
+        data : {data : text, filename : filename},
+        success : function(resp){
+            console.log(resp);
+        }
+    }); 
+
+    // var output = document.getElementById("output");
+    // text = text.replace(/</g, "&lt;");
+    // output.innerHTML = output.innerHTML + text;
 }
 
 function addModal() {
