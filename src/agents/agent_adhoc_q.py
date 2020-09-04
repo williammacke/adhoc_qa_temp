@@ -377,8 +377,12 @@ def create_optimal_query(cost, basecost, edp, wcd_f):
         w_pos, f_pos, s_pos, t_pos, f_tool, w_action, f_action, answer = obs
         G = np.where(agent.probs > 0)[0]
         VOI = np.array([get_voi(g, G, w_pos, f_pos) for g in G])
-        def obj(x, data):
+        values = {}
+        def obj(x, data=None):
             x = np.array(x)
+            xt = tuple(x)
+            if xt in values:
+                return values[xt]
             G = np.where(agent.probs > 0)[0]
             probs = agent.probs[G]
 
@@ -396,6 +400,7 @@ def create_optimal_query(cost, basecost, edp, wcd_f):
             VOI2 = np.array([get_voi(g, G2, w_pos, f_pos) for g in G2])
 
             value =  -1*(np.dot(w1, VOI1) + np.dot(w2, VOI2) + cost*len(G1))
+            values[xt] = value
             #if len(G1) == 0:
             #    print("Empty Query")
             #    print(x)
@@ -405,6 +410,53 @@ def create_optimal_query(cost, basecost, edp, wcd_f):
             return value
 
 
+        def crossover(x1, x2):
+            i = np.random.randint(len(x1))
+            new = np.empty(len(x1), dtype=int)
+            new[:i] = x1[:i]
+            new[i:] = x2[i:]
+            new2 = np.empty(len(x1), dtype=int)
+            new2[:i] = x2[:i]
+            new2[i:] = x1[i:]
+            return new, new2
+
+        def mutation(x, prob=0.001):
+            return x^np.random.choice([0,1], size=len(x), replace=True, p=[1-prob, prob])
+
+        def select(pop, fitness):
+            m = np.random.randint(2, size=2)
+            if fitness[m[0]] >= fitness[m[1]]:
+                return pop[m[0]]
+            return pop[m[1]]
+
+
+        population = np.random.randint(2, size=(50, len(G)))
+        fitness = np.array([obj(x) for x in population])
+        best = population[np.argmax(fitness)]
+        bestFit = fitness[best]
+        for _ in range(100):
+            new_pop = np.empty(population.shape, dtype=int)
+            m = 0
+            while m < len(new_pop):
+                p1 = select(population, fitness)
+                p2 = select(population, fitness)
+                new,new2 = crossover(p1, p2)
+                new = mutation(new)
+                new2 = mutation(new2)
+                new_pop[m] = new
+                m += 1
+                if m < len(new_pop):
+                    new_pop[m] = new2
+                    m += 1
+            population = new_pop
+            fitness = np.array([obj(x) for x in population])
+            if np.all(np.max(fitness) > bestFit):
+                best = population[np.argmax(fitness)]
+                bestFit = fitness[best]
+
+
+
+        """
 
         ga  = pyeasyga.GeneticAlgorithm(G)
         ga.population_size = 200
@@ -414,6 +466,8 @@ def create_optimal_query(cost, basecost, edp, wcd_f):
         space = [Integer(0, 1) for _ in G]
         #answer = gp_minimize(obj, space)
         answer = ga.best_individual()
+        """
+        answer = (bestFit, best)
         print("answer",answer)
         objective = obj(answer[1], None)
         objective += (np.dot(VOI, agent.probs[G]) - basecost)

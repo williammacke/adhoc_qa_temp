@@ -36,6 +36,7 @@ def graph(args):
     if args.x_vals:
         x_vals = args.x_vals
     else:
+        k = list(means.keys())[0]
         x_vals = list(range(len(means[k])))
     for k in means:
         assert len(x_vals) == len(means[k])

@@ -169,4 +169,6 @@ if __name__ == '__main__':
     goals = [np.array([7,2]), np.array([7,8]), np.array([3, 8])]
     wcd = ACD2(goals, width=10, height=10, pi=random_optimal_plan)
     print((wcd[1,2] + wcd[2,1])/2)
-    np.savetxt("test_acd.csv", (wcd[1,2] + wcd[2,1])/2)
+    np.savetxt("edp_g1_g2.csv", wcd[1,2])
+    np.savetxt("edp_g2_g1.csv", wcd[2,1])
+    #np.savetxt("test_acd.csv", (wcd[1,2] + wcd[2,1])/2)
