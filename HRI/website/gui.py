@@ -416,6 +416,14 @@ class GUI:
  
     # Close pygame when finished
     def on_cleanup(self):
+        self.font = pygame.font.SysFont("lucidaconsole", int(50 * self.height / 1080))
+        self.screen.fill(GRAY)
+
+        text = self.font.render("Thank you for participating", True, WHITE)
+        self.screen.blit(text, (self.width / 2 - 150, 100))
+        text = self.font.render("in the experiment!", True, WHITE)
+        self.screen.blit(text, (self.width / 2 - 150, 150))
+        pygame.display.flip()
         pygame.quit()
     
     # Move fetcher agent (robot)
@@ -461,6 +469,7 @@ class GUI:
                 self.user[1] += 1
                 return 2
             elif e.key == pygame.K_SPACE: # Work
+                self.arrived = True
                 return 5
             elif e.key == pygame.K_RETURN and NOOP_ALLOWED: # NOOP
                 return 4
@@ -483,9 +492,12 @@ class GUI:
         while self.running:
             self.clock.tick(8)
             #User input
-            for e in pygame.event.get():
-                if e.type == pygame.KEYDOWN:
-                    action = self.on_event(e)
+            if not self.arrived:
+                for e in pygame.event.get():
+                    if e.type == pygame.KEYDOWN:
+                        action = self.on_event(e)
+            else:
+                action = 5
             # Got input, return action, worker_pos, and fetcher_pos
             if action != None:
                 self.on_render()
@@ -506,61 +518,69 @@ def write_file(worker_action, fetcher_action, time):
     )
 
 if __name__ == '__main__':
-    # Dimensions, stations, and worker/fetcher values
-    cols = 10
-    rows = 6
-    stn_pos = [[3,0], [7,0], [3,5],[7,4]]
-    goal_stn = 3
-    tool_pos = [[9,4], [9,4], [9,4], [9,4]]
-    worker_pos = [0,2]
-    fetcher_pos = [9,2]
+    cols_list = [10, 10, 10, 10]
+    rows_list = [6, 6, 6, 6]
+    stn_pos_list = [[[3,0], [7,0], [3,5],[7,4]], [[3,0], [7,0], [3,5],[7,4]], [[3,0], [7,0], [3,5],[7,4]], [[3,0], [7,0], [3,5],[7,4]]]
+    goal_stn_list = [0, 1, 2, 3]
+    tool_pos_list = [[[9,4], [9,4], [9,4], [9,4]], [[9,4], [9,4], [9,4], [9,4]], [[9,4], [9,4], [9,4], [9,4]], [[9,4], [9,4], [9,4], [9,4]]]
+    worker_pos_list = [[0,2], [0,2], [0,2], [0,2]]
+    fetcher_pos_list = [[9,2], [9,2], [9,2], [9,2]]
 
-    # Set up pygame gui
-    gui = GUI(cols, rows, stn_pos, goal_stn, tool_pos, worker_pos, fetcher_pos)
+    for i in range(4):
+        # Dimensions, stations, and worker/fetcher values
+        cols = cols_list[i]
+        rows = rows_list[i]
+        stn_pos = stn_pos_list[i]
+        goal_stn = goal_stn_list[i]
+        tool_pos = tool_pos_list[i]
+        worker_pos = worker_pos_list[i]
+        fetcher_pos = fetcher_pos_list[i]
 
-    print("date") #Prints date to output file
+        # Set up pygame gui
+        gui = GUI(cols, rows, stn_pos, goal_stn, tool_pos, worker_pos, fetcher_pos)
 
-    # Set up fetcher robot
-    # fetcher = FetcherQueryPolicy()
-    fetcher = FetcherAltPolicy(epsilon=0.05)
+        print("date") #Prints date to output file
 
-    # Observation state 
-    f_obs = [worker_pos, fetcher_pos, stn_pos, tool_pos, None, None, None, None]
-    done = False
+        # Set up fetcher robot
+        # fetcher = FetcherQueryPolicy()
+        fetcher = FetcherAltPolicy(epsilon=0.05)
 
-    #Loop actions until expreiment is complete
-    while not done:
-        gui.clock.tick(8)
+        # Observation state 
+        f_obs = [worker_pos, fetcher_pos, stn_pos, tool_pos, None, None, None, None]
+        done = False
 
-        #Get fetcher move
-        fetcher_move = fetcher(f_obs)
+        #Loop actions until expreiment is complete
+        while not done:
+            gui.clock.tick(8)
 
-        #Get user action
-        t0 = time.clock()
-        action, worker_pos, fetcher_pos = gui.on_execute(fetcher_move)
-        t1 = time.clock()
+            #Get fetcher move
+            fetcher_move = fetcher(f_obs)
 
-        #Write actions to file
-        write_file(action, fetcher_move[0], t1-t0)
+            #Get user action
+            t0 = time.clock()
+            action, worker_pos, fetcher_pos = gui.on_execute(fetcher_move)
+            t1 = time.clock()
 
-        # Escape (backspace button) or working and finished
-        if action == -1 or (action == 5 and fetcher_pos == worker_pos and gui.pickup_tool == goal_stn):
-            done = True
+            #Write actions to file
+            write_file(action, fetcher_move[0], t1-t0)
 
-        #Move pickup tool
-        if gui.pickup_tool != -1:
-            modified_tool_pos = copy.deepcopy(tool_pos)
-            modified_tool_pos[gui.pickup_tool] = fetcher_pos
-            f_obs[3] = modified_tool_pos
-            f_obs[4] = gui.pickup_tool
+            # Escape (backspace button) or working and finished
+            if action == -1 or (action == 5 and fetcher_pos == worker_pos and gui.pickup_tool == goal_stn):
+                done = True
 
-        #Modify observation state
-        f_obs[0] = worker_pos
-        f_obs[1] = fetcher_pos
-        f_obs[5] = action
-        f_obs[6] = fetcher_move[0]
+            #Move pickup tool
+            if gui.pickup_tool != -1:
+                modified_tool_pos = copy.deepcopy(tool_pos)
+                modified_tool_pos[gui.pickup_tool] = fetcher_pos
+                f_obs[3] = modified_tool_pos
+                f_obs[4] = gui.pickup_tool
 
-    #TODO record like previous experiment
+            #Modify observation state
+            f_obs[0] = worker_pos
+            f_obs[1] = fetcher_pos
+            f_obs[5] = action
+            f_obs[6] = fetcher_move[0]
+
     gui.clock.tick(8)
     gui.screen.fill(pygame.Color("white"))
     pygame.display.update()
