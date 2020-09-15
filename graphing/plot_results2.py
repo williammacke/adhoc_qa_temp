@@ -50,6 +50,8 @@ def graph(args):
         plt.xlabel(args.x_axis)
     if args.y_axis:
         plt.ylabel(args.y_axis)
+    if args.title:
+        plt.title(args.title)
     plt.show()
 
         
@@ -128,6 +130,7 @@ if __name__ == '__main__':
     parser.add_argument('--x_axis', help="x-axis label")
     parser.add_argument('--y_axis', help="y-axis label")
     parser.add_argument('--labels', nargs='+', help='legend labels')
+    parser.add_argument('--title', help='Figure Title')
     args = parser.parse_args()
     graph(args)
 

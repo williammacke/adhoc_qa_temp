@@ -5,7 +5,7 @@ from enum import  IntEnum
 
 class BlockWorld4Teams:
     ACTIONS = IntEnum('Actions', 'RIGHT LEFT NOOP QUERY PICKUP', start=0)
-    def __init__(self, num_rooms, drop_room, num_blocks, locations, order, num_agents, agents):
+    def __init__(self, num_rooms, drop_room, num_blocks, locations, order, num_agents, agents, basecost=1,cost=0):
         self._num_rooms = num_rooms
         self._drop_room = drop_room
         self._num_blocks = num_blocks
@@ -17,6 +17,8 @@ class BlockWorld4Teams:
         self.state = np.array([np.random.randint(num_rooms, size=num_agents), np.array(locations), np.array([-1 for _ in range(num_agents)]), np.array(self._order)])
         self._start_state = deepcopy(self.state)
         self._agents = agents
+        self.basecost = basecost
+        self.cost = cost
 
     def reset(self):
         self.state = deepcopy(self._start_state)
@@ -38,19 +40,23 @@ class BlockWorld4Teams:
                 if self.state[2][i] != -1:
                     self.state[1][self.state[2][i]] += 1
                     self.state[1][self.state[2][i]] = min(self.state[1][self.state[2][i]], self._num_rooms-1)
+                reward += -1
             elif a1 == BlockWorld4Teams.ACTIONS.LEFT:
                 self.state[0][i] -= 1
                 self.state[0][i] = max(self.state[0][i], 0)
                 if self.state[2][i] != -1:
                     self.state[1][self.state[2][i]] -= 1
                     self.state[1][self.state[2][i]] = max(self.state[1][self.state[2][i]], 0)
+                reward += -1
             elif a1 == BlockWorld4Teams.ACTIONS.PICKUP:
                 if self.state[1][a2] == self.state[0][i] and not any(k == a2 for k in self.state[2]):
                     self.state[2][i] = a2
+                reward += -1
             elif a1 == BlockWorld4Teams.ACTIONS.QUERY:
                 target, query = a2
-                answer = self._agents[target].answer(self.state, query)
-                a.receive(query, answer)
+                answer = self._agents[target].answer(self.state, query, target)
+                a.receive(target, query, answer)
+                reward += -1*(self.basecost + self.cost*len(query))
         for i,loc in enumerate(self.state[1]):
             if loc == -1:
                 continue
@@ -75,7 +81,7 @@ class BlockWorld4Teams:
                 dropped.remove(n)
                 #print('Dropped:', dropped)
                 self._current_block += 1
-                reward += 1
+                #reward += 1
             else:
                 #print("done 1")
                 done = True

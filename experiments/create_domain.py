@@ -40,7 +40,8 @@ def create_domain(args):
     worker_pos = np.array(random.choice(pos))
     edp = ACD2(stations_pos, width=args.grid_size, height=args.grid_size)
     wcd_f = WCD(tools_pos, width=args.grid_size, height=args.grid_size)
-    domain = {"width":args.grid_size, "height":args.grid_size, "station_pos":stations_pos, "tools_pos":tools_pos, "fetcher_pos":fetcher_pos, "worker_pos":worker_pos, "edp":edp, "wcd_f":wcd_f}
+    wcd_a = WCD(stations_pos, width=args.grid_size, height=args.grid_size)
+    domain = {"width":args.grid_size, "height":args.grid_size, "station_pos":stations_pos, "tools_pos":tools_pos, "fetcher_pos":fetcher_pos, "worker_pos":worker_pos, "edp":edp, "wcd_f":wcd_f, "wcd_a":wcd_a}
     return domain
 
 
