@@ -1,3 +1,15 @@
+var key = ""
+var allText = ""
+
+function generateKey(){
+    const length = 16;
+    const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";  
+    const charactersLength = characters.length;
+    for ( var i = 0; i < length; i++ ) {
+        key += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+}
+
 function resetTarget() {
     var selector = Sk.TurtleGraphics.target;
     var target =
@@ -21,20 +33,50 @@ function builtinRead(x) {
 }
 
 function printString(text) {
-    var filename = "output1.txt";
-    
-    $.ajax({
-        url : 'cgi-bin/writeFile.py',
-        type : 'post',
-        data : {data : text, filename : filename},
-        success : function(resp){
-            console.log(resp);
-        }
-    }); 
+    var filename = key + ".txt";
 
-    // var output = document.getElementById("output");
-    // text = text.replace(/</g, "&lt;");
-    // output.innerHTML = output.innerHTML + text;
+    console.log(text);
+
+    if(text == "date" || text == "done"){
+        text = text == "done" ? allText + "\n" : text
+        allText = ""
+
+        $.ajax({
+            url : 'cgi-bin/writeFile.py',
+            type : 'post',
+            data : {data : text, filename : filename}
+        }); 
+
+
+    } else if (text == "complete"){
+        var buttonCode = document.getElementById("code");
+        buttonCode.style.display = "inline"
+        var codeText = document.getElementById("codeText");
+        codeText.style.display = "inline"
+        codeText.innerHTML = key
+    } else {
+        allText += text;
+    }
+}
+
+function getCode(){  
+    var textarea = document.createElement('textarea');
+    textarea.textContent = key;
+    document.body.appendChild(textarea);
+
+    var selection = document.getSelection();
+    var range = document.createRange();
+    //  range.selectNodeContents(textarea);
+    range.selectNode(textarea);
+    selection.removeAllRanges();
+    selection.addRange(range);
+    
+    document.execCommand('copy')
+    selection.removeAllRanges();
+
+    document.body.removeChild(textarea);
+
+    alert("You have successfully copied your MTurk code: \n" + key);
 }
 
 function addModal() {

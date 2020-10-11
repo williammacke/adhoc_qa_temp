@@ -12,11 +12,15 @@
     <body>
         <div id="mycanvas"></div>
         <div id="output"></div>
-
-        <textarea id="code" style="display: none;"></textarea>
+        
+        <div>
+            <div id="codeText" style="display:none; margin-left: 40%"></div>
+            <button id="code" style="display: none; height: 40px; width: 100px; margin-left: 50%" onclick="getCode()">Get Code</button>
+        </div>
 
         <script>
             $("document").ready(function () {
+                generateKey();
                 // Configuration for skulpt
                 (Sk.TurtleGraphics || (Sk.TurtleGraphics = {})).target =
                     "mycanvas";
@@ -49,8 +53,6 @@
                             alert(e);
                         }
                     });
-
-                    console.log("completed experient");
                 });
             });
         </script>

@@ -273,7 +273,7 @@ class GUI:
         self.robot_stay = False
 
         # Font
-        self.font = pygame.font.SysFont("lucidaconsole", int(120 * self.height / 1080))
+        self.font = pygame.font.SysFont("lucidaconsole", int(100 * self.height / 1080))
 
         if (self.on_init() == False):
             self.running = False
@@ -338,31 +338,31 @@ class GUI:
 
     # Pause screen
     def draw_pause_screen(self):
-        self.font = pygame.font.SysFont("lucidaconsole", int(50 * self.height / 1080))
+        self.font = pygame.font.SysFont("lucidaconsole", int(35 * self.height / 1080))
         self.screen.fill(GRAY)
 
         text = self.font.render("Your goal station is number " + str(self.goal_stn + 1), True, WHITE)
-        self.screen.blit(text, (self.width / 2 - 150, 25))
+        self.screen.blit(text, (self.width / 2 - 100, 25))
         text = self.font.render("Tab - Pause/Unpause", True, WHITE)
-        self.screen.blit(text, (self.width / 2 - 100 , 75))
+        self.screen.blit(text, (self.width / 2 - 75 , 75))
         text = self.font.render("Up - Move up", True, WHITE)
-        self.screen.blit(text, (self.width / 2 - 70, 125))
+        self.screen.blit(text, (self.width / 2 - 50, 125))
         text = self.font.render("Left - Move left", True, WHITE)
-        self.screen.blit(text, (self.width / 2 - 80, 175))
+        self.screen.blit(text, (self.width / 2 - 60, 175))
         text = self.font.render("Down - Move down", True, WHITE)
-        self.screen.blit(text, (self.width / 2 - 100, 225))
+        self.screen.blit(text, (self.width / 2 - 75, 225))
         text = self.font.render("Right - Move right", True, WHITE)
-        self.screen.blit(text, (self.width / 2 - 90, 275))
+        self.screen.blit(text, (self.width / 2 - 75, 275))
         text = self.font.render("Space - Done (press when arrived at station)", True, WHITE)
-        self.screen.blit(text, (self.width / 2 - 200, 325))
+        self.screen.blit(text, (self.width / 2 - 150, 325))
         if NOOP_ALLOWED:
             text = self.font.render("Enter - Stop (don't move)", True, WHITE)
-            self.screen.blit(text, (self.width / 2 - 150, 375))
+            self.screen.blit(text, (self.width / 2 - 90, 375))
             text = self.font.render("Press Tab to go to the experiment screen", True, BLACK)
-            self.screen.blit(text, (self.width / 2 - 175, 425))
+            self.screen.blit(text, (self.width / 2 - 140, 425))
         else:
             text = self.font.render("Press Tab to go to the experiment screen", True, BLACK)
-            self.screen.blit(text, (self.width / 2 - 175, 375))
+            self.screen.blit(text, (self.width / 2 - 140, 375))
         pygame.display.flip()
 
     def draw_experiment_screen(self):
@@ -423,6 +423,11 @@ class GUI:
         self.screen.blit(text, (self.width / 2 - 150, 100))
         text = self.font.render("in the experiment!", True, WHITE)
         self.screen.blit(text, (self.width / 2 - 150, 150))
+
+        text = self.font.render("Press the button below to", True, WHITE)
+        self.screen.blit(text, (self.width / 2 - 150, 250))
+        text = self.font.render("copy your MTurk code", True, WHITE)
+        self.screen.blit(text, (self.width / 2 - 150, 300))
         pygame.display.flip()
         pygame.quit()
     
@@ -518,28 +523,123 @@ def write_file(worker_action, fetcher_action, time):
     )
 
 if __name__ == '__main__':
-    cols_list = [10, 10, 10, 10]
-    rows_list = [6, 6, 6, 6]
-    stn_pos_list = [[[3,0], [7,0], [3,5],[7,4]], [[3,0], [7,0], [3,5],[7,4]], [[3,0], [7,0], [3,5],[7,4]], [[3,0], [7,0], [3,5],[7,4]]]
-    goal_stn_list = [0, 1, 2, 3]
-    tool_pos_list = [[[9,4], [9,4], [9,4], [9,4]], [[9,4], [9,4], [9,4], [9,4]], [[9,4], [9,4], [9,4], [9,4]], [[9,4], [9,4], [9,4], [9,4]]]
-    worker_pos_list = [[0,2], [0,2], [0,2], [0,2]]
-    fetcher_pos_list = [[9,2], [9,2], [9,2], [9,2]]
+    # Experiments
+    # Num Cols, Num Rows, Stations, Goal, Tool, Worker, Fetcher 
+    exp = [
+        [   
+            5,
+            3,
+            [[3,0], [3,2]],
+            0,
+            [[4,1], [4,1]],
+            [0,1],
+            [4,0]
+        ],
+        [   
+            5,
+            3,
+            [[3,0], [3,2]],
+            1,
+            [[4,1], [4,1]],
+            [0,1],
+            [4,0]
+        ],
+        [   
+            10,
+            6,
+            [[3,0], [7,0], [3,4], [7,4], [0,2], [5,0], [9,3], [4,5]],
+            0,
+            [[3,2], [3,2], [3,2], [3,2], [3,2], [3,2], [3,2], [3,2]],
+            [5,2],
+            [2,2]
+        ],
+        [   
+            10,
+            6,
+            [[3,0], [7,0], [3,4], [7,4], [0,2], [5,1], [9,3], [4,5]],
+            3,
+            [[3,2], [3,2], [3,2], [3,2], [3,2], [3,2], [3,2], [3,2]],
+            [5,2],
+            [2,2]
+        ],
+        [   
+            15,
+            9,
+            [[5,6], [8,3], [5,0], [2,3]],
+            1,
+            [[8,5], [8,5], [8,5], [8,5]],
+            [5,3],
+            [9,4]
+        ],
+        [   
+            15,
+            9,
+            [[5,6], [8,3], [5,0], [2,3]],
+            3,
+            [[8,5], [8,5], [8,5], [8,5]],
+            [5,3],
+            [9,4]
+        ],
+        [   
+            5,
+            3,
+            [[4,1], [0,1]],
+            0,
+            [[2,2], [2,2]],
+            [2,1],
+            [1,2]
+        ],
+        [   
+            5,
+            3,
+            [[4,1], [0,1]],
+            1,
+            [[2,2], [2,2]],
+            [2,1],
+            [1,2]
+        ],
+        [   
+            10,
+            6,
+            [[5,3], [5,2], [6,2]],
+            0,
+            [[8,3], [8,3], [8,3]],
+            [0,3],
+            [9,2]
+        ],
+        [   
+            10,
+            6,
+            [[5,3], [5,2], [6,2]],
+            2,
+            [[8,3], [8,3], [8,3]],
+            [0,3],
+            [9,2]
+        ],
 
-    for i in range(4):
+    ]
+
+    exp_ind = [x for x in range(len(exp))]
+    random.shuffle(exp_ind)
+
+    for x in range(8):
+        i = exp_ind[x]
+        cur_exp = exp[i]
+
         # Dimensions, stations, and worker/fetcher values
-        cols = cols_list[i]
-        rows = rows_list[i]
-        stn_pos = stn_pos_list[i]
-        goal_stn = goal_stn_list[i]
-        tool_pos = tool_pos_list[i]
-        worker_pos = worker_pos_list[i]
-        fetcher_pos = fetcher_pos_list[i]
+        cols = cur_exp[0]
+        rows = cur_exp[1]
+        stn_pos = cur_exp[2]
+        goal_stn = cur_exp[3]
+        tool_pos = cur_exp[4]
+        worker_pos = cur_exp[5]
+        fetcher_pos = cur_exp[6]
 
         # Set up pygame gui
         gui = GUI(cols, rows, stn_pos, goal_stn, tool_pos, worker_pos, fetcher_pos)
-
         print("date") #Prints date to output file
+        print("EXPERIMENT #{num}".format(num = i))
+        print("{0:15} {1:15} {2:15}\n".format("WORKER ACTION", "FETCHER ACTION", "TIME ELAPSED"))
 
         # Set up fetcher robot
         # fetcher = FetcherQueryPolicy()
@@ -580,7 +680,10 @@ if __name__ == '__main__':
             f_obs[1] = fetcher_pos
             f_obs[5] = action
             f_obs[6] = fetcher_move[0]
+        
+        print("done")
 
+    print("complete")
     gui.clock.tick(8)
     gui.screen.fill(pygame.Color("white"))
     pygame.display.update()

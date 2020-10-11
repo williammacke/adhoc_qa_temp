@@ -20,7 +20,8 @@ if(text == "date"):
     from datetime import datetime
     now = datetime.now()
     dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
-    output.write(dt_string)
+    output.write(dt_string + "\n")
+    output.write("{0:15} {1:15} {2:15}\n".format("WORKER ACTION", "FETCHER ACTION", "TIME ELAPSED"))
 
 
 else:
