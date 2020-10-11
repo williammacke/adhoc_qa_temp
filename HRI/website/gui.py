@@ -474,7 +474,7 @@ class GUI:
                 self.user[1] += 1
                 return 2
             elif e.key == pygame.K_SPACE: # Work
-                self.arrived = True
+                self.arrived = self.user == self.stn_pos[self.goal_stn]
                 return 5
             elif e.key == pygame.K_RETURN and NOOP_ALLOWED: # NOOP
                 return 4
@@ -651,8 +651,6 @@ if __name__ == '__main__':
 
         #Loop actions until expreiment is complete
         while not done:
-            gui.clock.tick(8)
-
             #Get fetcher move
             fetcher_move = fetcher(f_obs)
 
@@ -684,7 +682,6 @@ if __name__ == '__main__':
         print("done")
 
     print("complete")
-    gui.clock.tick(8)
     gui.screen.fill(pygame.Color("white"))
     pygame.display.update()
     gui.on_cleanup()
