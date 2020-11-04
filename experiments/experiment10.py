@@ -8,14 +8,15 @@ import numpy as np
 from src.agents.agent import RandomWorkerPolicy
 from src.agents.agent import PlanPolicy
 from src.agents.agent_adhoc_q import FetcherQueryPolicy
-from src.agents.agent_adhoc_q import FetcherAltPolicy
-from src.agents.agent_adhoc_q import never_query, random_query, max_action_query, min_action_query, median_action_query, smart_query, smart_query2, create_smart_query3, smart_query_noRandom, smart_query2_noRandom, create_smart_query3_noRandom, create_optimal_query
+from src.agents.agent_adhoc_q import FetcherAltPolicy, FetcherAltPolicy2
+from src.agents.query_policies import never_query, random_query, max_action_query, min_action_query, median_action_query, smart_query, smart_query2, create_smart_query3, smart_query_noRandom, smart_query2_noRandom, create_smart_query3_noRandom, create_optimal_query
 from itertools import permutations
 import pandas as pd
 import json
 import argparse
 from time import sleep
 from src.acd_utils import ACD2, WCD
+from src.wcd_utils import fast_wcd
 import os
 import pickle
 import time as clock
@@ -67,7 +68,13 @@ def experiment(args):
     results = {}
     results['graph 1'] = {}
     results['time'] = {}
-    strats = {'Never Query':never_query, "Random Query":random_query, "Smart Query":smart_query, 'Smart Query 2': smart_query2, 'Smart Query 3': create_smart_query3(args.cost), "Smart Query No Random":smart_query_noRandom, 'Smart Query 2 No Random': smart_query2_noRandom, 'Smart Query 3 No Random': create_smart_query3_noRandom(args.cost), "Tool Box Query":median_action_query, "Tool Box Query 2":max_action_query, "Best Query":create_optimal_query}
+    results['worker_actions'] = {}
+    results['fetcher_actions'] = {}
+    results['queries_asked'] = {}
+    results['action_times'] = {}
+    results['scenario'] = []
+    #strats = {'Never Query':never_query, "Random Query":random_query, "Smart Query":smart_query, 'Smart Query 2': smart_query2, 'Smart Query 3': create_smart_query3(args.cost), "Smart Query No Random":smart_query_noRandom, 'Smart Query 2 No Random': smart_query2_noRandom, 'Smart Query 3 No Random': create_smart_query3_noRandom(args.cost), "Tool Box Query":median_action_query, "Tool Box Query 2":max_action_query, "Best Query":create_optimal_query}
+    strats = {'Never Query':never_query, "Random Query":random_query,  'Smart Query 3': create_smart_query3(args.cost), 'Smart Query 3 No Random': create_smart_query3_noRandom(args.cost), "Tool Box Query":median_action_query, "Tool Box Query 2":max_action_query, "Best Query":create_optimal_query}
 
 
     def cost_fun(state, query):
@@ -95,6 +102,10 @@ def experiment(args):
     for strat in strats:
         results['graph 1'][strat] = []
         results['time'][strat] = []
+        results['worker_actions'][strat] = []
+        results['fetcher_actions'][strat] = []
+        results['queries_asked'][strat] = []
+        results['action_times'][strat] = []
     results['graph 1']['baseline'] = []
     results['time']['baseline'] = []
     if args.scenarios_dir:
@@ -116,6 +127,10 @@ def experiment(args):
             worker_pos = domain["worker_pos"]
             edp = domain["edp"]
             wcd_f = domain["wcd_f"]
+            seed = domain['seed']
+            random.seed(seed)
+            np.random.seed(seed)
+            results['scenario'].append(args.scenarios_dir + '/' + s_name)
         else:
             width = args.grid_size
             height = args.grid_size
@@ -137,6 +152,10 @@ def experiment(args):
         #probs = np.array([dist(worker_pos, s) for s in stations_pos])
         #probs = np.exp(-1*probs)
         #probs /= np.sum(probs)
+        wcd_planning = {}
+        for g1 in range(len(tools_pos)):
+            for g2 in range(len(tools_pos)):
+                wcd_planning[g1, g2] = fast_wcd(fetcher_pos, [tools_pos[g1], tools_pos[g2]])
         probs = priors[args.prior](stations_pos, tools_pos, worker_pos, fetcher_pos)
         goal = np.random.choice(list(range(len(stations_pos))), p=probs)
         env = ToolFetchingEnvironment(fetcher_pos, worker_pos, stations_pos, tools_pos, goal, width=width, height=height, cost_fun=cost_fun)
@@ -149,25 +168,48 @@ def experiment(args):
                 qp = strats[strat](args.cost, args.base_cost, edp, wcd_f)
             else:
                 qp = strats[strat]
+            random.seed(seed)
+            np.random.seed(seed)
             obs = env.reset()
             done = [False, False]
-            fetcher = FetcherAltPolicy(query_policy=qp, prior=probs)
+            fetcher = FetcherAltPolicy2(query_policy=qp, prior=probs, wcd=wcd_planning)
             worker = PlanPolicy(path + [ToolFetchingEnvironment.WORKER_ACTIONS.WORK])
             cost = 0
             time = 0
             rand_time = int(random.random()*args.grid_size)
             seconds = 0
+            worker_actions = []
+            fetcher_actions = []
+            queries_asked = []
+            action_times = []
             while not done[0]:
                 if args.render:
                     env.render()
                     sleep(0.05)
                 lastTime = clock.time()
-                obs, reward, done, _ = env.step([worker(obs[0]), fetcher(obs[1])])
+                w_action  = worker(obs[0])
+                f_action = fetcher(obs[1])
+                obs, reward, done, _ = env.step([w_action, f_action])
                 cost += reward[0]
-                seconds += clock.time() - lastTime
+                new_time = clock.time()
+                seconds += new_time - lastTime
                 time += 1
+                worker_actions.append(int(w_action))
+                fetcher_actions.append(int(f_action[0]))
+                if f_action[1] is not None:
+                    if f_action[0] == ToolFetchingEnvironment.FETCHER_ACTIONS.QUERY:
+                        queries_asked.append([int(s) for s in f_action[1]])
+                    else:
+                        queries_asked.append([])
+                else:
+                    queries_asked.append([])
+                action_times.append(float(seconds))
             results['graph 1'][strat].append(int(cost))
-            results['time'][strat].append(seconds)
+            results['time'][strat].append(float(seconds))
+            results['worker_actions'][strat].append(worker_actions)
+            results['fetcher_actions'][strat].append(fetcher_actions)
+            results['queries_asked'][strat].append(queries_asked)
+            results['action_times'][strat].append(action_times)
             env.close()
     return results
 

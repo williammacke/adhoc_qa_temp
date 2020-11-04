@@ -40,6 +40,7 @@ def wcd(start, finish1, finish2, obs=[], width=10, height=10):
 
 
 def fast_wcd(pos, goals):
+    pos = copy.deepcopy(pos)
     trans = np.array([[0,1], [0,-1], [-1,0], [1,0]])
     change = True
     time = 0

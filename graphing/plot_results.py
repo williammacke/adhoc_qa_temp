@@ -16,12 +16,17 @@ def graph(args):
     fig, ax = plt.subplots(len(list(results.keys())), 1, figsize=(15,10))
 
     for i,graph in enumerate(results):
+        if graph != 'graph 1': continue
         data = results[graph]
         if args.use_baseline:
             for k in data:
                 if k == 'baseline': continue
                 for i in range(len(data[k])):
                     data[k][i] -= data['baseline'][i]
+                print(k, data[k])
+                plt.hist(data[k], bins=100)
+                plt.show()
+                input()
         for k in data:
             if k == 'baseline': continue
             if k in args.skip: continue

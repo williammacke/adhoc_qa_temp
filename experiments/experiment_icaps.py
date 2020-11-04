@@ -8,14 +8,17 @@ import numpy as np
 from src.agents.agent import RandomWorkerPolicy
 from src.agents.agent import PlanPolicy
 from src.agents.agent_adhoc_q import FetcherQueryPolicy
-from src.agents.agent_adhoc_q import FetcherAltPolicy
+from src.agents.agent_adhoc_q import FetcherAltPolicy, FetcherAltPolicy2
 from src.agents.agent_adhoc_q import never_query, random_query, max_action_query, min_action_query, median_action_query, smart_query, smart_query2, create_smart_query3, smart_query_noRandom, smart_query2_noRandom, create_smart_query3_noRandom, create_optimal_query
 from itertools import permutations
 import pandas as pd
 import json
 import argparse
 from time import sleep
-from src.acd_utils import ACD2, WCD
+#from src.acd_utils import ACD2, WCD
+from src.wcd_utils import fast_wcd
+import pickle
+import os
 
 #strats = {'Never Query':never_query, 'Random Query':random_query, "Max Action Query":max_action_query, "Min Action Query":min_action_query, "Median Action Query":median_action_query, "Smart Query":smart_query}
 
@@ -92,37 +95,60 @@ def experiment(args):
     for strat in strats:
         results['graph 1'][strat] = []
     results['graph 1']['baseline'] = []
-    for t in range(args.num_exp):
+    if args.scenarios_dir:
+        scenarios = os.listdir(args.scenarios_dir)
+        num_exp = len(scenarios)
+    else:
+        num_exp = args.num_exp
+        scenarios = ["" for _ in range(num_exp)]
+    for s_name,t in zip(scenarios, range(num_exp)):
         print(f"Exp: {t}")
-        if args.cluster_stations:
-            num_clusters = args.num_stations//4
-            cluster_pos = [(i,j) for i in range(args.grid_size//2) for j in range(args.grid_size//2)]
-            cluster_pos = random.sample(cluster_pos, num_clusters)
-            stations_pos = np.array([k for i,j in cluster_pos for k in [(2*i,2*j), (2*i+1, 2*j), (2*i, 2*j+1), (2*i+1, 2*j+1)]])
+        if s_name != "":
+            with open(args.scenarios_dir + '/' + s_name, 'rb') as f:
+                domain = pickle.load(f)
+            width = domain["width"]
+            height = domain["height"]
+            stations_pos = domain["station_pos"]
+            tools_pos = domain["tools_pos"]
+            fetcher_pos = domain["fetcher_pos"]
+            worker_pos = domain["worker_pos"]
+            #edp = domain["edp"]
+            wcd_f = domain["wcd_f"]
         else:
-            stations_pos = [(i,j) for i in range(args.grid_size) for j in range(args.grid_size)]
-            stations_pos = np.array(random.sample(stations_pos, args.num_stations))
-        pos = [(i,j) for i in range(args.grid_size) for j in range(args.grid_size)]
-        tool_box_pos = random.sample(pos, args.num_tool_locations)
-        tools_pos = np.array([random.choice(tool_box_pos) for _ in range(args.num_stations)])
-        fetcher_pos = np.array(random.choice(pos))
-        worker_pos = np.array(random.choice(pos))
-        #edp = ACD2(stations_pos, width=args.grid_size, height=args.grid_size)
-        #wcd_f = WCD(tools_pos, width=args.grid_size, height=args.grid_size)
-        #probs = np.array([dist(worker_pos, s) for s in stations_pos])
-        #probs = np.exp(-1*probs)
-        #probs /= np.sum(probs)
+            if args.cluster_stations:
+                num_clusters = args.num_stations//4
+                cluster_pos = [(i,j) for i in range(args.grid_size//2) for j in range(args.grid_size//2)]
+                cluster_pos = random.sample(cluster_pos, num_clusters)
+                stations_pos = np.array([k for i,j in cluster_pos for k in [(2*i,2*j), (2*i+1, 2*j), (2*i, 2*j+1), (2*i+1, 2*j+1)]])
+            else:
+                stations_pos = [(i,j) for i in range(args.grid_size) for j in range(args.grid_size)]
+                stations_pos = np.array(random.sample(stations_pos, args.num_stations))
+            pos = [(i,j) for i in range(args.grid_size) for j in range(args.grid_size)]
+            tool_box_pos = random.sample(pos, args.num_tool_locations)
+            tools_pos = np.array([random.choice(tool_box_pos) for _ in range(args.num_stations)])
+            fetcher_pos = np.array(random.choice(pos))
+            worker_pos = np.array(random.choice(pos))
+            #edp = ACD2(stations_pos, width=args.grid_size, height=args.grid_size)
+            #wcd_f = WCD(tools_pos, width=args.grid_size, height=args.grid_size)
+            #probs = np.array([dist(worker_pos, s) for s in stations_pos])
+            #probs = np.exp(-1*probs)
+            #probs /= np.sum(probs)
         probs = priors[args.prior](stations_pos, tools_pos, worker_pos, fetcher_pos)
-        goal = np.random.choice(list(range(args.num_stations)), p=probs)
+        goal = np.random.choice(list(range(len(stations_pos))), p=probs)
         env = ToolFetchingEnvironment(fetcher_pos, worker_pos, stations_pos, tools_pos, goal, width=args.grid_size, height=args.grid_size, cost_fun=cost_fun)
         path = rand_path_perm(stations_pos[goal], worker_pos)
         results['graph 1']['baseline'].append(-int(max(dist(worker_pos, stations_pos[goal]), dist(fetcher_pos, tools_pos[goal])+dist(tools_pos[goal], stations_pos[goal]))))
+        wcd_f = {}
+        for g1 in range(len(tools_pos)):
+            for g2 in range(len(tools_pos)):
+                wcd_f[g1, g2] = fast_wcd(fetcher_pos, [tools_pos[g1], tools_pos[g2]])
         for strat in strats:
             print(f"Strat: {strat}")
             qp = strats[strat]
             obs = env.reset()
             done = [False, False]
-            fetcher = FetcherAltPolicy(query_policy=qp, prior=probs)
+            fetcher = FetcherAltPolicy2(query_policy=qp, prior=probs, wcd=wcd_f)
+            #fetcher = FetcherAltPolicy2(query_policy=qp, prior=probs)
             worker = PlanPolicy(path + [ToolFetchingEnvironment.WORKER_ACTIONS.WORK])
             cost = 0
             time = 0
@@ -134,8 +160,10 @@ def experiment(args):
                 obs, reward, done, _ = env.step([worker(obs[0]), fetcher(obs[1])])
                 cost += reward[1]
                 time += 1
+                #print(time)
             results['graph 1'][strat].append(int(cost))
-            env.close()
+            if args.render:
+                env.close()
     return results
 
 
@@ -151,6 +179,7 @@ if __name__ == '__main__':
     parser.add_argument('--prior', default='uniform', choices=list(priors.keys()), help='prior strategy to be used')
     parser.add_argument('-c', '--cost', default=0.1, type=float, help='Cost of including a station in a query')
     parser.add_argument('--base_cost', default=0.5, type=float, help='Base cost of querying')
+    parser.add_argument('--scenarios_dir', help='Directory with domains to run')
 
     args = parser.parse_args()
 

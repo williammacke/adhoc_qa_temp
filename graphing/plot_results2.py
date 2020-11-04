@@ -16,6 +16,8 @@ def graph(args):
         with open(fname, 'r') as f:
             results = json.load(f)
         for i,graph in enumerate(results):
+            if graph != 'graph 1': continue
+            if graph=='time':continue
             data = results[graph]
         if args.use_baseline:
             for k in data:
@@ -43,8 +45,10 @@ def graph(args):
         assert len(x_vals) == len(std[k])
 
     plt.rcParams.update({'font.size':32})
+    if args.y_lims:
+        plt.ylim(args.y_lims[0], args.y_lims[1])
     for k in means:
-        plt.errorbar(x_vals, means[k])
+        plt.errorbar(x_vals, means[k],linewidth=5)
     plt.legend(labels)
     if args.x_axis:
         plt.xlabel(args.x_axis)
@@ -131,6 +135,7 @@ if __name__ == '__main__':
     parser.add_argument('--y_axis', help="y-axis label")
     parser.add_argument('--labels', nargs='+', help='legend labels')
     parser.add_argument('--title', help='Figure Title')
+    parser.add_argument("--y_lims", nargs=2, type=float, help="Y-axis limits")
     args = parser.parse_args()
     graph(args)
 
