@@ -527,22 +527,22 @@ if __name__ == '__main__':
     # Num Cols, Num Rows, Stations, Goal, Tool, Worker, Fetcher 
     exp = [
         [   
-            5,
-            3,
-            [[3,0], [3,2]],
+            10,
+            6,
+            [[4,2], [4,4]],
             0,
-            [[4,1], [4,1]],
-            [0,1],
-            [4,0]
+            [[8,3], [8,3]],
+            [0,3],
+            [8,1]
         ],
         [   
-            5,
-            3,
-            [[3,0], [3,2]],
+            10,
+            6,
+            [[4,2], [4,4]],
             1,
-            [[4,1], [4,1]],
-            [0,1],
-            [4,0]
+            [[8,3], [8,3]],
+            [0,3],
+            [8,1]
         ],
         [   
             10,
@@ -619,10 +619,11 @@ if __name__ == '__main__':
 
     ]
 
-    exp_ind = [x for x in range(len(exp))]
+    num_exp = len(exp)
+    exp_ind = [x for x in range(num_exp)]
     random.shuffle(exp_ind)
 
-    for x in range(10):
+    for x in range(num_exp):
         i = exp_ind[x]
         cur_exp = exp[i]
 
