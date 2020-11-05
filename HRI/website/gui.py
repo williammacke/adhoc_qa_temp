@@ -622,7 +622,7 @@ if __name__ == '__main__':
     exp_ind = [x for x in range(len(exp))]
     random.shuffle(exp_ind)
 
-    for x in range(8):
+    for x in range(10):
         i = exp_ind[x]
         cur_exp = exp[i]
 
