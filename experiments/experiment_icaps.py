@@ -9,7 +9,7 @@ from src.agents.agent import RandomWorkerPolicy
 from src.agents.agent import PlanPolicy
 from src.agents.agent_adhoc_q import FetcherQueryPolicy
 from src.agents.agent_adhoc_q import FetcherAltPolicy, FetcherAltPolicy2
-from src.agents.agent_adhoc_q import never_query, random_query, max_action_query, min_action_query, median_action_query, smart_query, smart_query2, create_smart_query3, smart_query_noRandom, smart_query2_noRandom, create_smart_query3_noRandom, create_optimal_query
+from src.agents.query_policies import never_query, random_query, max_action_query, min_action_query, median_action_query, smart_query, smart_query2, create_smart_query3, smart_query_noRandom, smart_query2_noRandom, create_smart_query3_noRandom, create_optimal_query
 from itertools import permutations
 import pandas as pd
 import json
@@ -68,6 +68,7 @@ def experiment(args):
     results['graph 1'] = {}
     #strats = {'Never Query':never_query, "Random Query":random_query, "Smart Query":smart_query, 'Smart Query 2': smart_query2, 'Smart Query 3': create_smart_query3(args.cost), "Smart Query No Random":smart_query_noRandom, 'Smart Query 2 No Random': smart_query2_noRandom, 'Smart Query 3 No Random': create_smart_query3_noRandom(args.cost), "Tool Box Query":median_action_query, "Tool Box Query 2":max_action_query, "Best Query":create_optimal_query}
     strats = {'Never Query':never_query, "Random Query":random_query, "Smart Query":smart_query, 'Smart Query 2': smart_query2, 'Smart Query 3': create_smart_query3(args.cost), "Smart Query No Random":smart_query_noRandom, 'Smart Query 2 No Random': smart_query2_noRandom, 'Smart Query 3 No Random': create_smart_query3_noRandom(args.cost), "Tool Box Query":median_action_query, "Tool Box Query 2":max_action_query}
+    #strats = {'Never Query':never_query, "Random Query":random_query, "Smart Query":smart_query, 'Smart Query 2': smart_query2, 'Smart Query 3': create_smart_query3(args.cost), "Tool Box Query":median_action_query, "Tool Box Query 2":max_action_query}
 
 
     def cost_fun(state, query):

@@ -73,8 +73,8 @@ def experiment(args):
     results['queries_asked'] = {}
     results['action_times'] = {}
     results['scenario'] = []
-    #strats = {'Never Query':never_query, "Random Query":random_query, "Smart Query":smart_query, 'Smart Query 2': smart_query2, 'Smart Query 3': create_smart_query3(args.cost), "Smart Query No Random":smart_query_noRandom, 'Smart Query 2 No Random': smart_query2_noRandom, 'Smart Query 3 No Random': create_smart_query3_noRandom(args.cost), "Tool Box Query":median_action_query, "Tool Box Query 2":max_action_query, "Best Query":create_optimal_query}
-    strats = {'Never Query':never_query, "Random Query":random_query,  'Smart Query 3': create_smart_query3(args.cost), 'Smart Query 3 No Random': create_smart_query3_noRandom(args.cost), "Tool Box Query":median_action_query, "Tool Box Query 2":max_action_query, "Best Query":create_optimal_query}
+    strats = {'Never Query':never_query, "Random Query":random_query, "Smart Query":smart_query, 'Smart Query 2': smart_query2, 'Smart Query 3': create_smart_query3(args.cost), "Smart Query No Random":smart_query_noRandom, 'Smart Query 2 No Random': smart_query2_noRandom, 'Smart Query 3 No Random': create_smart_query3_noRandom(args.cost), "Tool Box Query":median_action_query, "Tool Box Query 2":max_action_query, "Best Query":create_optimal_query}
+    #strats = {'Never Query':never_query, "Random Query":random_query,  'Smart Query 3': create_smart_query3(args.cost), 'Smart Query 3 No Random': create_smart_query3_noRandom(args.cost), "Tool Box Query":median_action_query, "Tool Box Query 2":max_action_query, "Best Query":create_optimal_query}
 
 
     def cost_fun(state, query):

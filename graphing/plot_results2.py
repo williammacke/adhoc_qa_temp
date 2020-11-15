@@ -41,6 +41,9 @@ def graph(args):
         k = list(means.keys())[0]
         x_vals = list(range(len(means[k])))
     for k in means:
+        print(k)
+        print(len(x_vals))
+        print(len(means[k]))
         assert len(x_vals) == len(means[k])
         assert len(x_vals) == len(std[k])
 

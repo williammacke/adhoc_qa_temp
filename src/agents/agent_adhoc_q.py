@@ -246,7 +246,6 @@ class FetcherAltPolicy2(FetcherQueryPolicy):
         if self.query is not None:
             return ToolFetchingEnvironment.FETCHER_ACTIONS.QUERY, self.query
 
-        self.time += 1
 
         valid_actions = get_valid_actions(obs, self)
 
@@ -254,6 +253,7 @@ class FetcherAltPolicy2(FetcherQueryPolicy):
             #print(valid_actions)
             p = valid_actions / np.sum(valid_actions)
             action_idx = np.random.choice(np.arange(4), p=p)
+            self.time += 1
             return ToolFetchingEnvironment.FETCHER_ACTIONS(action_idx), None
         else:
             print("Should not happen unless never query")
