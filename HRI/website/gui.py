@@ -462,16 +462,20 @@ class GUI:
             self.prev_user[1] = self.user[1]
 
             if e.key == pygame.K_LEFT:
-                self.user[0] -= 1
+                if (self.user[0] - 1) >= 0:
+                    self.user[0] -= 1
                 return 1
             elif e.key == pygame.K_RIGHT:
-                self.user[0] += 1
+                if (self.user[0] + 1) < self.num_cols:
+                    self.user[0] += 1
                 return 0
             elif e.key == pygame.K_DOWN:
-                self.user[1] -= 1
+                if (self.user[1] - 1) >= 0:
+                    self.user[1] -= 1
                 return 3
             elif e.key == pygame.K_UP:
-                self.user[1] += 1
+                if (self.user[1] + 1) < self.num_rows:
+                    self.user[1] += 1
                 return 2
             elif e.key == pygame.K_SPACE: # Work
                 self.arrived = self.user == self.stn_pos[self.goal_stn]
@@ -495,12 +499,12 @@ class GUI:
         action = None
 
         while self.running:
-            self.clock.tick(8)
+            self.clock.tick()
             #User input
             if not self.arrived:
-                for e in pygame.event.get():
-                    if e.type == pygame.KEYDOWN:
-                        action = self.on_event(e)
+                e =  pygame.event.wait()
+                if e.type == pygame.KEYDOWN:
+                    action = self.on_event(e)
             else:
                 action = 5
             # Got input, return action, worker_pos, and fetcher_pos
@@ -660,11 +664,20 @@ if __name__ == '__main__':
             action, worker_pos, fetcher_pos = gui.on_execute(fetcher_move)
             t1 = time.clock()
 
+            # Escape (backspace button)
+            if action == -1:
+                done = True
+                break
+
             #Write actions to file
             write_file(action, fetcher_move[0], t1-t0)
 
-            # Escape (backspace button) or working and finished
-            if action == -1 or (action == 5 and fetcher_pos == worker_pos and gui.pickup_tool == goal_stn):
+            # working and finished
+            if (action == 5 and 
+                fetcher_pos == worker_pos and 
+                gui.pickup_tool == goal_stn and 
+                worker_pos == stn_pos[goal_stn]):
+                
                 done = True
 
             #Move pickup tool

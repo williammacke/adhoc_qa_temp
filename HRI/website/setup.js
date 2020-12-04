@@ -42,7 +42,7 @@ function printString(text) {
         allText = ""
 
         $.ajax({
-            url : 'cgi-bin/writeFile.py',
+            url : 'cgi-bin/writeFile.cgi',
             type : 'post',
             data : {data : text, filename : filename}
         }); 

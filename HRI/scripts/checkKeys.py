@@ -1,6 +1,11 @@
-import csv
+# 1st argument is filenames file
+# 2nd argument is batch file
+# 3rd argument is output file
 
-keys = open('temp.txt', 'r') 
+import csv
+import sys
+
+keys = open(sys.argv[1], 'r') # filenames.txt is the list of files
 Lines = keys.readlines() 
   
 # Strips the newline character 
@@ -8,9 +13,11 @@ validKeys = []
 for line in Lines: 
     validKeys.append(line.strip()[:-4])
 
-with open('temp.csv', 'w', newline='') as csvfile:
+#temp.csv is resulting file
+with open(sys.argv[3], 'w', newline='') as csvfile:
     writer = csv.writer(csvfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
-    with open('Batch_4222921_batch_results.csv', newline='') as csvfile:
+    # Batch file is output of MTurk
+    with open(sys.argv[2], newline='') as csvfile:
         reader = csv.reader(csvfile, delimiter=',', quotechar='|')
         first = True
         surveyCol = -1
@@ -21,7 +28,6 @@ with open('temp.csv', 'w', newline='') as csvfile:
             if first:
                 count = 0
                 for header in row:
-                    print(header)
                     if header == "Answer.surveycode":
                         surveyCol = count
                     elif header == "Approve":
