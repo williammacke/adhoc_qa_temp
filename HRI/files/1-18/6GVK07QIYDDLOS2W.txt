@@ -1,0 +1,220 @@
+18/01/2021 10:21:13
+EXPERIMENT #5
+WORKER ACTION   FETCHER ACTION  TIME ELAPSED   
+
+RIGHT           RIGHT           5.750705       
+RIGHT           NOOP            0.352185       
+UP              NOOP            0.271550       
+UP              PICKUP          0.244335       
+WORK            RIGHT           0.553010       
+WORK            UP              0.014125       
+WORK            UP              0.012355       
+WORK            RIGHT           0.008020       
+WORK            RIGHT           0.007760       
+WORK            RIGHT           0.011660       
+
+18/01/2021 10:21:20
+EXPERIMENT #4
+WORKER ACTION   FETCHER ACTION  TIME ELAPSED   
+
+DOWN            RIGHT           6.246450       
+DOWN            NOOP            0.174015       
+DOWN            NOOP            0.169730       
+LEFT            NOOP            0.360175       
+LEFT            PICKUP          0.290820       
+WORK            DOWN            0.495000       
+WORK            DOWN            0.008335       
+
+18/01/2021 10:21:28
+EXPERIMENT #1
+WORKER ACTION   FETCHER ACTION  TIME ELAPSED   
+
+UP              UP              4.891130       
+RIGHT           UP              0.348465       
+RIGHT           PICKUP          0.182450       
+RIGHT           UP              0.162215       
+RIGHT           LEFT            0.252915       
+WORK            LEFT            0.371355       
+WORK            LEFT            0.009020       
+WORK            LEFT            0.008530       
+
+18/01/2021 10:21:34
+EXPERIMENT #2
+WORKER ACTION   FETCHER ACTION  TIME ELAPSED   
+
+UP              UP              2.744235       
+UP              UP              0.164200       
+UP              NOOP            0.115190       
+RIGHT           NOOP            0.548615       
+RIGHT           PICKUP          0.178555       
+WORK            UP              0.296830       
+WORK            LEFT            0.014060       
+WORK            LEFT            0.006500       
+
+18/01/2021 10:21:38
+EXPERIMENT #0
+WORKER ACTION   FETCHER ACTION  TIME ELAPSED   
+
+RIGHT           UP              3.257740       
+RIGHT           UP              0.293050       
+RIGHT           NOOP            0.039385       
+RIGHT           NOOP            0.152515       
+DOWN            NOOP            0.595210       
+DOWN            PICKUP          0.209090       
+UP              LEFT            0.435400       
+WORK            DOWN            0.401870       
+WORK            LEFT            0.033195       
+WORK            LEFT            0.011940       
+WORK            LEFT            0.012310       
+
+18/01/2021 10:21:44
+EXPERIMENT #9
+WORKER ACTION   FETCHER ACTION  TIME ELAPSED   
+
+LEFT            UP              3.663160       
+LEFT            LEFT            0.156535       
+LEFT            PICKUP          0.170645       
+WORK            DOWN            0.440790       
+WORK            DOWN            0.009725       
+WORK            LEFT            0.010200       
+WORK            LEFT            0.010005       
+WORK            LEFT            0.010565       
+WORK            LEFT            0.017275       
+WORK            LEFT            0.024485       
+WORK            LEFT            0.009155       
+
+18/01/2021 10:21:49
+EXPERIMENT #6
+WORKER ACTION   FETCHER ACTION  TIME ELAPSED   
+
+DOWN            RIGHT           2.774005       
+DOWN            NOOP            0.158505       
+RIGHT           NOOP            0.461510       
+RIGHT           PICKUP          0.341055       
+WORK            RIGHT           6.127710       
+WORK            DOWN            0.010085       
+WORK            RIGHT           0.009040       
+WORK            DOWN            0.009385       
+WORK            RIGHT           0.040970       
+WORK            RIGHT           0.008930       
+
+18/01/2021 10:21:58
+EXPERIMENT #15
+WORKER ACTION   FETCHER ACTION  TIME ELAPSED   
+
+RIGHT           UP              4.717280       
+RIGHT           LEFT            0.164035       
+RIGHT           NOOP            0.165555       
+RIGHT           NOOP            0.166185       
+RIGHT           NOOP            0.170655       
+RIGHT           NOOP            0.499445       
+DOWN            NOOP            0.354675       
+WORK            PICKUP          0.798815       
+WORK            LEFT            0.010000       
+WORK            LEFT            0.006515       
+WORK            DOWN            0.006615       
+
+18/01/2021 10:22:0618/01/2021 10:22:10
+EXPERIMENT #8
+WORKER ACTION   FETCHER ACTION  TIME ELAPSED   
+
+RIGHT           LEFT            3.021285       
+RIGHT           UP              0.150875       
+RIGHT           PICKUP          0.148005       
+WORK            DOWN            0.608285       
+WORK            DOWN            0.013020       
+
+
+EXPERIMENT #14
+WORKER ACTION   FETCHER ACTION  TIME ELAPSED   
+
+RIGHT           LEFT            2.450205       
+RIGHT           UP              0.141485       
+RIGHT           NOOP            0.161435       
+RIGHT           NOOP            0.162755       
+RIGHT           NOOP            0.166045       
+WORK            NOOP            0.291990       
+WORK            NOOP            0.021420       
+WORK            PICKUP          0.009330       
+WORK            LEFT            0.008800       
+WORK            LEFT            0.008535       
+WORK            LEFT            0.007660       
+
+18/01/2021 10:22:13
+EXPERIMENT #7
+WORKER ACTION   FETCHER ACTION  TIME ELAPSED   
+
+UP              RIGHT           2.296575       
+UP              NOOP            0.167130       
+UP              NOOP            0.168815       
+LEFT            NOOP            0.094815       
+LEFT            PICKUP          0.226805       
+DOWN            UP              0.334165       
+WORK            UP              1.156915       
+
+18/01/2021 10:22:18
+EXPERIMENT #3
+WORKER ACTION   FETCHER ACTION  TIME ELAPSED   
+
+UP              UP              2.830280       
+UP              UP              0.305410       
+UP              NOOP            0.126835       
+UP              NOOP            0.214560       
+LEFT            NOOP            0.452995       
+LEFT            PICKUP          0.399250       
+DOWN            LEFT            0.295315       
+WORK            LEFT            0.448030       
+WORK            LEFT            0.009720       
+WORK            LEFT            0.027860       
+WORK            UP              0.007110       
+WORK            LEFT            0.005490       
+WORK            LEFT            0.005905       
+
+18/01/2021 10:22:23
+EXPERIMENT #11
+WORKER ACTION   FETCHER ACTION  TIME ELAPSED   
+
+DOWN            UP              3.197305       
+DOWN            LEFT            0.172190       
+DOWN            PICKUP          0.134410       
+WORK            LEFT            0.354710       
+WORK            LEFT            0.008325       
+WORK            DOWN            0.008145       
+WORK            LEFT            0.008820       
+WORK            DOWN            0.008335       
+WORK            DOWN            0.008390       
+WORK            DOWN            0.009285       
+WORK            DOWN            0.009640       
+
+18/01/2021 10:22:27
+EXPERIMENT #12
+WORKER ACTION   FETCHER ACTION  TIME ELAPSED   
+
+RIGHT           RIGHT           3.059025       
+RIGHT           PICKUP          0.141940       
+WORK            DOWN            0.560095       
+WORK            RIGHT           0.013625       
+WORK            RIGHT           0.007340       
+
+18/01/2021 10:22:30
+EXPERIMENT #13
+WORKER ACTION   FETCHER ACTION  TIME ELAPSED   
+
+LEFT            RIGHT           3.774015       
+LEFT            PICKUP          0.174015       
+WORK            LEFT            0.381520       
+WORK            DOWN            0.004230       
+WORK            LEFT            0.013260       
+
+18/01/2021 10:22:35
+EXPERIMENT #10
+WORKER ACTION   FETCHER ACTION  TIME ELAPSED   
+
+UP              UP              2.249070       
+UP              LEFT            0.157550       
+UP              PICKUP          0.135375       
+WORK            LEFT            0.597400       
+WORK            LEFT            0.009385       
+WORK            UP              0.008615       
+WORK            LEFT            0.007590       
+

@@ -1,6 +1,7 @@
 #1st argument is file with compiled data
 
 import sys
+import csv
 
 def recordData(exp, worker, totalTime, numSteps, results):
     if exp != -1:
@@ -12,9 +13,19 @@ def initResults(worker, results):
     results[worker]["avgTimes"] = [0] * 10
     results[worker]["steps"] = [0] * 10
 
+def createCSV(results):
+    workers = list(results)
+    with open(sys.argv[2], 'w', newline='') as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow(['Worker ID', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'])
+
+        for worker in workers:
+            writer.writerow([worker] + results[worker]['avgTimes'])
+
+
 def displayResults(results, numWorkers):
-    # numTopWorkers = numWorkers // 10
-    numTopWorkers = 2
+    numTopWorkers = numWorkers // 10
+    # numTopWorkers = 2
     workers = list(results)
     steps = []
     expAvgTimes = [0.0] * 10
@@ -80,9 +91,9 @@ if __name__ == "__main__":
     compiledLines = compiledData.readlines()
     for line in compiledLines:
         # Get worker id
-        if "Worker: " in line: 
+        if "Worker ID: " in line: 
             recordData(exp, worker, totalTime, numSteps, results)
-            worker = line[8:-1]
+            worker = line[11:-1]
             exp = -1
             initResults(worker, results)
             numWorkers += 1
@@ -103,3 +114,4 @@ if __name__ == "__main__":
     recordData(exp, worker, totalTime, numSteps, results)
 
     displayResults(results, numWorkers)
+    createCSV(results)

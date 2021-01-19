@@ -21,24 +21,6 @@ exp = [
             [0,3],
             [8,1]
         ],
-        # [
-        #     5,
-        #     3,
-        #     [[3,0], [3,2]],
-        #     0,
-        #     [[4,1], [4,1]],
-        #     [0,1],
-        #     [4,0]
-        # ],
-        # [
-        #     5,
-        #     3,
-        #     [[3,0], [3,2]],
-        #     1,
-        #     [[4,1], [4,1]],
-        #     [0,1],
-        #     [4,0]
-        # ],
         [   
             10,
             6,
@@ -119,15 +101,16 @@ directions = {"RIGHT" : (1, 0),
               "DOWN"  : (0, 1)}
 
 from PIL import Image, ImageDraw
+import sys
 
 # Adjust large offset by 5, medium by 10, small by 10
-large_offset = 45
+large_offset  = 45
 medium_offset = 90
-small_offset = 90
+small_offset  = 90
 # Fill color adjust each time
 color = (68, 35, 52)
 # Change file name
-experiment_file = open('../files/11-9/T47FN6OIOIFWDUPY.txt', 'r') # this is the file we want to read
+experiment_file = open("../files/" + sys.argv[1] + "/" + sys.argv[3] + ".txt", 'r') # this is the file we want to read
 exp_lines = experiment_file.readlines() 
 exp_num = -1
   
@@ -146,7 +129,7 @@ try:
             print("row", row)
             line = next(exp_iter)   
 
-        with Image.open("../experiment_images/11-9/ex" + str(exp_num) + ".PNG") as im:
+        with Image.open("../experiment_images/" + sys.argv[2] + "/ex" + str(exp_num) + ".PNG") as im:
 
             draw = ImageDraw.Draw(im)
             while "EXPERIMENT" not in line:
@@ -192,10 +175,10 @@ try:
                         cur_pos[1] -= cur_dir[1]
                 line = next(exp_iter)
 
-        im.save("../experiment_images/11-9/ex" + str(exp_num) + ".PNG")
+        im.save("../experiment_images/" + sys.argv[1] + "/ex" + str(exp_num) + ".PNG")
         
 except:
     print('done')
 
-im.save("../experiment_images/11-9/ex" + str(exp_num) + ".PNG")
+im.save("../experiment_images/" + sys.argv[1] + "/ex" + str(exp_num) + ".PNG")
 

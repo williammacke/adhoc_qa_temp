@@ -10,40 +10,36 @@ dir /b > filenames.txt
 ## checkKeys.py
 
 ```
-python filenames.txt Batch_1233456.csv output.csv
+python checkKeys.py filenames.txt Batch_1233456.csv output.csv
 ```
 
 ## drawExp.py
 
-At this line of code
+For first worker: 
 
 ```
-    im.save("../experiment_images/11-9/ex" + str(exp_num) + ".PNG")
+python drawExp.py 12-7 original workerID
 ```
 
-replace the date with the correct date.
-
-At this line of code
+For all workers after:
 
 ```
-with Image.open("../experiment_images/11-9/ex" + str(exp_num) + ".PNG") as im:
+python drawExp.py 12-7 12-7 workerID
 ```
-
-replace the date with "original" for the first run. After the first run, replace it with the folder name of the date.
 
 For each run you will need to modify these lines by the specified comments:
 ```
 # Adjust large offset by 5, medium by 10, small by 10
-large_offset = 45
-medium_offset = 90
-small_offset = 90
+large_offset = 5
+medium_offset = 10
+small_offset = 10
 # Fill color adjust each time
-color = (68, 35, 52)
-# Change file name
-experiment_file = open('../files/11-9/workerKey.txt', 'r') # this is the file we want to read
+color = (23, 18, 25)
 ```
 
 ## compileData.py
+
+This script compiles all of the worker data into one file.
 
 From within scripts/ run this command
 The first argument is the folder name containing all of the data and should be located in "files"
@@ -52,11 +48,19 @@ The second argument is the name of the output file you want to write to
 python compileData.py 11-9 output.txt
 ```
 
+
 ## analyzeResults.py
 
+This script gets the top 10% of workers, gets total average time etc.
+A new csv will also be generated with the average times for each worker
+
 From within scripts/ run this command
-The first argument is the folder name containing all of the data and should be located in "files"
-The second argument is the name of the output file you want to write to
+The first argument is the output file from compileData.py
 ```
-python analyzeResults.py output.txt
+python analyzeResults.py output.txt output.csv
+```
+
+## drawExp2.py
+```
+python drawExp2.py 1-15
 ```

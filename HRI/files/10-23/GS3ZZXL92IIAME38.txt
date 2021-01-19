@@ -1,0 +1,133 @@
+19/10/2020 17:52:35
+EXPERIMENT #0
+WORKER ACTION   FETCHER ACTION  TIME ELAPSED   
+
+RIGHT           UP              21.698025      
+RIGHT           NOOP            0.391730       
+RIGHT           NOOP            0.267290       
+DOWN            NOOP            0.398795       
+RIGHT           NOOP            0.640955       
+DOWN            NOOP            0.523525       
+UP              NOOP            0.642025       
+LEFT            NOOP            0.645435       
+DOWN            NOOP            0.267940       
+LEFT            NOOP            0.397885       
+RIGHT           NOOP            0.130370       
+DOWN            NOOP            0.265160       
+RIGHT           NOOP            0.135290       
+LEFT            NOOP            0.773285       
+UP              NOOP            0.525885       
+WORK            NOOP            0.386125       
+NOOP            NOOP            0.896460       
+UP              NOOP            1.400525       
+LEFT            NOOP            0.130565       
+DOWN            NOOP            3.171945       
+RIGHT           NOOP            2.562650       
+UP              NOOP            0.257420       
+RIGHT           NOOP            6.958390       
+DOWN            NOOP            0.394330       
+DOWN            NOOP            0.260070       
+RIGHT           NOOP            0.386500       
+LEFT            NOOP            0.137355       
+UP              NOOP            0.259615       
+UP              NOOP            0.382630       
+UP              NOOP            1.773315       
+LEFT            NOOP            0.783460       
+WORK            NOOP            5.178465       
+WORK            PICKUP          0.130975       
+WORK            DOWN            0.131755       
+WORK            LEFT            0.131070       
+
+19/10/2020 17:53:28
+EXPERIMENT #2
+WORKER ACTION   FETCHER ACTION  TIME ELAPSED   
+
+DOWN            RIGHT           11.036025      
+LEFT            NOOP            0.390005       
+DOWN            NOOP            0.403795       
+LEFT            NOOP            0.285225       
+WORK            PICKUP          1.911085       
+WORK            DOWN            0.144580       
+WORK            DOWN            0.154720       
+
+19/10/2020 17:53:43
+EXPERIMENT #3
+WORKER ACTION   FETCHER ACTION  TIME ELAPSED   
+
+RIGHT           RIGHT           5.601285       
+RIGHT           NOOP            0.414515       
+UP              NOOP            0.278895       
+UP              NOOP            0.392790       
+WORK            NOOP            2.548045       
+WORK            PICKUP          0.143105       
+WORK            RIGHT           0.143945       
+WORK            RIGHT           0.145620       
+WORK            UP              0.137995       
+WORK            RIGHT           0.171960       
+WORK            UP              0.138245       
+WORK            RIGHT           0.137320       
+
+19/10/2020 17:53:53
+EXPERIMENT #9
+WORKER ACTION   FETCHER ACTION  TIME ELAPSED   
+
+RIGHT           LEFT            3.174845       
+RIGHT           UP              0.270695       
+RIGHT           NOOP            0.278020       
+UP              NOOP            0.384085       
+RIGHT           NOOP            0.260580       
+RIGHT           NOOP            0.257545       
+RIGHT           NOOP            0.258640       
+DOWN            NOOP            0.385540       
+DOWN            NOOP            0.258565       
+WORK            PICKUP          7.968075       
+WORK            DOWN            0.136455       
+WORK            LEFT            0.133365       
+WORK            LEFT            0.130130       
+
+19/10/2020 17:54:07
+EXPERIMENT #7
+WORKER ACTION   FETCHER ACTION  TIME ELAPSED   
+
+LEFT            RIGHT           2.791900       
+LEFT            PICKUP          0.134120       
+WORK            LEFT            1.769610       
+WORK            DOWN            0.134550       
+WORK            LEFT            0.137670       
+
+19/10/2020 17:54:12
+EXPERIMENT #6
+WORKER ACTION   FETCHER ACTION  TIME ELAPSED   
+
+RIGHT           RIGHT           2.036450       
+RIGHT           PICKUP          0.259720       
+WORK            DOWN            0.637040       
+WORK            RIGHT           0.148285       
+WORK            RIGHT           0.130945       
+
+19/10/2020 17:54:15
+EXPERIMENT #4
+WORKER ACTION   FETCHER ACTION  TIME ELAPSED   
+
+RIGHT           LEFT            2.174425       
+RIGHT           UP              0.139270       
+RIGHT           PICKUP          0.282615       
+WORK            DOWN            0.515825       
+WORK            DOWN            0.136955       
+
+19/10/2020 17:54:18
+EXPERIMENT #5
+WORKER ACTION   FETCHER ACTION  TIME ELAPSED   
+
+LEFT            LEFT            2.044085       
+LEFT            UP              0.272680       
+LEFT            PICKUP          0.137250       
+LEFT            DOWN            0.272155       
+RIGHT           LEFT            0.520780       
+WORK            DOWN            0.396790       
+WORK            LEFT            0.130720       
+WORK            LEFT            0.132175       
+WORK            LEFT            0.136230       
+WORK            LEFT            0.134780       
+WORK            LEFT            0.136615       
+

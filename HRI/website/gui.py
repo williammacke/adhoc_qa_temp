@@ -240,11 +240,12 @@ NOOP_ALLOWED = True
 
 class GUI:
 
-    def __init__(self, num_cols, num_rows, stn_pos, goal_stn, tool_pos, worker_pos, fetcher_pos):
+    def __init__(self, num_cols, num_rows, stn_pos, goal_stn, tool_pos, worker_pos, fetcher_pos, tutorial):
         pygame.init()
         self.running = True
         self.clock = pygame.time.Clock()
         self.pause_screen = True
+        self.tutorial = tutorial
 
         # Dimensions and sizes
         self.size = self.width, self.height = 30*15, 30*15
@@ -273,7 +274,7 @@ class GUI:
         self.robot_stay = False
 
         # Font
-        self.font = pygame.font.SysFont("lucidaconsole", int(100 * self.height / 1080))
+        self.font = pygame.font.SysFont("lucidaconsole", int(10 * self.height / 1080))
 
         if (self.on_init() == False):
             self.running = False
@@ -327,22 +328,32 @@ class GUI:
         pygame.draw.circle(self.screen, color, (int(gui_x), int(gui_y)), int(self.radius))
 
     # Text within station or agent
-    def render_text(self, textString, box_x, box_y):
-        text_x = box_x * self.box_width + self.x_margin * 2
-        text_y = (self.num_rows - 1 - box_y) * self.box_height + self.y_margin * 2
+    def render_text(self, textString, box_x, box_y, color = WHITE):
+        text_x = box_x * self.box_width + self.x_margin * 3
+        text_y = (self.num_rows - 1 - box_y) * self.box_height + self.y_margin * 3
 
-        text = self.font.render(textString, True, WHITE)
+        text = self.font.render(textString, True, color)
         self.screen.blit(text,
             (text_x, text_y)
         )
 
     # Pause screen
     def draw_pause_screen(self):
+
         self.font = pygame.font.SysFont("lucidaconsole", int(35 * self.height / 1080))
         self.screen.fill(GRAY)
 
-        text = self.font.render("Your goal station is number " + str(self.goal_stn + 1), True, WHITE)
-        self.screen.blit(text, (self.width / 2 - 100, 25))
+        if self.tutorial:
+            text = self.font.render("Tutorial", True, BLACK)
+            self.screen.blit(text, (self.width / 2 - 30, 10))
+
+            text = self.font.render("Your goal station is number " + str(self.goal_stn + 1), True, WHITE)
+            self.screen.blit(text, (self.width / 2 - 100, 40))
+        else:
+            
+            text = self.font.render("Your goal station is number " + str(self.goal_stn + 1), True, WHITE)
+            self.screen.blit(text, (self.width / 2 - 100, 25))
+
         text = self.font.render("Tab - Pause/Unpause", True, WHITE)
         self.screen.blit(text, (self.width / 2 - 75 , 75))
         text = self.font.render("Up - Move up", True, WHITE)
@@ -366,7 +377,7 @@ class GUI:
         pygame.display.flip()
 
     def draw_experiment_screen(self):
-        self.font = pygame.font.SysFont("lucidaconsole", int(self.height / self.num_cols - 15))
+        self.font = pygame.font.SysFont("lucidaconsole", int(self.height / self.num_cols * 0.45))
         self.screen.fill(WHITE)
     
         # Grid lines
@@ -390,6 +401,11 @@ class GUI:
         # Fetcher
         self.render_agent(self.prev_robot[0], self.prev_robot[1], PRUSSIAN_BLUE)
         self.render_text("F", self.prev_robot[0], self.prev_robot[1])
+
+        #Tutorial Text
+        if self.tutorial:
+            text = "You don't need to go to the Tool station" if self.goal_stn is 0 else "You can pass through stations"
+            self.render_text(text, 0, 5, BLACK)
         pygame.display.flip()
     
     # Render drawing
@@ -410,6 +426,10 @@ class GUI:
             
             self.render_agent(self.robot[0], self.robot[1], PRUSSIAN_BLUE)
             self.render_text("F", self.robot[0], self.robot[1])
+            
+            if self.tutorial:
+                text = "You don't need to go to the Tool station" if self.goal_stn is 0 else "You can pass through stations"
+                self.render_text(text, 0, 5, BLACK)
 
             pygame.display.flip()
 
@@ -526,10 +546,105 @@ def write_file(worker_action, fetcher_action, time):
         )
     )
 
-if __name__ == '__main__':
+def run_tutorial():
+    
     # Experiments
     # Num Cols, Num Rows, Stations, Goal, Tool, Worker, Fetcher 
     exp = [
+        # Do not need to go to tool station
+        [   
+            10,
+            6,
+            [[2,3], [5,0], [5,1], [5,2], [5,3], [5,4], [5,5]],
+            0,
+            [[8,3], [8,3], [8,3], [8,3], [8,3], [8,3], [8,3]],
+            [0,3],
+            [8,1]
+        ],
+        # Can go through boxes 
+        [   
+            10,
+            6,
+            [[3,4], [4,4], [5,4], [3,3], [4,3], [5,3], [3,2], [4,2], [5,2]],
+            4,
+            [[8,3], [8,3], [8,3], [8,3], [8,3], [8,3], [8,3], [8,3], [8,3]],
+            [0,3],
+            [8,1]
+        ]
+    ]
+
+    num_exp = len(exp)
+    exp_ind = [x for x in range(num_exp)]
+
+    for x in range(num_exp):
+        i = exp_ind[x]
+        cur_exp = exp[i]
+
+        # Dimensions, stations, and worker/fetcher values
+        cols = cur_exp[0]
+        rows = cur_exp[1]
+        stn_pos = cur_exp[2]
+        goal_stn = cur_exp[3]
+        tool_pos = cur_exp[4]
+        worker_pos = cur_exp[5]
+        fetcher_pos = cur_exp[6]
+
+        # Set up pygame gui
+        gui = GUI(cols, rows, stn_pos, goal_stn, tool_pos, worker_pos, fetcher_pos, True)
+
+        # Set up fetcher robot
+        # fetcher = FetcherQueryPolicy()
+        fetcher = FetcherAltPolicy(epsilon=0.05)
+
+        # Observation state 
+        f_obs = [worker_pos, fetcher_pos, stn_pos, tool_pos, None, None, None, None]
+        done = False
+
+        #Loop actions until expreiment is complete
+        while not done:
+            #Get fetcher move
+            fetcher_move = fetcher(f_obs)
+
+            #Get user action
+            action, worker_pos, fetcher_pos = gui.on_execute(fetcher_move)
+
+            # Escape (backspace button)
+            if action == -1:
+                done = True
+                break
+            print(action)
+            print(fetcher_move)
+            # working and finished
+            if (action == 5 and 
+                fetcher_pos == worker_pos and 
+                gui.pickup_tool == goal_stn and 
+                worker_pos == stn_pos[goal_stn]):
+                print("working and finished")
+                
+                done = True
+
+            #Move pickup tool
+            if gui.pickup_tool != -1:
+                modified_tool_pos = copy.deepcopy(tool_pos)
+                modified_tool_pos[gui.pickup_tool] = fetcher_pos
+                f_obs[3] = modified_tool_pos
+                f_obs[4] = gui.pickup_tool
+
+            #Modify observation state
+            f_obs[0] = worker_pos
+            f_obs[1] = fetcher_pos
+            f_obs[5] = action
+            f_obs[6] = fetcher_move[0]
+        
+    gui.screen.fill(pygame.Color("white"))
+    pygame.display.update()
+
+def run_exp():
+    
+    # Experiments
+    # Num Cols, Num Rows, Stations, Goal, Tool, Worker, Fetcher 
+    exp = [
+        # Legibility test with split stations horizontally
         [   
             10,
             6,
@@ -548,24 +663,63 @@ if __name__ == '__main__':
             [0,3],
             [8,1]
         ],
+        # Legibility test with split stations vertically
         [   
             10,
             6,
-            [[3,0], [7,0], [3,4], [7,4], [0,2], [5,0], [9,3], [4,5]],
+            [[2,4], [6,4]],
+            1,
+            [[8,3], [8,3]],
+            [4,1],
+            [8,1]
+        ],
+        [   
+            10,
+            6,
+            [[2,4], [6,4]],
             0,
-            [[3,2], [3,2], [3,2], [3,2], [3,2], [3,2], [3,2], [3,2]],
+            [[8,3], [8,3]],
+            [4,1],
+            [8,1]
+        ],
+        # Station at every corner of square, worker in middle
+        [   
+            10,
+            6,
+            [[3,0], [7,0], [3,4], [7,4]],
+            0,
+            [[3,2], [3,2], [3,2], [3,2]],
             [5,2],
             [2,2]
         ],
         [   
             10,
             6,
-            [[3,0], [7,0], [3,4], [7,4], [0,2], [5,1], [9,3], [4,5]],
+            [[3,0], [7,0], [3,4], [7,4]],
             3,
-            [[3,2], [3,2], [3,2], [3,2], [3,2], [3,2], [3,2], [3,2]],
+            [[3,2], [3,2], [3,2], [3,2]],
             [5,2],
             [2,2]
         ],
+        [   
+            10,
+            6,
+            [[3,0], [7,0], [3,4], [7,4]],
+            1,
+            [[3,2], [3,2], [3,2], [3,2]],
+            [5,2],
+            [2,2]
+        ],
+        [   
+            10,
+            6,
+            [[3,0], [7,0], [3,4], [7,4]],
+            2,
+            [[3,2], [3,2], [3,2], [3,2]],
+            [5,2],
+            [2,2]
+        ],
+        # Large experiment with stations at every corner of a rotated square
         [   
             15,
             9,
@@ -585,6 +739,25 @@ if __name__ == '__main__':
             [9,4]
         ],
         [   
+            15,
+            9,
+            [[5,6], [8,3], [5,0], [2,3]],
+            0,
+            [[8,5], [8,5], [8,5], [8,5]],
+            [5,3],
+            [9,4]
+        ],
+        [   
+            15,
+            9,
+            [[5,6], [8,3], [5,0], [2,3]],
+            2,
+            [[8,5], [8,5], [8,5], [8,5]],
+            [5,3],
+            [9,4]
+        ],
+        # Simple experiment with station on left and right
+        [   
             5,
             3,
             [[4,1], [0,1]],
@@ -602,6 +775,7 @@ if __name__ == '__main__':
             [2,1],
             [1,2]
         ],
+        # Funky experiment with stations clustered
         [   
             10,
             6,
@@ -620,7 +794,6 @@ if __name__ == '__main__':
             [0,3],
             [9,2]
         ],
-
     ]
 
     num_exp = len(exp)
@@ -641,7 +814,7 @@ if __name__ == '__main__':
         fetcher_pos = cur_exp[6]
 
         # Set up pygame gui
-        gui = GUI(cols, rows, stn_pos, goal_stn, tool_pos, worker_pos, fetcher_pos)
+        gui = GUI(cols, rows, stn_pos, goal_stn, tool_pos, worker_pos, fetcher_pos, False)
         print("date") #Prints date to output file
         print("EXPERIMENT #{num}".format(num = i))
         print("{0:15} {1:15} {2:15}\n".format("WORKER ACTION", "FETCHER ACTION", "TIME ELAPSED"))
@@ -699,3 +872,9 @@ if __name__ == '__main__':
     gui.screen.fill(pygame.Color("white"))
     pygame.display.update()
     gui.on_cleanup()
+
+
+if __name__ == '__main__':
+
+    # run_tutorial()
+    run_exp()
