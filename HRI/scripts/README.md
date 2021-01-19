@@ -13,30 +13,6 @@ dir /b > filenames.txt
 python checkKeys.py filenames.txt Batch_1233456.csv output.csv
 ```
 
-## drawExp.py
-
-For first worker: 
-
-```
-python drawExp.py 12-7 original workerID
-```
-
-For all workers after:
-
-```
-python drawExp.py 12-7 12-7 workerID
-```
-
-For each run you will need to modify these lines by the specified comments:
-```
-# Adjust large offset by 5, medium by 10, small by 10
-large_offset = 5
-medium_offset = 10
-small_offset = 10
-# Fill color adjust each time
-color = (23, 18, 25)
-```
-
 ## compileData.py
 
 This script compiles all of the worker data into one file.
@@ -61,6 +37,35 @@ python analyzeResults.py output.txt output.csv
 ```
 
 ## drawExp2.py
+
+This is one script that will use the compiled data (should be called compiled.txt and within the files/date/ folder)
+to generate an image of the experiment. 
+
 ```
 python drawExp2.py 1-15
+```
+
+
+## drawExp.py (OLD)
+
+For first worker: 
+
+```
+python drawExp.py 12-7 original workerID
+```
+
+For all workers after:
+
+```
+python drawExp.py 12-7 12-7 workerID
+```
+
+For each run you will need to modify these lines by the specified comments:
+```
+# Adjust large offset by 5, medium by 10, small by 10
+large_offset = 5
+medium_offset = 10
+small_offset = 10
+# Fill color adjust each time
+color = (23, 18, 25)
 ```
