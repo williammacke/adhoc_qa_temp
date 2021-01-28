@@ -137,7 +137,7 @@ def WCD_iter(g1, g2, pi, T, actions, width=10, height=10, epsilon=0.01):
     if np.all(g1 == g2):
         for i in range(width):
             for j in range(height):
-                V[i,j] = abs(i-g1[0]) + abs(j-g2[0])
+                V[i,j] = abs(i-g1[0]) + abs(j-g2[1]) + 1
         return V
     while diff > epsilon:
         diff = 0

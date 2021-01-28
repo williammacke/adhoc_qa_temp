@@ -155,7 +155,19 @@ def experiment(args):
         wcd_planning = {}
         for g1 in range(len(tools_pos)):
             for g2 in range(len(tools_pos)):
+                if g1 == g2:
+                    continue
                 wcd_planning[g1, g2] = fast_wcd(fetcher_pos, [tools_pos[g1], tools_pos[g2]])
+                if np.all(tools_pos[g1] == tools_pos[g2]):
+                    for i in range(width):
+                        for j in range(height):
+                            wcd_f[g1, g2][i,j] = abs(i-tools_pos[g1][0]) + abs(j-tools_pos[g2][1]) + 1
+                #wcd_planning[g1, g2] = int(wcd_f[g1, g2][tuple(fetcher_pos)])-1
+                #print(wcd_planning[g1, g2])
+                #jprint(wcd_f[g1, g2][tuple(fetcher_pos)])
+                #print(fetcher_pos)
+                #print(tools_pos[g1], tools_pos[g2])
+                assert wcd_planning[g1, g2] == (int(wcd_f[g1,g2][tuple(fetcher_pos)])-1)
         probs = priors[args.prior](stations_pos, tools_pos, worker_pos, fetcher_pos)
         goal = np.random.choice(list(range(len(stations_pos))), p=probs)
         env = ToolFetchingEnvironment(fetcher_pos, worker_pos, stations_pos, tools_pos, goal, width=width, height=height, cost_fun=cost_fun)

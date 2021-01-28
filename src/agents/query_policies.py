@@ -52,7 +52,7 @@ def never_query(obs, agent):
 def random_query(obs, agent):
     if np.any(get_valid_actions(obs, agent)) or np.max(agent.probs) >= 1:
         return None
-    #goals = np.where(agent.probs > 0)[0]
+    goals = np.where(agent.probs > 0)[0]
     #if np.all([agent.time < agent.wcd[g1,g2] for g1 in goals for g2 in goals if g1 != g2]):
         #return None
     possible_stations = [s for s, s_p in enumerate(agent.probs) if s_p > 0]
@@ -136,6 +136,10 @@ def median_action_query(obs, agent):
     if np.any(get_valid_actions(obs, agent)) or np.max(agent.probs) >= 1:
         return None
 
+    goals = np.where(agent.probs > 0)[0]
+    #if np.all([agent.time < agent.wcd[g1, g2] for g1 in goals for g2 in goals if g1 != g2]):
+        #return None
+
     w_pos, f_pos, s_pos, t_pos, f_tool, w_action, f_action, answer = obs
     s_probs = agent.probs
     if np.all(t_pos[np.where(agent.probs > 0)] == f_pos):
@@ -164,12 +168,14 @@ def median_action_query(obs, agent):
     query = stns_per_action_values[len(stns_per_action_values)//2]
     if len(query) == 0:
         return None
+    if len(query) == len(goals):
+        return None
     return query
 
 def smart_query(obs, agent):
     if np.any(get_valid_actions(obs, agent)) or np.max(agent.probs) >= 1:
         return None
-    #goals = np.where(agent.probs > 0)[0]
+    goals = np.where(agent.probs > 0)[0]
     #if np.all([agent.time < agent.wcd[g1, g2] for g1 in goals for g2 in goals if g1 != g2]):
         #return None
 
@@ -232,7 +238,7 @@ def smart_query(obs, agent):
 def smart_query2(obs, agent):
     if np.any(get_valid_actions(obs, agent)) or np.max(agent.probs) >= 1:
         return None
-    #goals = np.where(agent.probs > 0)[0]
+    goals = np.where(agent.probs > 0)[0]
     #if np.all([agent.time < agent.wcd[g1, g2] for g1 in goals for g2 in goals if g1 != g2]):
         #return None
 
@@ -295,7 +301,7 @@ def create_smart_query3(cost):
         w_pos, f_pos, s_pos, t_pos, f_tool, w_action, f_action, answer = obs
         print(f_pos)
         print(t_pos)
-        #goals = np.where(agent.probs > 0)[0]
+        goals = np.where(agent.probs > 0)[0]
         #if np.all([agent.time < agent.wcd[g1, g2] for g1 in goals for g2 in goals if g1 != g2]):
             #return None
         if np.any(get_valid_actions(obs, agent)) or np.max(agent.probs) >= 1:
@@ -367,36 +373,47 @@ def create_optimal_query(cost, basecost, edp, wcd_f):
             self.b = b
 
         def card(self):
-            return self.b-self.a
+            return self.b - self.a + 1
 
     def card(x):
         return x[1] - x[0]
 
     def get_voi(g, G, s1, s2):
-        #intervals = [interval(wcd_f[gp,g][s2[0]][s2[1]], edp[g,gp][s1[0]][s1[1]]) for gp in G if g != gp and wcd_f[gp,g][s2[0]][s2[1]] <= edp[g,gp][s1[0]][s1[1]]]
-        intervals = np.array([(wcd_f[gp,g][s2[0]][s2[1]], edp[g,gp][s1[0]][s1[1]]) for gp in G if g != gp and wcd_f[gp,g][s2[0]][s2[1]] <= edp[g,gp][s1[0]][s1[1]]])
-        np.sort(intervals, axis=0)
-        #intervals.sort(key = lambda x:x.a)
+        intervals = [interval(wcd_f[gp,g][s2[0]][s2[1]], edp[g,gp][s1[0]][s1[1]]) for gp in G if g != gp and wcd_f[gp,g][s2[0]][s2[1]] <= edp[g,gp][s1[0]][s1[1]]]
+        intervals.sort(key = lambda x:x.a)
         if len(intervals) == 0:
             return 0
-        y = np.zeros(shape=(len(intervals), 2))
-        y[0] = intervals[0]
-        index = 1
+        y = [ intervals[0] ]
         for i in intervals[1:]:
-            if y[index-1][1] < i[0]:
-                y[index] = i
-                index += 1
-            elif y[index-1][1] >= i[0] and i[1] > y[index-1][1]:
-                y[index-1][1] = i[1]
-        s =  np.sum(y, axis=0)
-        return s[1]-s[0]
+            if y[-1].b < i.a:
+                y.append(i)
+            elif y[-1].b >= i.a and i.b > y[-1].b:
+                y[-1].b = i.b
+        return np.sum([i.card() for i in y])
+        ##intervals = [interval(wcd_f[gp,g][s2[0]][s2[1]], edp[g,gp][s1[0]][s1[1]]) for gp in G if g != gp and wcd_f[gp,g][s2[0]][s2[1]] <= edp[g,gp][s1[0]][s1[1]]]
+        #intervals = np.array([(wcd_f[gp,g][s2[0]][s2[1]]-1, edp[g,gp][s1[0]][s1[1]]) for gp in G if g != gp and wcd_f[gp,g][s2[0]][s2[1]] <= edp[g,gp][s1[0]][s1[1]]])
+        #np.sort(intervals, axis=0)
+        ##intervals.sort(key = lambda x:x.a)
+        #if len(intervals) == 0:
+        #    return 0
+        #y = np.zeros(shape=(len(intervals), 2))
+        #y[0] = intervals[0]
+        #index = 1
+        #for i in intervals[1:]:
+        #    if y[index-1][1] < i[0]:
+        #        y[index] = i
+        #        index += 1
+        #    elif y[index-1][1] >= i[0] and i[1] > y[index-1][1]:
+        #        y[index-1][1] = i[1]
+        #s =  np.sum(y, axis=0)
+        #return s[1]-s[0]
 
 
 
     def sq(obs, agent):
         if np.any(get_valid_actions(obs, agent)) or np.max(agent.probs) >= 1:
             return None
-        #goals = np.where(agent.probs > 0)[0]
+        goals = np.where(agent.probs > 0)[0]
         #if np.all([agent.time < agent.wcd[g1, g2] for g1 in goals for g2 in goals if g1 != g2]):
             #return None
     
@@ -407,7 +424,8 @@ def create_optimal_query(cost, basecost, edp, wcd_f):
         values = {}
         def obj(x, data=None):
             x = np.array(x)
-            xt = x.tostring()
+            #xt = x.tostring()
+            xt = tuple(x)
             if xt in values:
                 return values[xt]
             #G = np.where(agent.probs > 0)[0]
@@ -501,7 +519,7 @@ def create_optimal_query(cost, basecost, edp, wcd_f):
 def smart_query_noRandom(obs, agent):
     if np.any(get_valid_actions(obs, agent)) or np.max(agent.probs) >= 1:
         return None
-    #goals = np.where(agent.probs > 0)[0]
+    goals = np.where(agent.probs > 0)[0]
     #if np.all([agent.time < agent.wcd[g1, g2] for g1 in goals for g2 in goals if g1 != g2]):
         #return None
 
@@ -568,7 +586,7 @@ def smart_query_noRandom(obs, agent):
 def smart_query2_noRandom(obs, agent):
     if np.any(get_valid_actions(obs, agent)) or np.max(agent.probs) >= 1:
         return None
-    #goals = np.where(agent.probs > 0)[0]
+    goals = np.where(agent.probs > 0)[0]
     #if np.all([agent.time < agent.wcd[g1, g2] for g1 in goals for g2 in goals if g1 != g2]):
         #return None
 
@@ -635,7 +653,7 @@ def create_smart_query3_noRandom(cost):
     def smart_query3_noRandom(obs, agent):
         if np.any(get_valid_actions(obs, agent)) or np.max(agent.probs) >= 1:
             return None
-        #goals = np.where(agent.probs > 0)[0]
+        goals = np.where(agent.probs > 0)[0]
         #if np.all([agent.time < agent.wcd[g1, g2] for g1 in goals for g2 in goals if g1 != g2]):
             #return None
     

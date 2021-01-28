@@ -52,7 +52,7 @@ def graph(args):
         plt.ylim(args.y_lims[0], args.y_lims[1])
     for k in means:
         plt.errorbar(x_vals, means[k],linewidth=5)
-    plt.legend(labels)
+    #plt.legend(labels)
     if args.x_axis:
         plt.xlabel(args.x_axis)
     if args.y_axis:

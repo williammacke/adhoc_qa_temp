@@ -16,6 +16,7 @@ def graph(args):
 
 
     data = []
+    data2 = []
 
     key = None
     num_bins = 0
@@ -30,23 +31,29 @@ def graph(args):
             continue
         key = v
         labels = list(results[key]['fetcher_actions'].keys())
-        for ind, actions in enumerate(results[v]['fetcher_actions']['Best Query']):
+        #data2 += list(results[v]['time']['Smart Query 3 No Random'])
+        data2 += list(results[v]['time']['Best Query'])
+        #for ind, actions in enumerate(results[v]['fetcher_actions']['Best Query']):
+        for ind, actions in enumerate(results[v]['fetcher_actions']['Smart Query 3 No Random']):
             a = np.array(actions)
-            temp = np.array(results[v]['action_times']['Best Query'][ind])
-            for i in range(1, len(temp)):
-                temp[i] -= temp[i-1]
-            data += list(temp[np.where(a == 5)[0]])
-            data += list(temp[np.where(a == 4)[0]])
-            temp2 = np.array(results[v]['queries_asked']['Best Query'])
-            temp3 = temp2[np.where(a == 5)[0]]
-            lengthes += [len(t) for t in temp3]
+            #temp = np.array(results[v]['action_times']['Best Query'][ind])
+            #for i in range(1, len(temp)):
+            #    temp[i] -= temp[i-1]
+            #data += list(temp[np.where(a == 5)[0]])
+            #data += list(temp[np.where(a == 4)[0]])
+            #temp2 = np.array(results[v]['queries_asked']['Best Query'])
+            #temp3 = temp2[np.where(a == 5)[0]]
+            #lengthes += [len(t) for t in temp3]
             count += len(np.where(a == 5)[0])
             counts.append(len(np.where(a == 5)[0]))
-    print(np.mean(data))
+    print(np.mean(data2))
+    print(np.max(data2))
+    print("action times", np.mean(data))
     print(np.std(data))
     print(np.mean(lengthes))
     print(np.std(lengthes))
     print(count)
+    print(np.mean(counts))
     print(np.std(counts))
 
 
