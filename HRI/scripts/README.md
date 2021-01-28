@@ -45,6 +45,12 @@ to generate an image of the experiment.
 python drawExp2.py 1-15
 ```
 
+## analyzeLegibility.py
+
+```
+python analyzeLegibility.py 1-15
+```
+
 
 ## drawExp.py (OLD)
 
@@ -69,3 +75,4 @@ small_offset = 10
 # Fill color adjust each time
 color = (23, 18, 25)
 ```
+
